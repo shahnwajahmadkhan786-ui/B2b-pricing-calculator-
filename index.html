@@ -1,12 +1,1352 @@
 <!DOCTYPE html>
-<html lang="en">
+
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>B2B Pricing Calculator</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ChickenCalc">
+<meta name="mobile-web-app-capable" content="yes">
+<meta id="metaTheme" name="theme-color" content="#2d6a4f">
+<title>ChickenCalc</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f0f2f0;
+  --card: #ffffff;
+  --card2: #f8faf8;
+  --bdr: #e2e8e2;
+  --div: #eaedea;
+  --tx: #1a2a1a;
+  --mu: #607060;
+  --fa: #a8b8a8;
+  --pri: #2d6a4f;
+  --pri2: #1e4d38;
+  --priL: #d8eedf;
+  --green: #2d6a4f;
+  --greenL: #d8eedf;
+  --red: #c0392b;
+  --redL: #fde8e6;
+  --orange: #d4680a;
+  --orangeL: #fdebd8;
+  --blue: #1a5fa8;
+  --blueL: #ddeafa;
+  --gold: #b8860b;
+  --goldL: #fdf3d0;
+  --sh: 0 2px 8px rgba(0,0,0,.07);
+  --sh2: 0 4px 20px rgba(0,0,0,.10);
+  --r: .75rem;
+  --r2: 1rem;
+  --fn: 'Inter', sans-serif;
+  --mo: 'JetBrains Mono', monospace;
+}
+[data-theme="dark"] {
+  --bg: #141a14;
+  --card: #1e271e;
+  --card2: #192119;
+  --bdr: #2a372a;
+  --div: #243024;
+  --tx: #d4e8d4;
+  --mu: #7a9a7a;
+  --fa: #456045;
+  --pri: #4caf80;
+  --pri2: #38c070;
+  --priL: #1a3028;
+  --green: #4caf80;
+  --greenL: #1a3028;
+  --red: #e57373;
+  --redL: #3a1a1a;
+  --orange: #ffb74d;
+  --orangeL: #3a2a14;
+  --blue: #64b5f6;
+  --blueL: #1a2a3a;
+  --gold: #ffd54f;
+  --goldL: #2a2510;
+  --sh: 0 2px 8px rgba(0,0,0,.25);
+  --sh2: 0 4px 20px rgba(0,0,0,.35);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+html { -webkit-font-smoothing: antialiased }
+body { font-family: var(--fn); background: var(--bg); color: var(--tx); min-height: 100dvh;
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); font-size: 15px }
+button { cursor: pointer; font: inherit; color: inherit; border: none; background: none; -webkit-tap-highlight-color: transparent }
+input, select { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent }
+:focus-visible { outline: 2px solid var(--pri); outline-offset: 2px; border-radius: 4px }
+
+/* ── HEADER ── */
+.hdr { background: var(–pri); color: #fff; padding: calc(.8rem + env(safe-area-inset-top,0px)) 1rem .8rem;
+display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 80 }
+.hdr-logo { display: flex; align-items: center; gap: .5rem }
+.hdr-logo svg { width: 26px; height: 26px }
+.hdr-title { font-size: 1.1rem; font-weight: 800; letter-spacing: -.02em }
+.hdr-sub { font-size: .62rem; opacity: .75; margin-top: 1px }
+.hdr-right { display: flex; align-items: center; gap: .5rem }
+.hdr-date { font-size: .7rem; background: rgba(255,255,255,.18); padding: .28rem .65rem; border-radius: 20px; font-weight: 600 }
+.theme-btn { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center }
+
+/* ── APP ── */
+.app { max-width: 640px; margin: 0 auto; padding: .9rem 1rem 0 }
+
+/* ── BOTTOM NAV ── */
+.bnav { position: fixed; bottom: 0; left: 0; right: 0; background: var(–card); border-top: 1px solid var(–bdr);
+display: flex; padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 80 }
+.nb { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 0 7px;
+font-size: .6rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(–mu);
+border: none; background: none; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent }
+.nb svg { width: 21px; height: 21px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
+.nb.on { color: var(–pri) }
+.nb .dot { position: absolute; top: 7px; right: calc(50% - 16px); width: 8px; height: 8px; background: var(–red); border-radius: 50%; border: 2px solid var(–card) }
+
+/* ── VIEWS ── */
+.view { display: none }
+.view.on { display: block; animation: up .2s ease }
+@keyframes up { from { opacity: 0; transform: translateY(4px) } to { opacity: 1; transform: translateY(0) } }
+
+/* ── CARDS ── */
+.card { background: var(–card); border-radius: var(–r2); border: 1px solid var(–bdr); box-shadow: var(–sh); margin-bottom: .75rem }
+.card-pad { padding: 1.1rem }
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem }
+.card-title { font-size: .95rem; font-weight: 700; display: flex; align-items: center; gap: .4rem }
+.card-title svg { width: 17px; height: 17px; color: var(–pri) }
+
+/* ── STAT ROW ── */
+.stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: .75rem }
+.stat-row.c3 { grid-template-columns: 1fr 1fr 1fr }
+.stat-row.c4 { grid-template-columns: 1fr 1fr 1fr 1fr }
+@media(max-width: 380px) { .stat-row.c4 { grid-template-columns: 1fr 1fr } }
+.stat { border-radius: var(–r); padding: .75rem .7rem; border: 1.5px solid }
+.stat-lbl { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .25rem; opacity: .7 }
+.stat-val { font-size: 1.25rem; font-weight: 800; font-family: var(–mo); line-height: 1.2 }
+.stat-sub { font-size: .65rem; margin-top: .2rem; opacity: .7 }
+.stat.green { background: var(–greenL); border-color: var(–green); color: var(–green) }
+.stat.red { background: var(–redL); border-color: var(–red); color: var(–red) }
+.stat.orange { background: var(–orangeL); border-color: var(–orange); color: var(–orange) }
+.stat.blue { background: var(–blueL); border-color: var(–blue); color: var(–blue) }
+.stat.gold { background: var(–goldL); border-color: var(–gold); color: var(–gold) }
+.stat.neutral { background: var(–card2); border-color: var(–bdr); color: var(–tx) }
+
+/* ── FORM ── */
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; margin-bottom: .65rem }
+.frow.c1 { grid-template-columns: 1fr }
+.frow.c3 { grid-template-columns: 1fr 1fr 1fr }
+@media(max-width: 400px) { .frow { grid-template-columns: 1fr } .frow.c3 { grid-template-columns: 1fr 1fr } }
+.fg { display: flex; flex-direction: column; gap: .3rem }
+.fl { font-size: .72rem; font-weight: 700; color: var(–mu); text-transform: uppercase; letter-spacing: .04em }
+.fi-wrap { position: relative }
+.fi-pre { position: absolute; left: .7rem; top: 50%; transform: translateY(-50%); font-size: .85rem; color: var(–mu); pointer-events: none; font-family: var(–mo) }
+.fi-suf { position: absolute; right: .7rem; top: 50%; transform: translateY(-50%); font-size: .7rem; color: var(–fa); pointer-events: none; font-weight: 700 }
+.fi { width: 100%; padding: .72rem .72rem .72rem 1.85rem; background: var(–bg); border: 1.5px solid var(–bdr); border-radius: var(–r); font-size: 16px; font-family: var(–mo); font-weight: 600; color: var(–tx); transition: border-color .15s; -webkit-appearance: none }
+.fi:focus { outline: none; border-color: var(–pri); box-shadow: 0 0 0 3px var(–priL) }
+.fi.np { padding-left: .72rem }
+.fi.pr { padding-right: 2.2rem }
+.fi.ok { border-color: var(–green) }
+.fi.er { border-color: var(–red) }
+select.fi { cursor: pointer; padding-right: 2rem; background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘10’ height=‘10’ viewBox=‘0 0 24 24’ fill=‘none’ stroke=’%23607060’ stroke-width=‘2’%3E%3Cpolyline points=‘6 9 12 15 18 9’/%3E%3C/svg%3E”); background-repeat: no-repeat; background-position: right .6rem center }
+[data-theme=“dark”] select.fi { background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘10’ height=‘10’ viewBox=‘0 0 24 24’ fill=‘none’ stroke=’%237a9a7a’ stroke-width=‘2’%3E%3Cpolyline points=‘6 9 12 15 18 9’/%3E%3C/svg%3E”) }
+
+/* ── PAYMENT SPLIT ── */
+.pay-split { background: var(–blueL); border: 1.5px solid var(–blue); border-radius: var(–r); padding: .8rem; margin-bottom: .65rem }
+.pay-split-ttl { font-size: .72rem; font-weight: 700; color: var(–blue); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .6rem }
+.pay-split-row { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem }
+.pay-total-line { margin-top: .5rem; text-align: center; font-size: .72rem; color: var(–mu); font-family: var(–mo) }
+
+/* ── BUTTONS ── */
+.btn { display: flex; align-items: center; justify-content: center; gap: .4rem; border-radius: var(–r); font-weight: 700; cursor: pointer; transition: all .15s; -webkit-tap-highlight-color: transparent; border: none }
+.btn-full { width: 100% }
+.btn-lg { padding: .9rem 1.2rem; font-size: 1rem; min-height: 50px }
+.btn-md { padding: .6rem .9rem; font-size: .82rem; min-height: 38px }
+.btn-sm { padding: .35rem .65rem; font-size: .72rem; min-height: 30px }
+.btn svg { flex-shrink: 0 }
+.btn.primary { background: var(–pri); color: #fff }
+.btn.primary:hover { background: var(–pri2) }
+.btn.primary:active { transform: scale(.98) }
+.btn.success { background: var(–greenL); color: var(–green); border: 1.5px solid var(–green) }
+.btn.success:hover { background: var(–green); color: #fff }
+.btn.danger { background: var(–redL); color: var(–red); border: 1.5px solid var(–red) }
+.btn.danger:hover { background: var(–red); color: #fff }
+.btn.warn { background: var(–orangeL); color: var(–orange); border: 1.5px solid var(–orange) }
+.btn.warn:hover { background: var(–orange); color: #fff }
+.btn.blue { background: var(–blueL); color: var(–blue); border: 1.5px solid var(–blue) }
+.btn.blue:hover { background: var(–blue); color: #fff }
+.btn.ghost { background: transparent; color: var(–mu); border: 1.5px solid var(–bdr) }
+.btn.ghost:hover { background: var(–div); color: var(–tx) }
+.btn-row { display: flex; gap: .5rem }
+
+/* ── PILL TABS ── */
+.pill-tabs { display: flex; background: var(–card2); border-radius: 50px; padding: 3px; gap: 2px; margin-bottom: .85rem }
+.ptab { flex: 1; padding: .42rem .3rem; border-radius: 50px; font-size: .68rem; font-weight: 700; color: var(–mu); cursor: pointer; text-align: center; border: none; background: none; transition: all .15s; white-space: nowrap }
+.ptab.on { background: var(–pri); color: #fff; box-shadow: var(–sh) }
+
+/* ── STOCK BADGE ── */
+.stock-badge { display: inline-flex; align-items: center; gap: .3rem; padding: .22rem .6rem; border-radius: 20px; font-size: .7rem; font-weight: 700 }
+.stock-badge.good { background: var(–greenL); color: var(–green) }
+.stock-badge.warn { background: var(–orangeL); color: var(–orange) }
+.stock-badge.danger { background: var(–redL); color: var(–red) }
+
+/* ── ENTRY ROW ── */
+.entry { border: 1.5px solid var(–bdr); border-radius: var(–r); margin-bottom: .55rem; background: var(–card); overflow: hidden }
+.entry-head { padding: .75rem .9rem; display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem }
+.entry-left { flex: 1; min-width: 0 }
+.entry-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(–mu); margin-bottom: .22rem; display: flex; align-items: center; gap: .3rem }
+.entry-main { font-size: .92rem; font-weight: 700; color: var(–tx); line-height: 1.3 }
+.entry-sub { font-size: .7rem; color: var(–mu); margin-top: .22rem; line-height: 1.5 }
+.entry-right { text-align: right; flex-shrink: 0 }
+.entry-amount { font-size: 1rem; font-weight: 800; font-family: var(–mo) }
+.entry-status { font-size: .65rem; font-weight: 700; margin-top: .18rem }
+.entry-prog { padding: .3rem .9rem .6rem; border-top: 1px solid var(–div) }
+.prog-bar { height: 6px; background: var(–div); border-radius: 10px; overflow: hidden; margin-top: .3rem }
+.prog-fill { height: 100%; border-radius: 10px; background: var(–pri); transition: width .4s }
+.entry-actions { padding: .5rem .9rem .65rem; border-top: 1px solid var(–div); display: flex; gap: .4rem; flex-wrap: wrap }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: var(–div); margin: .7rem 0 }
+.section-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(–mu); margin-bottom: .5rem }
+
+/* ── DATE NAV ── */
+.datenav { display: flex; align-items: center; gap: .5rem; background: var(–card); border: 1px solid var(–bdr); border-radius: var(–r); padding: .55rem .7rem; margin-bottom: .75rem; box-shadow: var(–sh) }
+.datenav-btn { width: 36px; height: 36px; border-radius: 8px; background: var(–card2); border: 1px solid var(–bdr); display: flex; align-items: center; justify-content: center; color: var(–mu); flex-shrink: 0 }
+.datenav-btn:hover { background: var(–div); color: var(–tx) }
+.datenav-center { flex: 1; text-align: center }
+.datenav-main { font-size: .95rem; font-weight: 800; color: var(–tx) }
+.datenav-day { font-size: .65rem; color: var(–mu); margin-top: .12rem }
+.datenav-today { display: inline-block; font-size: .58rem; font-weight: 700; color: var(–pri); background: var(–priL); padding: .08rem .42rem; border-radius: 20px; margin-left: .35rem }
+
+/* ── SUPPLIER SECTION ── */
+.supplier-box { background: var(–goldL); border: 1.5px solid var(–gold); border-radius: var(–r); padding: .8rem; margin-bottom: .65rem }
+.supplier-ttl { font-size: .72rem; font-weight: 700; color: var(–gold); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .55rem }
+.supplier-row { display: flex; justify-content: space-between; align-items: center; font-size: .82rem; padding: .28rem 0 }
+.supplier-row:not(:last-child) { border-bottom: 1px solid rgba(184,134,11,.2) }
+.supplier-key { color: var(–mu) }
+.supplier-val { font-family: var(–mo); font-weight: 700; color: var(–tx) }
+.supplier-val.due { color: var(–red) }
+.supplier-val.paid { color: var(–green) }
+
+/* ── INFO BOX ── */
+.info-box { background: var(–card2); border: 1px solid var(–bdr); border-radius: var(–r); padding: .65rem .8rem; font-size: .78rem; color: var(–mu); line-height: 1.7; margin-bottom: .6rem }
+.info-box.orange { background: var(–orangeL); border-color: var(–orange); color: var(–orange) }
+.info-box.green { background: var(–greenL); border-color: var(–green); color: var(–green) }
+.info-box.red { background: var(–redL); border-color: var(–red); color: var(–red) }
+.info-box strong { color: var(–tx); }
+[data-theme=“dark”] .info-box strong { color: var(–tx) }
+
+/* ── MODAL ── */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: none; align-items: flex-end; justify-content: center }
+.modal-bg.on { display: flex; animation: up .2s ease }
+.modal { background: var(–card); border-radius: var(–r2) var(–r2) 0 0; width: 100%; max-width: 640px;
+padding: 1.2rem 1.1rem calc(1.3rem + env(safe-area-inset-bottom,0px)); max-height: 92dvh; overflow-y: auto; box-shadow: var(–sh2) }
+.modal-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between }
+.modal-close { width: 32px; height: 32px; border-radius: 8px; background: var(–card2); display: flex; align-items: center; justify-content: center; color: var(–mu) }
+
+/* ── EMPTY ── */
+.empty { text-align: center; padding: 2.2rem 1.5rem; color: var(–fa) }
+.empty-icon { font-size: 2.5rem; margin-bottom: .6rem }
+.empty p { font-size: .82rem; line-height: 1.7 }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: calc(78px + env(safe-area-inset-bottom,0px)); left: 50%; transform: translateX(-50%);
+background: #1a2a1a; color: #e8f4e8; padding: .52rem 1.1rem; border-radius: 50px; font-size: .78rem;
+font-weight: 600; z-index: 300; pointer-events: none; opacity: 0; transition: opacity .2s; white-space: nowrap }
+.toast.show { opacity: 1 }
+
+/* ── ANALYTICS ── */
+.a-table { width: 100%; border-collapse: collapse }
+.a-table th { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(–mu); padding: .5rem .7rem; background: var(–card2); border-bottom: 1px solid var(–bdr); text-align: right }
+.a-table th:first-child { text-align: left }
+.a-table td { font-size: .78rem; padding: .6rem .7rem; border-bottom: 1px solid var(–div); font-family: var(–mo); font-weight: 600; text-align: right; color: var(–tx) }
+.a-table td:first-child { font-family: var(–fn); text-align: left; font-weight: 600 }
+.a-table tr:last-child td { border-bottom: none }
+.a-table tr:hover td { background: var(–card2) }
+.bar { height: 5px; background: var(–div); border-radius: 10px; overflow: hidden; min-width: 50px }
+.bar-f { height: 100%; border-radius: 10px; background: var(–green) }
+.gc { color: var(–green) !important }
+.rc { color: var(–red) !important }
+
+/* ── UDHAAR ── */
+.ud-row { padding: .8rem 1rem; border-bottom: 1px solid var(–div); display: flex; align-items: flex-start; gap: .65rem }
+.ud-row:last-child { border-bottom: none }
+.ud-av { width: 36px; height: 36px; border-radius: 50%; background: var(–priL); color: var(–pri); font-weight: 800; font-size: .9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; text-transform: uppercase }
+.ud-av.paid { background: var(–greenL); color: var(–green) }
+.ud-info { flex: 1; min-width: 0 }
+.ud-name { font-weight: 700; font-size: .88rem }
+.ud-note { font-size: .7rem; color: var(–mu); margin-top: .1rem }
+.ud-date { font-size: .62rem; color: var(–fa); margin-top: .1rem }
+.ud-right { text-align: right; flex-shrink: 0 }
+.ud-amt { font-family: var(–mo); font-weight: 800; font-size: .92rem; color: var(–red) }
+.ud-amt.paid { color: var(–green); text-decoration: line-through; opacity: .6 }
+
+/* ── PRINT ── */
+@media print {
+.bnav, .hdr, .btn, .modal-bg, .no-print { display: none !important }
+body { padding: 0; background: #fff; color: #000 }
+.app { max-width: 100%; padding: 0 }
+.card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid }
+.view { display: block !important }
+.view:not(.pt) { display: none !important }
+}
+</style>
+
 </head>
 <body>
-    <h1>Welcome to the B2B Pricing Calculator</h1>
-    <!-- Calculator functionality goes here -->
+
+<!-- HEADER -->
+
+<header class="hdr">
+  <div class="hdr-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2C8 2 5 5 5 9c0 2.5 1.5 4.5 3 6l1 5h6l1-5c1.5-1.5 3-3.5 3-6 0-4-3-7-7-7z"/>
+      <path d="M9 20h6"/><path d="M8 9c0 2.2 1.8 4 4 4s4-1.8 4-4"/>
+    </svg>
+    <div><div class="hdr-title">ChickenCalc</div><div class="hdr-sub">Live Stock Ledger</div></div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-date" id="todayBadge"></div>
+    <button class="theme-btn" id="themeBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+</header>
+
+<div class="toast" id="toast"></div>
+<div class="app">
+
+<!-- ████ TODAY ████ -->
+
+<div class="view on" id="vHome">
+  <div id="homeContent"></div>
+</div>
+
+<!-- ████ ENTRY ████ -->
+
+<div class="view" id="vEntry">
+
+  <!-- Date picker for entry -->
+
+  <div class="card card-pad" style="margin-bottom:.75rem">
+    <div class="card-head" style="margin-bottom:.6rem">
+      <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Entry Date</div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Date</label><input class="fi np ok" id="entryDate" type="date"></div>
+      <div class="fg" style="justify-content: flex-end; padding-bottom: .05rem">
+        <button class="btn ghost btn-md btn-full" onclick="setEntryToday()">Set Today</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- What to add -->
+
+  <div class="pill-tabs" id="entryTypeTabs">
+    <button class="ptab on" onclick="setEntryType('buy')">🛒 Buy Stock</button>
+    <button class="ptab" onclick="setEntryType('sell')">💰 Sell Stock</button>
+    <button class="ptab" onclick="setEntryType('supplier')">🏭 Supplier Pay</button>
+  </div>
+
+  <!-- BUY STOCK -->
+
+  <div id="buyForm">
+    <div class="card card-pad">
+      <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Stock Purchase Details</div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Pieces Bought</label><div class="fi-wrap"><input class="fi np pr" id="b_pcs" type="number" inputmode="numeric" placeholder="22" oninput="onBuyInput()"><span class="fi-suf">pcs</span></div></div>
+        <div class="fg"><label class="fl">Total Live Weight</label><div class="fi-wrap"><input class="fi np pr" id="b_kg" type="number" inputmode="decimal" step="0.1" placeholder="40.9" oninput="onBuyInput()"><span class="fi-suf">kg</span></div></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Buy Price ₹/kg</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_buy" type="number" inputmode="decimal" placeholder="130" oninput="onBuyInput()"></div></div>
+        <div class="fg"><label class="fl">Wastage %</label>
+          <div style="display:flex;gap:.35rem;align-items:center">
+            <div class="fi-wrap" style="flex:1"><input class="fi np pr" id="b_waste" type="number" inputmode="decimal" value="30" min="0" max="60" oninput="onBuyInput()"><span class="fi-suf">%</span></div>
+          </div>
+          <div style="display:flex;gap:.3rem;margin-top:.3rem">
+            <button class="btn ghost btn-sm" onclick="setWaste(25)">25%</button>
+            <button class="btn ghost btn-sm" onclick="setWaste(30)">30%</button>
+            <button class="btn ghost btn-sm" onclick="setWaste(35)">35%</button>
+            <button class="btn ghost btn-sm" onclick="setWaste(39)">39%</button>
+          </div>
+        </div>
+      </div>
+
+```
+  <!-- Live preview of avg -->
+  <div id="buyPreview" style="display:none" class="info-box">
+    <span id="buyPreviewTxt"></span>
+  </div>
+
+  <!-- Supplier payment -->
+  <div class="divider"></div>
+  <div class="section-label">🏭 Supplier Payment</div>
+  <div class="frow">
+    <div class="fg"><label class="fl">Supplier Name</label><input class="fi np" id="b_supplier" type="text" placeholder="e.g. Ahmed bhai"></div>
+    <div class="fg"><label class="fl">Total Amount Due ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppdue" type="number" inputmode="decimal" placeholder="auto-calc"></div></div>
+  </div>
+  <div class="pay-split">
+    <div class="pay-split-ttl">💵 Paid Now (optional)</div>
+    <div class="pay-split-row">
+      <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppCash" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPaid()"></div></div>
+      <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppUpi" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPaid()"></div></div>
+    </div>
+    <div class="pay-total-line" id="suppPaidLine">Paid: ₹0 · Remaining: ₹0</div>
+  </div>
+  <div class="frow c1"><div class="fg"><label class="fl">Note (optional)</label><input class="fi np" id="b_note" type="text" placeholder="Batch name, time, order…"></div></div>
+  <button class="btn primary btn-lg btn-full" onclick="saveBuy()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    Save Purchase
+  </button>
+</div>
+```
+
+  </div>
+
+  <!-- SELL STOCK -->
+
+  <div id="sellForm" style="display:none">
+    <div class="card card-pad">
+      <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Sell From Stock</div>
+
+```
+  <!-- Pick which batch -->
+  <div class="fg" style="margin-bottom:.65rem">
+    <label class="fl">Select Stock Batch</label>
+    <select class="fi np" id="s_batch" onchange="onBatchSelect()">
+      <option value="">— Choose batch to sell from —</option>
+    </select>
+  </div>
+  <div id="batchInfo" style="display:none" class="info-box"></div>
+
+  <div class="frow">
+    <div class="fg"><label class="fl">Pieces to Sell</label><div class="fi-wrap"><input class="fi np pr" id="s_pcs" type="number" inputmode="numeric" placeholder="17" oninput="onSellInput()"><span class="fi-suf">pcs</span></div></div>
+    <div class="fg"><label class="fl">Sell Price ₹/kg <span style="font-weight:400;text-transform:none;font-size:.65rem">(net weight)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_sellkg" type="number" inputmode="decimal" placeholder="e.g. 240" oninput="onSellInput()"></div></div>
+  </div>
+  <div class="fg" style="margin-bottom:.65rem"><label class="fl">= ₹/piece <span style="font-weight:400;text-transform:none;font-size:.65rem">(auto-calculated)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_sellpc" type="number" inputmode="decimal" placeholder="auto" style="background:var(--card2);color:var(--mu)" readonly></div></div>
+
+  <div id="sellPreview" style="display:none" class="info-box green"></div>
+
+  <!-- Payment collection -->
+  <div class="pay-split">
+    <div class="pay-split-ttl">💵 Cash Collected Now</div>
+    <div class="pay-split-row">
+      <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_cash" type="number" inputmode="decimal" placeholder="0" oninput="updateSellPaid()"></div></div>
+      <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_upi" type="number" inputmode="decimal" placeholder="0" oninput="updateSellPaid()"></div></div>
+    </div>
+    <div class="pay-total-line" id="sellPaidLine">Collected: ₹0 · Pending: ₹0</div>
+  </div>
+  <div class="frow c1"><div class="fg"><label class="fl">Note (optional)</label><input class="fi np" id="s_note" type="text" placeholder="Customer name, order…"></div></div>
+  <button class="btn primary btn-lg btn-full" onclick="saveSell()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    Save Sale
+  </button>
+</div>
+```
+
+  </div>
+
+  <!-- SUPPLIER PAYMENT -->
+
+  <div id="suppPayForm" style="display:none">
+    <div class="card card-pad">
+      <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Record Supplier Payment</div>
+      <div id="suppPayBatchSel"></div>
+      <div class="pay-split" style="margin-top:.5rem">
+        <div class="pay-split-ttl">💵 Payment Made</div>
+        <div class="pay-split-row">
+          <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="sp_cash" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPayLine()"></div></div>
+          <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="sp_upi" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPayLine()"></div></div>
+        </div>
+        <div class="pay-total-line" id="suppPayLine">Total: ₹0</div>
+      </div>
+      <div class="frow c1"><div class="fg"><label class="fl">Note</label><input class="fi np" id="sp_note" type="text" placeholder="e.g. full payment, advance…"></div></div>
+      <button class="btn primary btn-lg btn-full" onclick="saveSuppPay()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Payment
+      </button>
+    </div>
+  </div>
+
+</div><!-- /vEntry -->
+
+<!-- ████ LEDGER ████ -->
+
+<div class="view" id="vLedger">
+  <div class="datenav">
+    <button class="datenav-btn" onclick="shiftDate(-1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <div class="datenav-center" onclick="openDatePicker()" style="cursor:pointer">
+      <div class="datenav-main" id="dnavMain"></div>
+      <div class="datenav-day" id="dnavSub"></div>
+    </div>
+    <button class="datenav-btn" onclick="shiftDate(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+  </div>
+  <input type="date" id="dpInput" onchange="setDateFromPicker(this.value)" style="position:absolute;opacity:0;width:0;height:0">
+  <div id="ledgerContent"></div>
+</div>
+
+<!-- ████ ANALYTICS ████ -->
+
+<div class="view" id="vAnalytics">
+  <div class="pill-tabs" id="aTabs">
+    <button class="ptab on" onclick="setPeriod('today')">Today</button>
+    <button class="ptab" onclick="setPeriod('week')">Week</button>
+    <button class="ptab" onclick="setPeriod('month')">Month</button>
+    <button class="ptab" onclick="setPeriod('year')">Year</button>
+    <button class="ptab" onclick="setPeriod('custom')">Custom</button>
+  </div>
+  <div id="customRangePick" style="display:none;gap:.5rem;margin-bottom:.75rem" class="frow">
+    <div class="fg"><label class="fl">From</label><input class="fi np" id="cFrom" type="date" onchange="renderAnalytics()"></div>
+    <div class="fg"><label class="fl">To</label><input class="fi np" id="cTo" type="date" onchange="renderAnalytics()"></div>
+  </div>
+  <div id="analyticsContent"></div>
+</div>
+
+<!-- ████ UDHAAR ████ -->
+
+<div class="view" id="vUdhaar">
+  <div class="card card-pad">
+    <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Add Udhaar Entry</div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Customer Name</label><input class="fi np" id="u_name" type="text" placeholder="Ramesh bhai"></div>
+      <div class="fg"><label class="fl">Amount ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="u_amt" type="number" inputmode="decimal" placeholder="1250"></div></div>
+    </div>
+    <div class="frow c1" style="margin-bottom:.75rem"><div class="fg"><label class="fl">Note</label><input class="fi np" id="u_note" type="text" placeholder="5 kg chicken, will pay tomorrow"></div></div>
+    <button class="btn primary btn-lg btn-full" onclick="addUdhaar()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Udhaar
+    </button>
+  </div>
+  <div class="card" id="udCard">
+    <div class="card-pad" style="padding-bottom:.5rem">
+      <div class="card-head" style="margin-bottom:0">
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Udhaar Ledger</div>
+        <div id="udTotalWrap" style="display:none"><span style="font-size:.7rem;color:var(--mu)">Pending: </span><span id="udTotalVal" style="font-family:var(--mo);font-weight:800;color:var(--red)">₹0</span></div>
+      </div>
+    </div>
+    <div id="udList"></div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- Bottom Nav -->
+
+<nav class="bnav">
+  <button class="nb on" id="nHome" onclick="nav('Home')">
+    <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Today
+  </button>
+  <button class="nb" id="nEntry" onclick="nav('Entry')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Add Entry
+  </button>
+  <button class="nb" id="nLedger" onclick="nav('Ledger')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Ledger
+  </button>
+  <button class="nb" id="nAnalytics" onclick="nav('Analytics')">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Reports
+  </button>
+  <button class="nb" id="nUdhaar" onclick="nav('Udhaar')">
+    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span id="udBadge" class="dot" style="display:none"></span>
+    Udhaar
+  </button>
+</nav>
+
+<!-- MODAL -->
+
+<div class="modal-bg" id="modalBg" onclick="closeMBg(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-title"><span id="mTitle">Action</span><button class="modal-close btn" onclick="closeModal()">✕</button></div>
+    <div id="mBody"></div>
+  </div>
+</div>
+
+<script>
+/* ════ KEYS ════ */
+const KB='cc5_buys', KS='cc5_sales', KSP='cc5_suppays', KU='cc5_ud', KT='cc5_theme', KM='cc5_thm', IB='cc5_ib';
+
+/* ════ UTILS ════ */
+const $=id=>document.getElementById(id);
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const SDAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const FMON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
+function p2(n){return String(n).padStart(2,'0')}
+function keyDisp(k){if(!k)return '—';const[y,m,d]=k.split('-').map(Number);return d+' '+FMON[m-1]+' '+y}
+function keyShort(k){if(!k)return '—';const[y,m,d]=k.split('-').map(Number);return d+' '+MON[m-1]}
+function keyDay(k){if(!k)return '';const[y,m,d]=k.split('-').map(Number);return DAYS[new Date(y,m-1,d).getDay()]}
+function fmt(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
+function fmtD(n){return n>=0?'+₹'+Math.round(n).toLocaleString('en-IN'):'−₹'+Math.round(-n).toLocaleString('en-IN')}
+function fkg(n,d=2){return n.toFixed(d)+' kg'}
+function la(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch{return[]}}
+function sa(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+let _id=parseInt(localStorage.getItem('cc5_id')||'1');
+function nid(){const i=_id++;localStorage.setItem('cc5_id',_id);return i}
+
+/* ════ DOMAIN ════ */
+function getBuys(){return la(KB)}
+function getSales(){return la(KS)}
+function getSuppays(){return la(KSP)}
+
+/* Per-buy calculations */
+function buyCalc(b){
+  const totalCost=(b.liveKg||0)*(b.buyPrice||0);
+  const netKgTotal=(b.liveKg||0)*(1-(b.wastage||30)/100);
+  const netKgPerPc=b.pcs>0?netKgTotal/b.pcs:0;
+  const liveKgPerPc=b.pcs>0?(b.liveKg||0)/b.pcs:0;
+  const costPerPc=b.pcs>0?totalCost/b.pcs:0;
+  return{totalCost,netKgTotal,netKgPerPc,liveKgPerPc,costPerPc};
+}
+function salesOf(buyId){return getSales().filter(s=>s.buyId===buyId)}
+function suppaysOf(buyId){return getSuppays().filter(p=>p.buyId===buyId)}
+function soldPcs(buyId){return salesOf(buyId).reduce((a,s)=>a+s.pcs,0)}
+function unsoldPcs(b){return Math.max(0,(b.pcs||0)-soldPcs(b.id))}
+function totalRevenue(b){
+  const{netKgPerPc}=buyCalc(b);
+  return salesOf(b.id).reduce((a,s)=>{
+    if(s.sellPc)return a+s.pcs*s.sellPc;
+    return a+s.pcs*netKgPerPc*(s.sellKg||0);
+  },0);
+}
+function totalCollected(b){return salesOf(b.id).reduce((a,s)=>a+(s.cash||0)+(s.upi||0),0)}
+function pendingCash(b){return Math.max(0,totalRevenue(b)-totalCollected(b))}
+function suppTotal(b){
+  const totalPaid=suppaysOf(b.id).reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
+  const due=(b.suppDue||buyCalc(b).totalCost);
+  return{due,paid:totalPaid+(b.suppInitCash||0)+(b.suppInitUpi||0),remaining:due-totalPaid-(b.suppInitCash||0)-(b.suppInitUpi||0)};
+}
+
+/* ════ TOAST ════ */
+function toast(msg,ms=2400){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms)}
+
+/* ════ MODAL ════ */
+function openModal(title,html){$('mTitle').textContent=title;$('mBody').innerHTML=html;$('modalBg').classList.add('on')}
+function closeModal(){$('modalBg').classList.remove('on')}
+function closeMBg(e){if(e.target===$('modalBg'))closeModal()}
+
+/* ════ THEME ════ */
+(function(){
+  const btn=$('themeBtn'),root=document.documentElement;
+  const hr=new Date().getHours();
+  const m=localStorage.getItem(KM);
+  let t=m?localStorage.getItem(KT)||'light':(hr>=19||hr<6)?'dark':matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  apply(t);
+  btn.addEventListener('click',()=>{t=t==='dark'?'light':'dark';apply(t);localStorage.setItem(KT,t);localStorage.setItem(KM,'1')});
+  function apply(t){
+    root.setAttribute('data-theme',t);$('metaTheme').content=t==='dark'?'#141a14':'#2d6a4f';
+    btn.innerHTML=t==='dark'
+      ?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      :'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  }
+})();
+
+/* ════ DATE BADGE ════ */
+(()=>{const d=new Date();$('todayBadge').textContent=SDAYS[d.getDay()]+', '+d.getDate()+' '+MON[d.getMonth()]})();
+
+/* ════ PWA ════ */
+(()=>{
+  const ic=`%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%232d6a4f'/%3E%3Cpath d='M96 28C70 28 50 48 50 74c0 16 9 28 18 37l6 31h44l6-31c9-9 18-21 18-37 0-26-20-46-46-46z' fill='white'/%3E%3C/svg%3E`;
+  const m={name:'ChickenCalc',short_name:'ChickenCalc',start_url:'./',display:'standalone',background_color:'#f0f2f0',theme_color:'#2d6a4f',icons:[{src:'data:image/svg+xml,'+ic,sizes:'192x192',type:'image/svg+xml'}]};
+  const blob=new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
+  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(blob);document.head.appendChild(l);
+})();
+let dPr=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dPr=e});
+
+/* ════ NAV ════ */
+function nav(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  $('v'+name).classList.add('on');$('n'+name).classList.add('on');
+  if(name==='Home')renderHome();
+  if(name==='Ledger')renderLedger();
+  if(name==='Analytics')renderAnalytics();
+  if(name==='Udhaar')renderUdhaar();
+  if(name==='Entry'){populateSellBatches();populateSuppBatches();}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ════ ENTRY DATE ════ */
+(()=>{$('entryDate').value=todayKey();$('entryDate').max=todayKey()})();
+function setEntryToday(){$('entryDate').value=todayKey()}
+
+/* ════ ENTRY TYPE ════ */
+let entryType='buy';
+function setEntryType(t){
+  entryType=t;
+  document.querySelectorAll('#entryTypeTabs .ptab').forEach((b,i)=>b.classList.toggle('on',['buy','sell','supplier'][i]===t));
+  $('buyForm').style.display=t==='buy'?'':'none';
+  $('sellForm').style.display=t==='sell'?'':'none';
+  $('suppPayForm').style.display=t==='supplier'?'':'none';
+}
+
+/* ════ BUY ════ */
+function setWaste(v){$('b_waste').value=v;onBuyInput()}
+function onBuyInput(){
+  const pcs=parseFloat($('b_pcs').value)||0,kg=parseFloat($('b_kg').value)||0;
+  const buy=parseFloat($('b_buy').value)||0,waste=parseFloat($('b_waste').value)||30;
+  const el=$('buyPreview');
+  if(pcs>0&&kg>0){
+    const avgL=kg/pcs,netKg=kg*(1-waste/100),avgN=netKg/pcs;
+    const totalCost=kg*buy;
+    const cpc=buy>0?totalCost/pcs:0;
+    $('buyPreviewTxt').innerHTML=
+      `<strong>Avg bird:</strong> ${avgL.toFixed(3)} kg live → ${avgN.toFixed(3)} kg net after ${waste}% wastage<br>`+
+      `<strong>Total cost:</strong> ${buy>0?fmt(totalCost)+` · Cost/piece: ${fmt(cpc)}`:'Enter buy price to calculate'}`;
+    el.style.display='block';
+    // Auto-fill supplier due
+    if(buy>0&&!$('b_suppdue').value)$('b_suppdue').value=Math.round(totalCost);
+    updateSuppPaid();
+  } else {el.style.display='none'}
+}
+function updateSuppPaid(){
+  const due=parseFloat($('b_suppdue').value)||0;
+  const cash=parseFloat($('b_suppCash').value)||0,upi=parseFloat($('b_suppUpi').value)||0;
+  const paid=cash+upi,rem=Math.max(0,due-paid);
+  $('suppPaidLine').textContent=`Paid Now: ${fmt(paid)} · Still Owed: ${fmt(rem)}`;
+}
+function saveBuy(){
+  const pcs=parseFloat($('b_pcs').value),kg=parseFloat($('b_kg').value),buy=parseFloat($('b_buy').value);
+  if(!pcs||!kg||!buy){toast('Fill pieces, weight and buy price');return}
+  const rec={id:nid(),date:$('entryDate').value,ts:Date.now(),
+    pcs,liveKg:kg,buyPrice:buy,wastage:parseFloat($('b_waste').value)||30,
+    supplier:$('b_supplier').value.trim(),
+    suppDue:parseFloat($('b_suppdue').value)||Math.round(kg*buy),
+    suppInitCash:parseFloat($('b_suppCash').value)||0,
+    suppInitUpi:parseFloat($('b_suppUpi').value)||0,
+    note:$('b_note').value.trim()};
+  const buys=getBuys();buys.push(rec);sa(KB,buys);
+  ['b_pcs','b_kg','b_buy','b_suppdue','b_suppCash','b_suppUpi','b_note'].forEach(id=>{const e=$(id);if(e)e.value=''});
+  $('b_supplier').value='';$('b_waste').value=30;onBuyInput();
+  toast('✅ Purchase saved!');
+  setEntryToday();
+  setTimeout(()=>nav('Ledger'),700);
+}
+
+/* ════ SELL ════ */
+function populateSellBatches(){
+  const buys=getBuys().sort((a,b)=>b.date.localeCompare(a.date));
+  const opts=buys.filter(b=>unsoldPcs(b)>0).map(b=>`<option value="${b.id}">${keyShort(b.date)} — ${unsoldPcs(b)} pcs remaining (of ${b.pcs})</option>`);
+  $('s_batch').innerHTML=`<option value="">— Choose batch —</option>`+opts.join('');
+  if(opts.length===0)$('s_batch').innerHTML=`<option value="">No stock available</option>`;
+  onBatchSelect();
+}
+function onBatchSelect(){
+  const id=parseInt($('s_batch').value);
+  const buys=getBuys(),b=buys.find(x=>x.id===id);
+  if(!b){$('batchInfo').style.display='none';return}
+  const{netKgPerPc,liveKgPerPc,costPerPc}=buyCalc(b);
+  const u=unsoldPcs(b);
+  $('batchInfo').innerHTML=
+    `<strong>${b.pcs} pcs bought</strong> on ${keyDisp(b.date)} · ${b.liveKg} kg live<br>`+
+    `Buy: ${fmt(b.buyPrice)}/kg · Wastage: ${b.wastage}%<br>`+
+    `<strong style="color:var(--orange)">${u} pieces still unsold</strong> · Net ${netKgPerPc.toFixed(3)} kg/piece · Cost: ${fmt(costPerPc)}/piece`;
+  $('batchInfo').style.display='block';
+  // Pre-fill sell price from previous sales of this batch
+  const prev=salesOf(id).filter(s=>s.sellKg>0).slice(-1)[0];
+  if(prev){$('s_sellkg').value=prev.sellKg||'';$('s_sellpc').value='';onSellInput()}
+}
+function onSellInput(){
+  const id=parseInt($('s_batch').value);
+  const buys=getBuys(),b=buys.find(x=>x.id===id);
+  if(!b)return;
+  const{netKgPerPc,costPerPc}=buyCalc(b);
+  const pcs=parseFloat($('s_pcs').value)||0;
+  const sk=parseFloat($('s_sellkg').value)||0;
+  // auto-fill ₹/piece from ₹/kg × avg net kg/piece
+  const sp=sk>0&&netKgPerPc>0?sk*netKgPerPc:0;
+  if(sp>0)$('s_sellpc').value=sp.toFixed(1);
+  else $('s_sellpc').value='';
+  const rev=pcs*sp,cost=pcs*costPerPc,profit=rev-cost;
+  const el=$('sellPreview');
+  if(pcs>0&&sk>0){
+    const breakeven=costPerPc/netKgPerPc;
+    el.innerHTML=`<strong>${pcs} pcs × ₹${sk}/kg × ${netKgPerPc.toFixed(3)}kg net = ₹${sp.toFixed(1)}/piece</strong><br>`+
+      `Revenue: <strong>${fmt(rev)}</strong> · Cost: <strong>${fmt(cost)}</strong> · Profit: <strong style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</strong><br>`+
+      `Break-even: ₹${breakeven.toFixed(1)}/kg`;
+    el.className='info-box '+(profit>=0?'green':'red');
+    el.style.display='block';
+  } else {el.style.display='none'}
+  updateSellPaid();
+}
+function updateSellPaid(){
+  const id=parseInt($('s_batch').value);
+  const buys=getBuys(),b=buys.find(x=>x.id===id);
+  const pcs=parseFloat($('s_pcs').value)||0;
+  const sk=parseFloat($('s_sellkg').value)||0;
+  const netKgPerPc=b?buyCalc(b).netKgPerPc:0;
+  const sp=sk>0&&netKgPerPc>0?sk*netKgPerPc:0;
+  const rev=pcs*sp,cash=parseFloat($('s_cash').value)||0,upi=parseFloat($('s_upi').value)||0;
+  const coll=cash+upi,pend=Math.max(0,rev-coll);
+  $('sellPaidLine').textContent=`Collected: ${fmt(coll)} · Pending: ${fmt(pend)}`;
+}
+function saveSell(){
+  const buyId=parseInt($('s_batch').value);
+  if(!buyId){toast('Select a batch');return}
+  const buys=getBuys(),b=buys.find(x=>x.id===buyId);
+  if(!b){toast('Batch not found');return}
+  const pcs=parseFloat($('s_pcs').value);
+  const sk=parseFloat($('s_sellkg').value)||0;
+  if(!pcs||pcs<=0){toast('Enter pieces to sell');return}
+  if(!sk){toast('Enter sell price ₹/kg');return}
+  if(pcs>unsoldPcs(b)){toast(`Only ${unsoldPcs(b)} pieces available`);return}
+  const{netKgPerPc}=buyCalc(b);
+  const sp=sk*netKgPerPc;
+  const sales=getSales();
+  sales.push({id:nid(),buyId,date:$('entryDate').value,ts:Date.now(),
+    pcs,sellKg:sk,sellPc:parseFloat(sp.toFixed(2)),
+    cash:parseFloat($('s_cash').value)||0,upi:parseFloat($('s_upi').value)||0,
+    note:$('s_note').value.trim()});
+  sa(KS,sales);
+  ['s_pcs','s_sellkg','s_sellpc','s_cash','s_upi','s_note'].forEach(id=>{const e=$(id);if(e)e.value=''});
+  $('sellPreview').style.display='none';$('batchInfo').style.display='none';$('s_batch').value='';
+  toast('✅ Sale saved!');
+  populateSellBatches();
+  setTimeout(()=>nav('Ledger'),700);
+}
+
+/* ════ SUPPLIER PAY ════ */
+function populateSuppBatches(){
+  const buys=getBuys().sort((a,b)=>b.date.localeCompare(a.date));
+  const opts=buys.filter(b=>suppTotal(b).remaining>0.5);
+  if(!opts.length){$('suppPayBatchSel').innerHTML=`<div class="info-box green">✅ No outstanding supplier payments!</div>`;return}
+  let html='<div class="fg" style="margin-bottom:.7rem"><label class="fl">Select Batch</label><select class="fi np" id="sp_batch">';
+  html+=`<option value="">— Choose batch —</option>`;
+  opts.forEach(b=>{const s=suppTotal(b);html+=`<option value="${b.id}">${keyShort(b.date)} — ${b.supplier||'Supplier'} — Remaining: ${fmt(s.remaining)}</option>`});
+  html+='</select></div>';
+  $('suppPayBatchSel').innerHTML=html;
+}
+function updateSuppPayLine(){
+  const c=parseFloat($('sp_cash').value)||0,u=parseFloat($('sp_upi').value)||0;
+  $('suppPayLine').textContent=`Total: ${fmt(c+u)}`;
+}
+function saveSuppPay(){
+  const buyId=parseInt($('sp_batch')?.value||0);
+  if(!buyId){toast('Select a batch');return}
+  const c=parseFloat($('sp_cash').value)||0,u=parseFloat($('sp_upi').value)||0;
+  if(!c&&!u){toast('Enter amount paid');return}
+  const sp=getSuppays();
+  sp.push({id:nid(),buyId,date:$('entryDate').value,ts:Date.now(),cash:c,upi:u,note:$('sp_note').value.trim()});
+  sa(KSP,sp);
+  toast('✅ Supplier payment saved!');
+  populateSuppBatches();
+  if($('sp_cash'))$('sp_cash').value='';if($('sp_upi'))$('sp_upi').value='';
+}
+
+/* ════ HOME ════ */
+function renderHome(){
+  const buys=getBuys(),today=todayKey();
+  // Global alerts: unsold stock + pending cash
+  const allUnsold=buys.filter(b=>unsoldPcs(b)>0);
+  const allPendCash=buys.filter(b=>pendingCash(b)>0.5);
+  const allPendSupp=buys.filter(b=>suppTotal(b).remaining>0.5);
+  const totUnsold=allUnsold.reduce((a,b)=>a+unsoldPcs(b),0);
+  const totPendCash=allPendCash.reduce((a,b)=>a+pendingCash(b),0);
+  const totPendSupp=allPendSupp.reduce((a,b)=>a+suppTotal(b).remaining,0);
+
+  // Today's numbers
+  const todayBuys=buys.filter(b=>b.date===today);
+  const todaySales=getSales().filter(s=>s.date===today);
+  const todaySuppays=getSuppays().filter(p=>p.date===today);
+  const todayRevenue=todaySales.reduce((a,s)=>{
+    const b=buys.find(x=>x.id===s.buyId);if(!b)return a;
+    const{netKgPerPc}=buyCalc(b);return a+(s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0));
+  },0);
+  const todayCost=todayBuys.reduce((a,b)=>a+buyCalc(b).totalCost,0);
+  const todayCollected=todaySales.reduce((a,s)=>a+(s.cash||0)+(s.upi||0),0);
+  const todayCash=todaySales.reduce((a,s)=>a+(s.cash||0),0);
+  const todayUpi=todaySales.reduce((a,s)=>a+(s.upi||0),0);
+  const todayProfit=todayRevenue-todayCost;
+  const todaySuppPaid=todaySuppays.reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
+
+  let html='';
+
+  // Alerts
+  if(totUnsold>0||totPendCash>0.5||totPendSupp>0.5){
+    html+=`<div class="card card-pad" style="border-color:var(--orange);background:var(--orangeL)">
+      <div class="card-title" style="margin-bottom:.7rem;color:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Pending Actions</div>`;
+    if(totUnsold>0)html+=`<div class="info-box orange" style="margin-bottom:.45rem">🐔 <strong>${totUnsold} pieces unsold</strong> — tap Ledger to sell them at today's price</div>`;
+    if(totPendCash>0.5)html+=`<div class="info-box orange" style="margin-bottom:.45rem">💰 <strong>${fmt(totPendCash)} pending from customers</strong> — collect and record payment</div>`;
+    if(totPendSupp>0.5)html+=`<div class="info-box red" style="margin-bottom:0">🏭 <strong>${fmt(totPendSupp)} owed to supplier</strong> — pay and record in Add Entry</div>`;
+    html+='</div>';
+  }
+
+  // Today summary
+  html+=`<div class="card card-pad">
+    <div class="card-title" style="margin-bottom:.75rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Today's Summary</div>
+    <div class="stat-row c4">
+      <div class="stat ${todayCost>0?'orange':'neutral'}"><div class="stat-lbl">Invested</div><div class="stat-val" style="font-size:1rem">${todayCost>0?fmt(todayCost):'—'}</div></div>
+      <div class="stat ${todayRevenue>0?'blue':'neutral'}"><div class="stat-lbl">Revenue</div><div class="stat-val" style="font-size:1rem">${todayRevenue>0?fmt(todayRevenue):'—'}</div></div>
+      <div class="stat ${todayProfit>0?'green':todayProfit<0?'red':'neutral'}"><div class="stat-lbl">Profit</div><div class="stat-val" style="font-size:1rem">${todayRevenue>0?fmtD(todayProfit):'—'}</div></div>
+      <div class="stat ${todayCollected>0?'green':'neutral'}"><div class="stat-lbl">Collected</div><div class="stat-val" style="font-size:1rem">${todayCollected>0?fmt(todayCollected):'—'}</div></div>
+    </div>`;
+  if(todayCash>0||todayUpi>0){
+    html+=`<div style="display:flex;gap:.5rem;margin-top:.5rem">
+      <div class="stat green" style="flex:1;padding:.55rem .65rem"><div class="stat-lbl">Cash</div><div class="stat-val" style="font-size:.92rem">${fmt(todayCash)}</div></div>
+      <div class="stat blue" style="flex:1;padding:.55rem .65rem"><div class="stat-lbl">UPI</div><div class="stat-val" style="font-size:.92rem">${fmt(todayUpi)}</div></div>
+      ${todaySuppPaid>0?`<div class="stat gold" style="flex:1;padding:.55rem .65rem"><div class="stat-lbl">Supp. Paid</div><div class="stat-val" style="font-size:.92rem">${fmt(todaySuppPaid)}</div></div>`:''}
+    </div>`;
+  }
+  html+='</div>';
+
+  // Today's stock
+  if(todayBuys.length){
+    html+=`<div class="card card-pad"><div class="card-title" style="margin-bottom:.7rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Today's Purchase</div>`;
+    todayBuys.forEach((b,i)=>{
+      const u=unsoldPcs(b),sold=soldPcs(b),rev=totalRevenue(b),{totalCost,netKgPerPc}=buyCalc(b),profit=rev-totalCost;
+      const pct=b.pcs>0?Math.min(100,sold/b.pcs*100):0;
+      html+=`<div class="entry">
+        <div class="entry-head">
+          <div class="entry-left">
+            <div class="entry-label">Batch ${i+1}${b.note?' · '+b.note:''}</div>
+            <div class="entry-main">🐔 ${b.pcs} pieces · ${b.liveKg} kg live</div>
+            <div class="entry-sub">Buy: ${fmt(b.buyPrice)}/kg · Wastage: ${b.wastage}% · Net ${netKgPerPc.toFixed(3)} kg/pc<br>
+            ${u>0?`<span style="color:var(--orange);font-weight:700">${u} pieces unsold</span>`:'<span style="color:var(--green);font-weight:700">All sold ✓</span>'}</div>
+          </div>
+          <div class="entry-right">
+            <div class="entry-amount" style="color:var(--orange)">${fmt(totalCost)}</div>
+            <div class="entry-status" style="color:${profit>=0?'var(--green)':'var(--red)'}">${rev>0?fmtD(profit)+' profit':'No sales yet'}</div>
+          </div>
+        </div>
+        ${sold>0?`<div class="entry-prog">
+          <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--mu)"><span>Sold ${sold}/${b.pcs} pieces</span><span>${pct.toFixed(0)}%</span></div>
+          <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+        </div>`:''}
+        <div class="entry-actions">
+          ${u>0?`<button class="btn warn btn-sm" onclick="quickSell(${b.id})">🐔 Sell ${u} pieces</button>`:''}
+          ${pendingCash(b)>0.5?`<button class="btn blue btn-sm" onclick="quickCollect(${b.id})">💰 Collect ${fmt(pendingCash(b))}</button>`:''}
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  if(!todayBuys.length&&!totUnsold&&!totPendCash){
+    html+=`<div class="empty"><div class="empty-icon">🐔</div><p>Nothing here yet.<br>Tap <strong>Add Entry</strong> to record today's purchase.</p></div>`;
+  }
+
+  $('homeContent').innerHTML=html;
+}
+
+/* ════ QUICK SELL MODAL ════ */
+function quickSell(buyId){
+  const buys=getBuys(),b=buys.find(x=>x.id===buyId);if(!b)return;
+  const u=unsoldPcs(b),{netKgPerPc,costPerPc}=buyCalc(b);
+  // Get last sell price for this batch
+  const lastSale=salesOf(buyId).slice(-1)[0];
+  const lastPc=lastSale?.sellPc||'';
+  openModal(`Sell from ${keyDisp(b.date)} batch`,`
+    <div class="info-box" style="margin-bottom:.8rem">
+      <strong>${b.pcs} pieces</strong> bought at ₹${b.buyPrice}/kg on ${keyDisp(b.date)}<br>
+      <strong style="color:var(--orange)">${u} pieces remaining unsold</strong><br>
+      Net weight per piece: <strong>${netKgPerPc.toFixed(3)} kg</strong> · Cost/piece: <strong>${fmt(costPerPc)}</strong>
+    </div>
+    <div class="frow" style="margin-bottom:.6rem">
+      <div class="fg"><label class="fl">Pieces to Sell</label><div class="fi-wrap"><input class="fi np pr" id="qs_pcs" type="number" inputmode="numeric" value="${u}" placeholder="${u}" oninput="qsPreview(${buyId})"><span class="fi-suf">pcs</span></div></div>
+      <div class="fg"><label class="fl">Sell Price ₹/kg <span style="font-weight:400;text-transform:none;font-size:.62rem">(net weight)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_kg" type="number" inputmode="decimal" value="${lastSale?.sellKg||''}" placeholder="e.g. 240" oninput="qsPreview(${buyId})"></div></div>
+    </div>
+    <div class="fg" style="margin-bottom:.6rem"><label class="fl">= ₹/piece <span style="font-weight:400;text-transform:none;font-size:.62rem">(auto-calculated)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_pc" type="number" inputmode="decimal" placeholder="auto" style="background:var(--card2);color:var(--mu)" readonly></div></div>
+    <div class="fg" style="margin-bottom:.6rem"><label class="fl">Sale Date</label><input class="fi np" id="qs_date" type="date" value="${todayKey()}" max="${todayKey()}"></div>
+    <div id="qsPreviewBox" style="display:none;margin-bottom:.6rem"></div>
+    <div class="pay-split" style="margin-bottom:.75rem">
+      <div class="pay-split-ttl">💵 Cash Collected Now</div>
+      <div class="pay-split-row">
+        <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_cash" type="number" inputmode="decimal" placeholder="0" oninput="qsPreview(${buyId})"></div></div>
+        <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_upi" type="number" inputmode="decimal" placeholder="0" oninput="qsPreview(${buyId})"></div></div>
+      </div>
+      <div class="pay-total-line" id="qsPaidLine">Collected: ₹0 · Pending: ₹0</div>
+    </div>
+    <div class="fg" style="margin-bottom:.85rem"><label class="fl">Note</label><input class="fi np" id="qs_note" type="text" placeholder="Customer name…"></div>
+    <button class="btn primary btn-lg btn-full" onclick="confirmQuickSell(${buyId})">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Save Sale
+    </button>
+  `);
+  setTimeout(()=>qsPreview(buyId),50);
+}
+function qsPreview(buyId){
+  const buys=getBuys(),b=buys.find(x=>x.id===buyId);if(!b)return;
+  const{netKgPerPc,costPerPc}=buyCalc(b);
+  const pcs=parseFloat($('qs_pcs')?.value)||0;
+  const sk=parseFloat($('qs_kg')?.value)||0;
+  const sp=sk>0&&netKgPerPc>0?sk*netKgPerPc:0;
+  // update piece price display
+  const pcEl=$('qs_pc');if(pcEl)pcEl.value=sp>0?sp.toFixed(1):'';
+  const cash=parseFloat($('qs_cash')?.value)||0,upi=parseFloat($('qs_upi')?.value)||0;
+  const rev=pcs*sp,cost=pcs*costPerPc,profit=rev-cost,coll=cash+upi;
+  const pb=$('qsPreviewBox');
+  if(pb&&pcs>0&&sk>0){
+    const be=costPerPc/netKgPerPc;
+    pb.innerHTML=`${pcs} pcs × ₹${sk}/kg × ${netKgPerPc.toFixed(3)}kg = <strong>₹${sp.toFixed(1)}/pc</strong><br>Revenue: <strong>${fmt(rev)}</strong> · Profit: <strong style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</strong><br>Break-even: ₹${be.toFixed(1)}/kg`;
+    pb.className='info-box '+(profit>=0?'green':'red');pb.style.display='block';
+  }
+  const pl=$('qsPaidLine');
+  if(pl)pl.textContent=`Collected: ${fmt(coll)} · Pending: ${fmt(Math.max(0,rev-coll))}`;
+}
+function confirmQuickSell(buyId){
+  const pcs=parseFloat($('qs_pcs')?.value)||0;
+  const sk=parseFloat($('qs_kg')?.value)||0;
+  if(!pcs||pcs<=0){toast('Enter pieces');return}
+  if(!sk){toast('Enter sell price ₹/kg');return}
+  const buys=getBuys(),b=buys.find(x=>x.id===buyId);
+  if(pcs>unsoldPcs(b)){toast(`Only ${unsoldPcs(b)} pieces available`);return}
+  const{netKgPerPc}=buyCalc(b);
+  const sp=sk*netKgPerPc;
+  const sales=getSales();
+  sales.push({id:nid(),buyId,date:$('qs_date')?.value||todayKey(),ts:Date.now(),
+    pcs,sellKg:sk,sellPc:parseFloat(sp.toFixed(2)),
+    cash:parseFloat($('qs_cash')?.value)||0,upi:parseFloat($('qs_upi')?.value)||0,
+    note:$('qs_note')?.value.trim()||''});
+  sa(KS,sales);closeModal();toast('✅ Sale saved!');renderHome();
+}
+
+/* ════ QUICK COLLECT MODAL ════ */
+function quickCollect(buyId){
+  const buys=getBuys(),b=buys.find(x=>x.id===buyId);if(!b)return;
+  const rev=totalRevenue(b),coll=totalCollected(b),pend=pendingCash(b);
+  openModal(`Collect Payment`,`
+    <div class="info-box" style="margin-bottom:.8rem">
+      Total revenue: <strong>${fmt(rev)}</strong><br>
+      Already collected: <strong style="color:var(--green)">${fmt(coll)}</strong><br>
+      <strong style="color:var(--red)">Still pending: ${fmt(pend)}</strong>
+    </div>
+    <div class="pay-split" style="margin-bottom:.75rem">
+      <div class="pay-split-ttl">💵 Collecting Now</div>
+      <div class="pay-split-row">
+        <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qc_cash" type="number" inputmode="decimal" value="${Math.round(pend)}" oninput="qcLine()"></div></div>
+        <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qc_upi" type="number" inputmode="decimal" placeholder="0" oninput="qcLine()"></div></div>
+      </div>
+      <div class="pay-total-line" id="qcLine">Total: ${fmt(pend)}</div>
+    </div>
+    <div class="fg" style="margin-bottom:.85rem"><label class="fl">Note</label><input class="fi np" id="qc_note" type="text" placeholder="Cash, UPI, partial…"></div>
+    <button class="btn primary btn-lg btn-full" onclick="confirmCollect(${buyId})">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Confirm Collection
+    </button>
+  `);
+}
+function qcLine(){
+  const c=parseFloat($('qc_cash')?.value)||0,u=parseFloat($('qc_upi')?.value)||0;
+  const pl=$('qcLine');if(pl)pl.textContent=`Total: ${fmt(c+u)}`;
+}
+function confirmCollect(buyId){
+  const c=parseFloat($('qc_cash')?.value)||0,u=parseFloat($('qc_upi')?.value)||0;
+  if(!c&&!u){toast('Enter amount');return}
+  const sales=getSales(),lastSale=salesOf(buyId).slice(-1)[0];
+  if(!lastSale){toast('No sales found for this batch');return}
+  // Add as a payment against the last sale (or create a general collect)
+  const allSales=getSales();
+  // Find first sale with pending
+  let added=false;
+  const buys=getBuys(),b=buys.find(x=>x.id===buyId);
+  // We attach the payment to the batch via a new collection-only sale record
+  allSales.push({id:nid(),buyId,date:todayKey(),ts:Date.now(),pcs:0,sellPc:0,sellKg:0,cash:c,upi:u,isCollectionOnly:true,note:$('qc_note')?.value.trim()||''});
+  sa(KS,allSales);closeModal();toast(`✅ ${fmt(c+u)} collected!`);renderHome();
+}
+
+/* ════ LEDGER ════ */
+let ledgerDateKey=todayKey();
+function shiftDate(d){
+  const dt=new Date(ledgerDateKey);dt.setDate(dt.getDate()+d);
+  const nk=dt.toISOString().slice(0,10);
+  if(nk>todayKey())return;
+  ledgerDateKey=nk;renderLedger();
+}
+function openDatePicker(){$('dpInput').max=todayKey();$('dpInput').value=ledgerDateKey;$('dpInput').click()}
+function setDateFromPicker(v){if(v){ledgerDateKey=v;renderLedger()}}
+
+function renderLedger(){
+  const[y,m,d]=ledgerDateKey.split('-').map(Number);
+  const isToday=ledgerDateKey===todayKey();
+  $('dnavMain').innerHTML=d+' '+FMON[m-1]+' '+y+(isToday?` <span class="datenav-today">Today</span>`:'');
+  $('dnavSub').textContent=DAYS[new Date(y,m-1,d).getDay()];
+
+  const buys=getBuys(),allSales=getSales(),allSuppays=getSuppays();
+  const dayBuys=buys.filter(b=>b.date===ledgerDateKey);
+  const daySales=allSales.filter(s=>s.date===ledgerDateKey);
+  const daySuppays=allSuppays.filter(p=>p.date===ledgerDateKey);
+
+  // P&L for this day
+  const dayRevenue=daySales.filter(s=>!s.isCollectionOnly).reduce((a,s)=>{
+    const b=buys.find(x=>x.id===s.buyId);if(!b)return a;
+    const{netKgPerPc}=buyCalc(b);return a+(s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0));
+  },0);
+  const dayBuyCost=dayBuys.reduce((a,b)=>a+buyCalc(b).totalCost,0);
+  const dayColl=daySales.reduce((a,s)=>a+(s.cash||0)+(s.upi||0),0);
+  const dayCash=daySales.reduce((a,s)=>a+(s.cash||0),0);
+  const dayUpi=daySales.reduce((a,s)=>a+(s.upi||0),0);
+  const dayProfit=dayRevenue-dayBuyCost;
+  const daySuppPaid=daySuppays.reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
+
+  let html='';
+
+  // Day summary
+  html+=`<div class="card card-pad">
+    <div class="card-head" style="margin-bottom:.75rem">
+      <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Day Summary</div>
+      <button class="btn danger btn-sm" onclick="deleteDay('${ledgerDateKey}')">🗑 Delete Day</button>
+    </div>
+    <div class="stat-row c4">
+      <div class="stat orange"><div class="stat-lbl">Invested</div><div class="stat-val" style="font-size:.95rem">${fmt(dayBuyCost)}</div></div>
+      <div class="stat blue"><div class="stat-lbl">Revenue</div><div class="stat-val" style="font-size:.95rem">${fmt(dayRevenue)}</div></div>
+      <div class="stat ${dayProfit>=0?'green':'red'}"><div class="stat-lbl">Profit</div><div class="stat-val" style="font-size:.95rem">${dayRevenue>0?fmtD(dayProfit):'—'}</div></div>
+      <div class="stat green"><div class="stat-lbl">Collected</div><div class="stat-val" style="font-size:.95rem">${fmt(dayColl)}</div></div>
+    </div>
+    ${dayCash>0||dayUpi>0?`<div style="display:flex;gap:.5rem;margin-top:.5rem">
+      <div class="stat green" style="flex:1;padding:.5rem .6rem"><div class="stat-lbl">Cash</div><div class="stat-val" style="font-size:.88rem">${fmt(dayCash)}</div></div>
+      <div class="stat blue" style="flex:1;padding:.5rem .6rem"><div class="stat-lbl">UPI</div><div class="stat-val" style="font-size:.88rem">${fmt(dayUpi)}</div></div>
+      ${daySuppPaid>0?`<div class="stat gold" style="flex:1;padding:.5rem .6rem"><div class="stat-lbl">Supp.</div><div class="stat-val" style="font-size:.88rem">${fmt(daySuppPaid)}</div></div>`:''}
+    </div>`:''}
+  </div>`;
+
+  // Purchases
+  if(dayBuys.length){
+    html+=`<div class="card card-pad"><div class="section-label">🛒 Purchases on this day</div>`;
+    dayBuys.forEach((b,i)=>{
+      const u=unsoldPcs(b),sold=soldPcs(b),{netKgPerPc,totalCost,costPerPc}=buyCalc(b);
+      const rev=totalRevenue(b),pend=pendingCash(b),profit=rev-totalCost;
+      const pct=b.pcs>0?Math.min(100,sold/b.pcs*100):0;
+      const suppInfo=suppTotal(b);
+      html+=`<div class="entry">
+        <div class="entry-head">
+          <div class="entry-left">
+            <div class="entry-label">Batch ${i+1}${b.supplier?' · '+b.supplier:''}${b.note?' · '+b.note:''}</div>
+            <div class="entry-main">🐔 ${b.pcs} pieces · ${b.liveKg} kg live · ₹${b.buyPrice}/kg</div>
+            <div class="entry-sub">Cost: ${fmt(totalCost)} · Net ${netKgPerPc.toFixed(3)} kg/pc · Cost/pc: ${fmt(costPerPc)}<br>
+            ${u>0?`<span style="color:var(--orange)">⚠️ ${u} pieces unsold</span>`:`<span style="color:var(--green)">✅ All ${b.pcs} sold</span>`}
+            ${suppInfo.remaining>0.5?` · <span style="color:var(--red)">Supplier: ${fmt(suppInfo.remaining)} pending</span>`:` · <span style="color:var(--green)">Supplier paid ✅</span>`}
+            </div>
+          </div>
+          <div class="entry-right">
+            <div class="entry-amount" style="color:var(--orange)">${fmt(totalCost)}</div>
+            ${rev>0?`<div class="entry-status" style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</div>`:''}
+            ${pend>0.5?`<div class="entry-status" style="color:var(--red)">Pend: ${fmt(pend)}</div>`:''}
+          </div>
+        </div>
+        ${sold>0?`<div class="entry-prog"><div style="display:flex;justify-content:space-between;font-size:.63rem;color:var(--mu)"><span>Sold ${sold}/${b.pcs}</span><span>${pct.toFixed(0)}%</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>`:''}
+        <div class="entry-actions">
+          ${u>0?`<button class="btn warn btn-sm" onclick="quickSell(${b.id})">Sell ${u} pcs</button>`:''}
+          ${pend>0.5?`<button class="btn blue btn-sm" onclick="quickCollect(${b.id})">Collect ${fmt(pend)}</button>`:''}
+          <button class="btn ghost btn-sm" onclick="deleteBatch(${b.id})">Delete</button>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  // Sales on this day (from other dates' batches)
+  const crossDaySales=daySales.filter(s=>!s.isCollectionOnly&&!dayBuys.find(b=>b.id===s.buyId));
+  if(crossDaySales.length){
+    html+=`<div class="card card-pad"><div class="section-label">💰 Sales (from previous batches)</div>`;
+    crossDaySales.forEach(s=>{
+      const b=buys.find(x=>x.id===s.buyId);if(!b)return;
+      const{netKgPerPc,costPerPc}=buyCalc(b);
+      const rev=s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0);
+      const cost=s.pcs*costPerPc,profit=rev-cost;
+      html+=`<div class="entry">
+        <div class="entry-head">
+          <div class="entry-left">
+            <div class="entry-label">Batch from ${keyDisp(b.date)}${s.note?' · '+s.note:''}</div>
+            <div class="entry-main">${s.pcs} pieces sold @ ${s.sellPc?fmt(s.sellPc)+'/pc':fmt(s.sellKg||0)+'/kg'}</div>
+            <div class="entry-sub">Revenue: ${fmt(rev)} · Profit on these: <span style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</span></div>
+          </div>
+          <div class="entry-right">
+            <div class="entry-amount" style="color:var(--pri)">${fmt(rev)}</div>
+            <div class="entry-status" style="color:var(--mu)">Cash: ${fmt(s.cash||0)} · UPI: ${fmt(s.upi||0)}</div>
+          </div>
+        </div>
+        <div class="entry-actions"><button class="btn ghost btn-sm" onclick="deleteSale(${s.id})">Delete</button></div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
+  // Collections on this day
+  const dayColl2=daySales.filter(s=>s.isCollectionOnly);
+  if(dayColl2.length){
+    html+=`<div class="card card-pad"><div class="section-label">💵 Collections</div>`;
+    dayColl2.forEach(s=>{
+      const b=buys.find(x=>x.id===s.buyId);
+      html+=`<div class="entry"><div class="entry-head">
+        <div class="entry-left"><div class="entry-label">From ${b?keyDisp(b.date)+' batch':'batch'}</div>
+        <div class="entry-main">${s.note||'Payment collected'}</div></div>
+        <div class="entry-right"><div class="entry-amount" style="color:var(--green)">${fmt((s.cash||0)+(s.upi||0))}</div>
+        <div class="entry-status" style="color:var(--mu)">Cash: ${fmt(s.cash||0)} · UPI: ${fmt(s.upi||0)}</div></div>
+      </div></div>`;
+    });
+    html+='</div>';
+  }
+
+  // Supplier payments on this day
+  if(daySuppays.length){
+    html+=`<div class="card card-pad"><div class="section-label">🏭 Supplier Payments</div>`;
+    daySuppays.forEach(p=>{
+      const b=buys.find(x=>x.id===p.buyId);
+      html+=`<div class="entry"><div class="entry-head">
+        <div class="entry-left"><div class="entry-label">To ${b?.supplier||'Supplier'} · ${b?keyDisp(b.date)+' batch':''}</div>
+        <div class="entry-main">${p.note||'Supplier payment'}</div></div>
+        <div class="entry-right"><div class="entry-amount" style="color:var(--gold)">${fmt((p.cash||0)+(p.upi||0))}</div>
+        <div class="entry-status" style="color:var(--mu)">Cash: ${fmt(p.cash||0)} · UPI: ${fmt(p.upi||0)}</div></div>
+      </div></div>`;
+    });
+    html+='</div>';
+  }
+
+  if(!dayBuys.length&&!daySales.length&&!daySuppays.length){
+    html+=`<div class="empty"><div class="empty-icon">📅</div><p>No activity on this day.<br>Use ← → to browse other dates.</p></div>`;
+  }
+
+  $('ledgerContent').innerHTML=html;
+}
+
+function deleteDay(dateKey){
+  if(!confirm(`Delete ALL entries for ${keyDisp(dateKey)}? This cannot be undone.`))return;
+  const buyIds=getBuys().filter(b=>b.date===dateKey).map(b=>b.id);
+  sa(KB,getBuys().filter(b=>b.date!==dateKey));
+  sa(KS,getSales().filter(s=>s.date!==dateKey&&!buyIds.includes(s.buyId)));
+  sa(KSP,getSuppays().filter(p=>p.date!==dateKey&&!buyIds.includes(p.buyId)));
+  toast('Day deleted');renderLedger();renderHome();
+}
+function deleteBatch(id){
+  if(!confirm('Delete this batch and all its sales?'))return;
+  sa(KB,getBuys().filter(b=>b.id!==id));
+  sa(KS,getSales().filter(s=>s.buyId!==id));
+  sa(KSP,getSuppays().filter(p=>p.buyId!==id));
+  toast('Batch deleted');renderLedger();
+}
+function deleteSale(id){
+  if(!confirm('Delete this sale?'))return;
+  sa(KS,getSales().filter(s=>s.id!==id));
+  toast('Sale deleted');renderLedger();
+}
+
+/* ════ ANALYTICS ════ */
+let aPeriod='today';
+function setPeriod(p){
+  aPeriod=p;
+  document.querySelectorAll('#aTabs .ptab').forEach((t,i)=>t.classList.toggle('on',['today','week','month','year','custom'][i]===p));
+  $('customRangePick').style.display=p==='custom'?'grid':'none';
+  if(p==='custom'&&!$('cFrom').value){const t=todayKey();$('cTo').value=t;const d=new Date();d.setDate(d.getDate()-29);$('cFrom').value=d.toISOString().slice(0,10)}
+  renderAnalytics();
+}
+function renderAnalytics(){
+  const buys=getBuys(),sales=getSales(),suppays=getSuppays();
+  if(!buys.length){$('analyticsContent').innerHTML=`<div class="empty"><div class="empty-icon">📊</div><p>No data yet.<br>Add your first purchase to see reports.</p></div>`;return}
+  const today=todayKey();
+  let from=today,to=today;
+  if(aPeriod==='week'){const d=new Date();d.setDate(d.getDate()-d.getDay()+1);from=d.toISOString().slice(0,10)}
+  else if(aPeriod==='month')from=today.slice(0,7)+'-01';
+  else if(aPeriod==='year')from=today.slice(0,4)+'-01-01';
+  else if(aPeriod==='custom'){from=$('cFrom').value||today;to=$('cTo').value||today}
+  
+  // Group by date
+  const gk={};
+  buys.filter(b=>b.date>=from&&b.date<=to).forEach(b=>{
+    if(!gk[b.date])gk[b.date]={date:b.date,cost:0,revenue:0,coll:0,cash:0,upi:0,pieces:0,kg:0};
+    gk[b.date].cost+=buyCalc(b).totalCost;gk[b.date].pieces+=b.pcs;gk[b.date].kg+=b.liveKg;
+  });
+  sales.filter(s=>s.date>=from&&s.date<=to).forEach(s=>{
+    const b=buys.find(x=>x.id===s.buyId);if(!b)return;
+    if(!gk[s.date])gk[s.date]={date:s.date,cost:0,revenue:0,coll:0,cash:0,upi:0,pieces:0,kg:0};
+    const{netKgPerPc}=buyCalc(b);
+    gk[s.date].revenue+=s.isCollectionOnly?0:(s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0));
+    gk[s.date].coll+=(s.cash||0)+(s.upi||0);gk[s.date].cash+=s.cash||0;gk[s.date].upi+=s.upi||0;
+  });
+  const rows=Object.values(gk).sort((a,b)=>b.date.localeCompare(a.date));
+  const tCost=rows.reduce((a,r)=>a+r.cost,0),tRev=rows.reduce((a,r)=>a+r.revenue,0);
+  const tColl=rows.reduce((a,r)=>a+r.coll,0),tCash=rows.reduce((a,r)=>a+r.cash,0),tUpi=rows.reduce((a,r)=>a+r.upi,0);
+  const tProfit=tRev-tCost,margin=tCost>0?(tProfit/tCost)*100:0;
+  const maxRev=Math.max(...rows.map(r=>r.revenue),1);
+  // Global pending
+  const totalPendCash=buys.reduce((a,b)=>a+pendingCash(b),0);
+  const totalPendSupp=buys.reduce((a,b)=>a+suppTotal(b).remaining,0);
+
+  let html=`
+    <div class="stat-row">
+      <div class="stat ${tCost>0?'orange':'neutral'}"><div class="stat-lbl">Total Cost</div><div class="stat-val">${fmt(tCost)}</div></div>
+      <div class="stat blue"><div class="stat-lbl">Revenue</div><div class="stat-val">${fmt(tRev)}</div></div>
+    </div>
+    <div class="stat-row c3">
+      <div class="stat ${tProfit>=0?'green':'red'}"><div class="stat-lbl">${tProfit>=0?'Profit':'Loss'}</div><div class="stat-val" style="font-size:1.1rem">${fmtD(tProfit)}</div><div class="stat-sub">Margin ${margin.toFixed(1)}%</div></div>
+      <div class="stat green"><div class="stat-lbl">Collected</div><div class="stat-val" style="font-size:1.1rem">${fmt(tColl)}</div></div>
+      <div class="stat ${totalPendCash>0.5?'red':'green'}"><div class="stat-lbl">Pending</div><div class="stat-val" style="font-size:1.1rem">${fmt(totalPendCash)}</div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat green"><div class="stat-lbl">Cash</div><div class="stat-val">${fmt(tCash)}</div></div>
+      <div class="stat blue"><div class="stat-lbl">UPI</div><div class="stat-val">${fmt(tUpi)}</div></div>
+    </div>`;
+
+  if(rows.length){
+    html+=`<div class="card" style="overflow:hidden">
+      <div class="card-pad" style="padding-bottom:.5rem"><div class="section-label">Day-wise Breakdown</div></div>
+      <div style="overflow-x:auto"><table class="a-table">
+        <thead><tr><th>Date</th><th>Cost</th><th>Revenue</th><th>Profit</th><th>Collected</th><th>Chart</th></tr></thead>
+        <tbody>`;
+    rows.forEach(r=>{
+      const pr=r.revenue-r.cost,pct=Math.max(0,Math.min(100,r.revenue/maxRev*100));
+      html+=`<tr>
+        <td>${keyShort(r.date)}${r.date===today?` <span style="font-size:.58rem;color:var(--pri);font-weight:700;background:var(--priL);padding:.05rem .35rem;border-radius:20px">Today</span>`:''}</td>
+        <td style="color:var(--orange)">${fmt(r.cost)}</td><td style="color:var(--blue)">${fmt(r.revenue)}</td>
+        <td class="${pr>=0?'gc':'rc'}">${fmtD(pr)}</td>
+        <td style="color:var(--green)">${fmt(r.coll)}</td>
+        <td><div class="bar"><div class="bar-f" style="width:${pct}%;background:${pr>=0?'var(--green)':'var(--red)'}"></div></div></td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div></div>`;
+    if(rows.length>1){
+      const best=rows.reduce((a,b)=>(b.revenue-b.cost)>(a.revenue-a.cost)?b:a);
+      html+=`<div class="card card-pad"><div class="section-label">💡 Insights</div>
+        <div style="font-size:.8rem;color:var(--tx);line-height:2.1">
+          🏆 Best day: <strong>${keyDisp(best.date)}</strong> — Profit ${fmtD(best.revenue-best.cost)}<br>
+          📦 Total live kg bought: <strong>${rows.reduce((a,r)=>a+r.kg,0).toFixed(1)} kg</strong><br>
+          ${totalPendSupp>0.5?`🏭 Supplier balance due: <strong style="color:var(--red)">${fmt(totalPendSupp)}</strong><br>`:'🏭 Supplier: <strong style="color:var(--green)">All paid ✅</strong><br>'}
+        </div>
+      </div>`;
+    }
+  }
+  $('analyticsContent').innerHTML=html;
+}
+
+/* ════ UDHAAR ════ */
+function addUdhaar(){
+  const name=$('u_name').value.trim(),amt=parseFloat($('u_amt').value);
+  if(!name){toast('Enter name');return}if(!amt||amt<=0){toast('Enter amount');return}
+  const ud=la(KU);
+  ud.push({id:nid(),ts:Date.now(),date:todayKey(),name,amount:amt,note:$('u_note').value.trim(),paid:false});
+  sa(KU,ud);$('u_name').value='';$('u_amt').value='';$('u_note').value='';
+  renderUdhaar();updateUdBadge();toast('Udhaar added for '+name);
+}
+function markPaid(id){sa(KU,la(KU).map(u=>u.id===id?{...u,paid:true}:u));renderUdhaar();updateUdBadge();toast('Marked paid ✅')}
+function markUnpaid(id){sa(KU,la(KU).map(u=>u.id===id?{...u,paid:false}:u));renderUdhaar();updateUdBadge()}
+function delUdhaar(id){if(!confirm('Delete?'))return;sa(KU,la(KU).filter(u=>u.id!==id));renderUdhaar();updateUdBadge()}
+function renderUdhaar(){
+  const data=la(KU).sort((a,b)=>b.ts-a.ts);
+  const pend=data.filter(u=>!u.paid),tot=pend.reduce((a,u)=>a+u.amount,0);
+  $('udTotalWrap').style.display=pend.length?'block':'none';
+  if(pend.length)$('udTotalVal').textContent=fmt(tot);
+  if(!data.length){$('udList').innerHTML=`<div class="empty"><div class="empty-icon">😊</div><p>No udhaar entries.<br>All payments are clear!</p></div>`;return}
+  $('udList').innerHTML=data.map(u=>`
+    <div class="ud-row">
+      <div class="ud-av ${u.paid?'paid':''}">${u.name[0].toUpperCase()}</div>
+      <div class="ud-info">
+        <div class="ud-name">${u.name}</div>
+        ${u.note?`<div class="ud-note">${u.note}</div>`:''}
+        <div class="ud-date">${keyDisp(u.date)}</div>
+      </div>
+      <div class="ud-right">
+        <div class="ud-amt ${u.paid?'paid':''}">${fmt(u.amount)}</div>
+        ${u.paid
+          ?`<div style="font-size:.65rem;color:var(--green);font-weight:700;margin-top:.15rem">✅ Paid</div><button class="btn ghost btn-sm" style="margin-top:.2rem;font-size:.62rem" onclick="markUnpaid(${u.id})">Undo</button>`
+          :`<button class="btn success btn-sm" style="margin-top:.2rem;font-size:.65rem" onclick="markPaid(${u.id})">Mark Paid</button>`}
+        <button class="btn danger btn-sm" style="margin-top:.18rem;font-size:.6rem;padding:.22rem .45rem" onclick="delUdhaar(${u.id})">Del</button>
+      </div>
+    </div>`).join('');
+}
+function updateUdBadge(){const c=la(KU).filter(u=>!u.paid).length;$('udBadge').style.display=c?'block':'none'}
+
+/* ════ INIT ════ */
+renderHome();
+updateUdBadge();
+document.querySelectorAll('#aTabs .ptab').forEach((t,i)=>t.classList.toggle('on',i===0));
+</script>
+
 </body>
 </html>
