@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
@@ -10,7 +9,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta id="metaTheme" name="theme-color" content="#2d6a4f">
 <title>ChickenCalc</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #f0f2f0;
@@ -38,8 +36,8 @@
   --sh2: 0 4px 20px rgba(0,0,0,.10);
   --r: .75rem;
   --r2: 1rem;
-  --fn: 'Inter', sans-serif;
-  --mo: 'JetBrains Mono', monospace;
+  --fn: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mo: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', 'Roboto Mono', Consolas, 'Courier New', monospace;
 }
 [data-theme="dark"] {
   --bg: #141a14;
@@ -75,8 +73,8 @@ input, select { font: inherit; color: inherit; -webkit-tap-highlight-color: tran
 :focus-visible { outline: 2px solid var(--pri); outline-offset: 2px; border-radius: 4px }
 
 /* ── HEADER ── */
-.hdr { background: var(–pri); color: #fff; padding: calc(.8rem + env(safe-area-inset-top,0px)) 1rem .8rem;
-display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 80 }
+.hdr { background: var(--pri); color: #fff; padding: calc(.8rem + env(safe-area-inset-top,0px)) 1rem .8rem;
+  display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 80 }
 .hdr-logo { display: flex; align-items: center; gap: .5rem }
 .hdr-logo svg { width: 26px; height: 26px }
 .hdr-title { font-size: 1.1rem; font-weight: 800; letter-spacing: -.02em }
@@ -89,14 +87,14 @@ display: flex; align-items: center; justify-content: space-between; position: st
 .app { max-width: 640px; margin: 0 auto; padding: .9rem 1rem 0 }
 
 /* ── BOTTOM NAV ── */
-.bnav { position: fixed; bottom: 0; left: 0; right: 0; background: var(–card); border-top: 1px solid var(–bdr);
-display: flex; padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 80 }
+.bnav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--bdr);
+  display: flex; padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 80 }
 .nb { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 0 7px;
-font-size: .6rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(–mu);
-border: none; background: none; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent }
+  font-size: .6rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--mu);
+  border: none; background: none; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent }
 .nb svg { width: 21px; height: 21px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
-.nb.on { color: var(–pri) }
-.nb .dot { position: absolute; top: 7px; right: calc(50% - 16px); width: 8px; height: 8px; background: var(–red); border-radius: 50%; border: 2px solid var(–card) }
+.nb.on { color: var(--pri) }
+.nb .dot { position: absolute; top: 7px; right: calc(50% - 16px); width: 8px; height: 8px; background: var(--red); border-radius: 50%; border: 2px solid var(--card) }
 
 /* ── VIEWS ── */
 .view { display: none }
@@ -104,27 +102,27 @@ border: none; background: none; cursor: pointer; position: relative; -webkit-tap
 @keyframes up { from { opacity: 0; transform: translateY(4px) } to { opacity: 1; transform: translateY(0) } }
 
 /* ── CARDS ── */
-.card { background: var(–card); border-radius: var(–r2); border: 1px solid var(–bdr); box-shadow: var(–sh); margin-bottom: .75rem }
+.card { background: var(--card); border-radius: var(--r2); border: 1px solid var(--bdr); box-shadow: var(--sh); margin-bottom: .75rem }
 .card-pad { padding: 1.1rem }
 .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem }
 .card-title { font-size: .95rem; font-weight: 700; display: flex; align-items: center; gap: .4rem }
-.card-title svg { width: 17px; height: 17px; color: var(–pri) }
+.card-title svg { width: 17px; height: 17px; color: var(--pri) }
 
 /* ── STAT ROW ── */
 .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: .75rem }
 .stat-row.c3 { grid-template-columns: 1fr 1fr 1fr }
 .stat-row.c4 { grid-template-columns: 1fr 1fr 1fr 1fr }
 @media(max-width: 380px) { .stat-row.c4 { grid-template-columns: 1fr 1fr } }
-.stat { border-radius: var(–r); padding: .75rem .7rem; border: 1.5px solid }
+.stat { border-radius: var(--r); padding: .75rem .7rem; border: 1.5px solid }
 .stat-lbl { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .25rem; opacity: .7 }
-.stat-val { font-size: 1.25rem; font-weight: 800; font-family: var(–mo); line-height: 1.2 }
+.stat-val { font-size: 1.25rem; font-weight: 800; font-family: var(--mo); line-height: 1.2 }
 .stat-sub { font-size: .65rem; margin-top: .2rem; opacity: .7 }
-.stat.green { background: var(–greenL); border-color: var(–green); color: var(–green) }
-.stat.red { background: var(–redL); border-color: var(–red); color: var(–red) }
-.stat.orange { background: var(–orangeL); border-color: var(–orange); color: var(–orange) }
-.stat.blue { background: var(–blueL); border-color: var(–blue); color: var(–blue) }
-.stat.gold { background: var(–goldL); border-color: var(–gold); color: var(–gold) }
-.stat.neutral { background: var(–card2); border-color: var(–bdr); color: var(–tx) }
+.stat.green { background: var(--greenL); border-color: var(--green); color: var(--green) }
+.stat.red { background: var(--redL); border-color: var(--red); color: var(--red) }
+.stat.orange { background: var(--orangeL); border-color: var(--orange); color: var(--orange) }
+.stat.blue { background: var(--blueL); border-color: var(--blue); color: var(--blue) }
+.stat.gold { background: var(--goldL); border-color: var(--gold); color: var(--gold) }
+.stat.neutral { background: var(--card2); border-color: var(--bdr); color: var(--tx) }
 
 /* ── FORM ── */
 .frow { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; margin-bottom: .65rem }
@@ -132,165 +130,163 @@ border: none; background: none; cursor: pointer; position: relative; -webkit-tap
 .frow.c3 { grid-template-columns: 1fr 1fr 1fr }
 @media(max-width: 400px) { .frow { grid-template-columns: 1fr } .frow.c3 { grid-template-columns: 1fr 1fr } }
 .fg { display: flex; flex-direction: column; gap: .3rem }
-.fl { font-size: .72rem; font-weight: 700; color: var(–mu); text-transform: uppercase; letter-spacing: .04em }
+.fl { font-size: .72rem; font-weight: 700; color: var(--mu); text-transform: uppercase; letter-spacing: .04em }
 .fi-wrap { position: relative }
-.fi-pre { position: absolute; left: .7rem; top: 50%; transform: translateY(-50%); font-size: .85rem; color: var(–mu); pointer-events: none; font-family: var(–mo) }
-.fi-suf { position: absolute; right: .7rem; top: 50%; transform: translateY(-50%); font-size: .7rem; color: var(–fa); pointer-events: none; font-weight: 700 }
-.fi { width: 100%; padding: .72rem .72rem .72rem 1.85rem; background: var(–bg); border: 1.5px solid var(–bdr); border-radius: var(–r); font-size: 16px; font-family: var(–mo); font-weight: 600; color: var(–tx); transition: border-color .15s; -webkit-appearance: none }
-.fi:focus { outline: none; border-color: var(–pri); box-shadow: 0 0 0 3px var(–priL) }
+.fi-pre { position: absolute; left: .7rem; top: 50%; transform: translateY(-50%); font-size: .85rem; color: var(--mu); pointer-events: none; font-family: var(--mo) }
+.fi-suf { position: absolute; right: .7rem; top: 50%; transform: translateY(-50%); font-size: .7rem; color: var(--fa); pointer-events: none; font-weight: 700 }
+.fi { width: 100%; padding: .72rem .72rem .72rem 1.85rem; background: var(--bg); border: 1.5px solid var(--bdr); border-radius: var(--r); font-size: 16px; font-family: var(--mo); font-weight: 600; color: var(--tx); transition: border-color .15s; -webkit-appearance: none }
+.fi:focus { outline: none; border-color: var(--pri); box-shadow: 0 0 0 3px var(--priL) }
 .fi.np { padding-left: .72rem }
 .fi.pr { padding-right: 2.2rem }
-.fi.ok { border-color: var(–green) }
-.fi.er { border-color: var(–red) }
-select.fi { cursor: pointer; padding-right: 2rem; background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘10’ height=‘10’ viewBox=‘0 0 24 24’ fill=‘none’ stroke=’%23607060’ stroke-width=‘2’%3E%3Cpolyline points=‘6 9 12 15 18 9’/%3E%3C/svg%3E”); background-repeat: no-repeat; background-position: right .6rem center }
-[data-theme=“dark”] select.fi { background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘10’ height=‘10’ viewBox=‘0 0 24 24’ fill=‘none’ stroke=’%237a9a7a’ stroke-width=‘2’%3E%3Cpolyline points=‘6 9 12 15 18 9’/%3E%3C/svg%3E”) }
+.fi.ok { border-color: var(--green) }
+.fi.er { border-color: var(--red) }
+select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23607060' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right .6rem center }
+[data-theme="dark"] select.fi { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%237a9a7a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") }
 
 /* ── PAYMENT SPLIT ── */
-.pay-split { background: var(–blueL); border: 1.5px solid var(–blue); border-radius: var(–r); padding: .8rem; margin-bottom: .65rem }
-.pay-split-ttl { font-size: .72rem; font-weight: 700; color: var(–blue); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .6rem }
+.pay-split { background: var(--blueL); border: 1.5px solid var(--blue); border-radius: var(--r); padding: .8rem; margin-bottom: .65rem }
+.pay-split-ttl { font-size: .72rem; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .6rem }
 .pay-split-row { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem }
-.pay-total-line { margin-top: .5rem; text-align: center; font-size: .72rem; color: var(–mu); font-family: var(–mo) }
+.pay-total-line { margin-top: .5rem; text-align: center; font-size: .72rem; color: var(--mu); font-family: var(--mo) }
 
 /* ── BUTTONS ── */
-.btn { display: flex; align-items: center; justify-content: center; gap: .4rem; border-radius: var(–r); font-weight: 700; cursor: pointer; transition: all .15s; -webkit-tap-highlight-color: transparent; border: none }
+.btn { display: flex; align-items: center; justify-content: center; gap: .4rem; border-radius: var(--r); font-weight: 700; cursor: pointer; transition: all .15s; -webkit-tap-highlight-color: transparent; border: none }
 .btn-full { width: 100% }
 .btn-lg { padding: .9rem 1.2rem; font-size: 1rem; min-height: 50px }
 .btn-md { padding: .6rem .9rem; font-size: .82rem; min-height: 38px }
 .btn-sm { padding: .35rem .65rem; font-size: .72rem; min-height: 30px }
 .btn svg { flex-shrink: 0 }
-.btn.primary { background: var(–pri); color: #fff }
-.btn.primary:hover { background: var(–pri2) }
+.btn.primary { background: var(--pri); color: #fff }
+.btn.primary:hover { background: var(--pri2) }
 .btn.primary:active { transform: scale(.98) }
-.btn.success { background: var(–greenL); color: var(–green); border: 1.5px solid var(–green) }
-.btn.success:hover { background: var(–green); color: #fff }
-.btn.danger { background: var(–redL); color: var(–red); border: 1.5px solid var(–red) }
-.btn.danger:hover { background: var(–red); color: #fff }
-.btn.warn { background: var(–orangeL); color: var(–orange); border: 1.5px solid var(–orange) }
-.btn.warn:hover { background: var(–orange); color: #fff }
-.btn.blue { background: var(–blueL); color: var(–blue); border: 1.5px solid var(–blue) }
-.btn.blue:hover { background: var(–blue); color: #fff }
-.btn.ghost { background: transparent; color: var(–mu); border: 1.5px solid var(–bdr) }
-.btn.ghost:hover { background: var(–div); color: var(–tx) }
+.btn.success { background: var(--greenL); color: var(--green); border: 1.5px solid var(--green) }
+.btn.success:hover { background: var(--green); color: #fff }
+.btn.danger { background: var(--redL); color: var(--red); border: 1.5px solid var(--red) }
+.btn.danger:hover { background: var(--red); color: #fff }
+.btn.warn { background: var(--orangeL); color: var(--orange); border: 1.5px solid var(--orange) }
+.btn.warn:hover { background: var(--orange); color: #fff }
+.btn.blue { background: var(--blueL); color: var(--blue); border: 1.5px solid var(--blue) }
+.btn.blue:hover { background: var(--blue); color: #fff }
+.btn.ghost { background: transparent; color: var(--mu); border: 1.5px solid var(--bdr) }
+.btn.ghost:hover { background: var(--div); color: var(--tx) }
 .btn-row { display: flex; gap: .5rem }
 
 /* ── PILL TABS ── */
-.pill-tabs { display: flex; background: var(–card2); border-radius: 50px; padding: 3px; gap: 2px; margin-bottom: .85rem }
-.ptab { flex: 1; padding: .42rem .3rem; border-radius: 50px; font-size: .68rem; font-weight: 700; color: var(–mu); cursor: pointer; text-align: center; border: none; background: none; transition: all .15s; white-space: nowrap }
-.ptab.on { background: var(–pri); color: #fff; box-shadow: var(–sh) }
+.pill-tabs { display: flex; background: var(--card2); border-radius: 50px; padding: 3px; gap: 2px; margin-bottom: .85rem }
+.ptab { flex: 1; padding: .42rem .3rem; border-radius: 50px; font-size: .68rem; font-weight: 700; color: var(--mu); cursor: pointer; text-align: center; border: none; background: none; transition: all .15s; white-space: nowrap }
+.ptab.on { background: var(--pri); color: #fff; box-shadow: var(--sh) }
 
 /* ── STOCK BADGE ── */
 .stock-badge { display: inline-flex; align-items: center; gap: .3rem; padding: .22rem .6rem; border-radius: 20px; font-size: .7rem; font-weight: 700 }
-.stock-badge.good { background: var(–greenL); color: var(–green) }
-.stock-badge.warn { background: var(–orangeL); color: var(–orange) }
-.stock-badge.danger { background: var(–redL); color: var(–red) }
+.stock-badge.good { background: var(--greenL); color: var(--green) }
+.stock-badge.warn { background: var(--orangeL); color: var(--orange) }
+.stock-badge.danger { background: var(--redL); color: var(--red) }
 
 /* ── ENTRY ROW ── */
-.entry { border: 1.5px solid var(–bdr); border-radius: var(–r); margin-bottom: .55rem; background: var(–card); overflow: hidden }
+.entry { border: 1.5px solid var(--bdr); border-radius: var(--r); margin-bottom: .55rem; background: var(--card); overflow: hidden }
 .entry-head { padding: .75rem .9rem; display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem }
 .entry-left { flex: 1; min-width: 0 }
-.entry-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(–mu); margin-bottom: .22rem; display: flex; align-items: center; gap: .3rem }
-.entry-main { font-size: .92rem; font-weight: 700; color: var(–tx); line-height: 1.3 }
-.entry-sub { font-size: .7rem; color: var(–mu); margin-top: .22rem; line-height: 1.5 }
+.entry-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--mu); margin-bottom: .22rem; display: flex; align-items: center; gap: .3rem }
+.entry-main { font-size: .92rem; font-weight: 700; color: var(--tx); line-height: 1.3 }
+.entry-sub { font-size: .7rem; color: var(--mu); margin-top: .22rem; line-height: 1.5 }
 .entry-right { text-align: right; flex-shrink: 0 }
-.entry-amount { font-size: 1rem; font-weight: 800; font-family: var(–mo) }
+.entry-amount { font-size: 1rem; font-weight: 800; font-family: var(--mo) }
 .entry-status { font-size: .65rem; font-weight: 700; margin-top: .18rem }
-.entry-prog { padding: .3rem .9rem .6rem; border-top: 1px solid var(–div) }
-.prog-bar { height: 6px; background: var(–div); border-radius: 10px; overflow: hidden; margin-top: .3rem }
-.prog-fill { height: 100%; border-radius: 10px; background: var(–pri); transition: width .4s }
-.entry-actions { padding: .5rem .9rem .65rem; border-top: 1px solid var(–div); display: flex; gap: .4rem; flex-wrap: wrap }
+.entry-prog { padding: .3rem .9rem .6rem; border-top: 1px solid var(--div) }
+.prog-bar { height: 6px; background: var(--div); border-radius: 10px; overflow: hidden; margin-top: .3rem }
+.prog-fill { height: 100%; border-radius: 10px; background: var(--pri); transition: width .4s }
+.entry-actions { padding: .5rem .9rem .65rem; border-top: 1px solid var(--div); display: flex; gap: .4rem; flex-wrap: wrap }
 
 /* ── DIVIDER ── */
-.divider { height: 1px; background: var(–div); margin: .7rem 0 }
-.section-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(–mu); margin-bottom: .5rem }
+.divider { height: 1px; background: var(--div); margin: .7rem 0 }
+.section-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--mu); margin-bottom: .5rem }
 
 /* ── DATE NAV ── */
-.datenav { display: flex; align-items: center; gap: .5rem; background: var(–card); border: 1px solid var(–bdr); border-radius: var(–r); padding: .55rem .7rem; margin-bottom: .75rem; box-shadow: var(–sh) }
-.datenav-btn { width: 36px; height: 36px; border-radius: 8px; background: var(–card2); border: 1px solid var(–bdr); display: flex; align-items: center; justify-content: center; color: var(–mu); flex-shrink: 0 }
-.datenav-btn:hover { background: var(–div); color: var(–tx) }
+.datenav { display: flex; align-items: center; gap: .5rem; background: var(--card); border: 1px solid var(--bdr); border-radius: var(--r); padding: .55rem .7rem; margin-bottom: .75rem; box-shadow: var(--sh) }
+.datenav-btn { width: 36px; height: 36px; border-radius: 8px; background: var(--card2); border: 1px solid var(--bdr); display: flex; align-items: center; justify-content: center; color: var(--mu); flex-shrink: 0 }
+.datenav-btn:hover { background: var(--div); color: var(--tx) }
 .datenav-center { flex: 1; text-align: center }
-.datenav-main { font-size: .95rem; font-weight: 800; color: var(–tx) }
-.datenav-day { font-size: .65rem; color: var(–mu); margin-top: .12rem }
-.datenav-today { display: inline-block; font-size: .58rem; font-weight: 700; color: var(–pri); background: var(–priL); padding: .08rem .42rem; border-radius: 20px; margin-left: .35rem }
+.datenav-main { font-size: .95rem; font-weight: 800; color: var(--tx) }
+.datenav-day { font-size: .65rem; color: var(--mu); margin-top: .12rem }
+.datenav-today { display: inline-block; font-size: .58rem; font-weight: 700; color: var(--pri); background: var(--priL); padding: .08rem .42rem; border-radius: 20px; margin-left: .35rem }
 
 /* ── SUPPLIER SECTION ── */
-.supplier-box { background: var(–goldL); border: 1.5px solid var(–gold); border-radius: var(–r); padding: .8rem; margin-bottom: .65rem }
-.supplier-ttl { font-size: .72rem; font-weight: 700; color: var(–gold); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .55rem }
+.supplier-box { background: var(--goldL); border: 1.5px solid var(--gold); border-radius: var(--r); padding: .8rem; margin-bottom: .65rem }
+.supplier-ttl { font-size: .72rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .55rem }
 .supplier-row { display: flex; justify-content: space-between; align-items: center; font-size: .82rem; padding: .28rem 0 }
 .supplier-row:not(:last-child) { border-bottom: 1px solid rgba(184,134,11,.2) }
-.supplier-key { color: var(–mu) }
-.supplier-val { font-family: var(–mo); font-weight: 700; color: var(–tx) }
-.supplier-val.due { color: var(–red) }
-.supplier-val.paid { color: var(–green) }
+.supplier-key { color: var(--mu) }
+.supplier-val { font-family: var(--mo); font-weight: 700; color: var(--tx) }
+.supplier-val.due { color: var(--red) }
+.supplier-val.paid { color: var(--green) }
 
 /* ── INFO BOX ── */
-.info-box { background: var(–card2); border: 1px solid var(–bdr); border-radius: var(–r); padding: .65rem .8rem; font-size: .78rem; color: var(–mu); line-height: 1.7; margin-bottom: .6rem }
-.info-box.orange { background: var(–orangeL); border-color: var(–orange); color: var(–orange) }
-.info-box.green { background: var(–greenL); border-color: var(–green); color: var(–green) }
-.info-box.red { background: var(–redL); border-color: var(–red); color: var(–red) }
-.info-box strong { color: var(–tx); }
-[data-theme=“dark”] .info-box strong { color: var(–tx) }
+.info-box { background: var(--card2); border: 1px solid var(--bdr); border-radius: var(--r); padding: .65rem .8rem; font-size: .78rem; color: var(--mu); line-height: 1.7; margin-bottom: .6rem }
+.info-box.orange { background: var(--orangeL); border-color: var(--orange); color: var(--orange) }
+.info-box.green { background: var(--greenL); border-color: var(--green); color: var(--green) }
+.info-box.red { background: var(--redL); border-color: var(--red); color: var(--red) }
+.info-box strong { color: var(--tx); }
+[data-theme="dark"] .info-box strong { color: var(--tx) }
 
 /* ── MODAL ── */
 .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: none; align-items: flex-end; justify-content: center }
 .modal-bg.on { display: flex; animation: up .2s ease }
-.modal { background: var(–card); border-radius: var(–r2) var(–r2) 0 0; width: 100%; max-width: 640px;
-padding: 1.2rem 1.1rem calc(1.3rem + env(safe-area-inset-bottom,0px)); max-height: 92dvh; overflow-y: auto; box-shadow: var(–sh2) }
+.modal { background: var(--card); border-radius: var(--r2) var(--r2) 0 0; width: 100%; max-width: 640px;
+  padding: 1.2rem 1.1rem calc(1.3rem + env(safe-area-inset-bottom,0px)); max-height: 92dvh; overflow-y: auto; box-shadow: var(--sh2) }
 .modal-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between }
-.modal-close { width: 32px; height: 32px; border-radius: 8px; background: var(–card2); display: flex; align-items: center; justify-content: center; color: var(–mu) }
+.modal-close { width: 32px; height: 32px; border-radius: 8px; background: var(--card2); display: flex; align-items: center; justify-content: center; color: var(--mu) }
 
 /* ── EMPTY ── */
-.empty { text-align: center; padding: 2.2rem 1.5rem; color: var(–fa) }
+.empty { text-align: center; padding: 2.2rem 1.5rem; color: var(--fa) }
 .empty-icon { font-size: 2.5rem; margin-bottom: .6rem }
 .empty p { font-size: .82rem; line-height: 1.7 }
 
 /* ── TOAST ── */
 .toast { position: fixed; bottom: calc(78px + env(safe-area-inset-bottom,0px)); left: 50%; transform: translateX(-50%);
-background: #1a2a1a; color: #e8f4e8; padding: .52rem 1.1rem; border-radius: 50px; font-size: .78rem;
-font-weight: 600; z-index: 300; pointer-events: none; opacity: 0; transition: opacity .2s; white-space: nowrap }
+  background: #1a2a1a; color: #e8f4e8; padding: .52rem 1.1rem; border-radius: 50px; font-size: .78rem;
+  font-weight: 600; z-index: 300; pointer-events: none; opacity: 0; transition: opacity .2s; white-space: nowrap }
 .toast.show { opacity: 1 }
 
 /* ── ANALYTICS ── */
 .a-table { width: 100%; border-collapse: collapse }
-.a-table th { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(–mu); padding: .5rem .7rem; background: var(–card2); border-bottom: 1px solid var(–bdr); text-align: right }
+.a-table th { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--mu); padding: .5rem .7rem; background: var(--card2); border-bottom: 1px solid var(--bdr); text-align: right }
 .a-table th:first-child { text-align: left }
-.a-table td { font-size: .78rem; padding: .6rem .7rem; border-bottom: 1px solid var(–div); font-family: var(–mo); font-weight: 600; text-align: right; color: var(–tx) }
-.a-table td:first-child { font-family: var(–fn); text-align: left; font-weight: 600 }
+.a-table td { font-size: .78rem; padding: .6rem .7rem; border-bottom: 1px solid var(--div); font-family: var(--mo); font-weight: 600; text-align: right; color: var(--tx) }
+.a-table td:first-child { font-family: var(--fn); text-align: left; font-weight: 600 }
 .a-table tr:last-child td { border-bottom: none }
-.a-table tr:hover td { background: var(–card2) }
-.bar { height: 5px; background: var(–div); border-radius: 10px; overflow: hidden; min-width: 50px }
-.bar-f { height: 100%; border-radius: 10px; background: var(–green) }
-.gc { color: var(–green) !important }
-.rc { color: var(–red) !important }
+.a-table tr:hover td { background: var(--card2) }
+.bar { height: 5px; background: var(--div); border-radius: 10px; overflow: hidden; min-width: 50px }
+.bar-f { height: 100%; border-radius: 10px; background: var(--green) }
+.gc { color: var(--green) !important }
+.rc { color: var(--red) !important }
 
 /* ── UDHAAR ── */
-.ud-row { padding: .8rem 1rem; border-bottom: 1px solid var(–div); display: flex; align-items: flex-start; gap: .65rem }
+.ud-row { padding: .8rem 1rem; border-bottom: 1px solid var(--div); display: flex; align-items: flex-start; gap: .65rem }
 .ud-row:last-child { border-bottom: none }
-.ud-av { width: 36px; height: 36px; border-radius: 50%; background: var(–priL); color: var(–pri); font-weight: 800; font-size: .9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; text-transform: uppercase }
-.ud-av.paid { background: var(–greenL); color: var(–green) }
+.ud-av { width: 36px; height: 36px; border-radius: 50%; background: var(--priL); color: var(--pri); font-weight: 800; font-size: .9rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; text-transform: uppercase }
+.ud-av.paid { background: var(--greenL); color: var(--green) }
 .ud-info { flex: 1; min-width: 0 }
 .ud-name { font-weight: 700; font-size: .88rem }
-.ud-note { font-size: .7rem; color: var(–mu); margin-top: .1rem }
-.ud-date { font-size: .62rem; color: var(–fa); margin-top: .1rem }
+.ud-note { font-size: .7rem; color: var(--mu); margin-top: .1rem }
+.ud-date { font-size: .62rem; color: var(--fa); margin-top: .1rem }
 .ud-right { text-align: right; flex-shrink: 0 }
-.ud-amt { font-family: var(–mo); font-weight: 800; font-size: .92rem; color: var(–red) }
-.ud-amt.paid { color: var(–green); text-decoration: line-through; opacity: .6 }
+.ud-amt { font-family: var(--mo); font-weight: 800; font-size: .92rem; color: var(--red) }
+.ud-amt.paid { color: var(--green); text-decoration: line-through; opacity: .6 }
 
 /* ── PRINT ── */
 @media print {
-.bnav, .hdr, .btn, .modal-bg, .no-print { display: none !important }
-body { padding: 0; background: #fff; color: #000 }
-.app { max-width: 100%; padding: 0 }
-.card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid }
-.view { display: block !important }
-.view:not(.pt) { display: none !important }
+  .bnav, .hdr, .btn, .modal-bg, .no-print { display: none !important }
+  body { padding: 0; background: #fff; color: #000 }
+  .app { max-width: 100%; padding: 0 }
+  .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid }
+  .view { display: block !important }
+  .view:not(.pt) { display: none !important }
 }
 </style>
-
 </head>
 <body>
 
 <!-- HEADER -->
-
 <header class="hdr">
   <div class="hdr-logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -309,17 +305,14 @@ body { padding: 0; background: #fff; color: #000 }
 <div class="app">
 
 <!-- ████ TODAY ████ -->
-
 <div class="view on" id="vHome">
   <div id="homeContent"></div>
 </div>
 
 <!-- ████ ENTRY ████ -->
-
 <div class="view" id="vEntry">
 
   <!-- Date picker for entry -->
-
   <div class="card card-pad" style="margin-bottom:.75rem">
     <div class="card-head" style="margin-bottom:.6rem">
       <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Entry Date</div>
@@ -333,7 +326,6 @@ body { padding: 0; background: #fff; color: #000 }
   </div>
 
   <!-- What to add -->
-
   <div class="pill-tabs" id="entryTypeTabs">
     <button class="ptab on" onclick="setEntryType('buy')">🛒 Buy Stock</button>
     <button class="ptab" onclick="setEntryType('sell')">💰 Sell Stock</button>
@@ -341,7 +333,6 @@ body { padding: 0; background: #fff; color: #000 }
   </div>
 
   <!-- BUY STOCK -->
-
   <div id="buyForm">
     <div class="card card-pad">
       <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Stock Purchase Details</div>
@@ -364,82 +355,74 @@ body { padding: 0; background: #fff; color: #000 }
         </div>
       </div>
 
-```
-  <!-- Live preview of avg -->
-  <div id="buyPreview" style="display:none" class="info-box">
-    <span id="buyPreviewTxt"></span>
-  </div>
+      <!-- Live preview of avg -->
+      <div id="buyPreview" style="display:none" class="info-box">
+        <span id="buyPreviewTxt"></span>
+      </div>
 
-  <!-- Supplier payment -->
-  <div class="divider"></div>
-  <div class="section-label">🏭 Supplier Payment</div>
-  <div class="frow">
-    <div class="fg"><label class="fl">Supplier Name</label><input class="fi np" id="b_supplier" type="text" placeholder="e.g. Ahmed bhai"></div>
-    <div class="fg"><label class="fl">Total Amount Due ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppdue" type="number" inputmode="decimal" placeholder="auto-calc"></div></div>
-  </div>
-  <div class="pay-split">
-    <div class="pay-split-ttl">💵 Paid Now (optional)</div>
-    <div class="pay-split-row">
-      <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppCash" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPaid()"></div></div>
-      <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppUpi" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPaid()"></div></div>
+      <!-- Supplier payment -->
+      <div class="divider"></div>
+      <div class="section-label">🏭 Supplier Payment</div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Supplier Name</label><input class="fi np" id="b_supplier" type="text" placeholder="e.g. Ahmed bhai"></div>
+        <div class="fg"><label class="fl">Total Amount Due ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppdue" type="number" inputmode="decimal" placeholder="auto-calc" oninput="suppDueManual=true;updateSuppPaid()"></div></div>
+      </div>
+      <div class="pay-split">
+        <div class="pay-split-ttl">💵 Paid Now (optional)</div>
+        <div class="pay-split-row">
+          <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppCash" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPaid()"></div></div>
+          <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppUpi" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPaid()"></div></div>
+        </div>
+        <div class="pay-total-line" id="suppPaidLine">Paid: ₹0 · Remaining: ₹0</div>
+      </div>
+      <div class="frow c1"><div class="fg"><label class="fl">Note (optional)</label><input class="fi np" id="b_note" type="text" placeholder="Batch name, time, order…"></div></div>
+      <button class="btn primary btn-lg btn-full" onclick="saveBuy()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Purchase
+      </button>
     </div>
-    <div class="pay-total-line" id="suppPaidLine">Paid: ₹0 · Remaining: ₹0</div>
-  </div>
-  <div class="frow c1"><div class="fg"><label class="fl">Note (optional)</label><input class="fi np" id="b_note" type="text" placeholder="Batch name, time, order…"></div></div>
-  <button class="btn primary btn-lg btn-full" onclick="saveBuy()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-    Save Purchase
-  </button>
-</div>
-```
-
   </div>
 
   <!-- SELL STOCK -->
-
   <div id="sellForm" style="display:none">
     <div class="card card-pad">
       <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Sell From Stock</div>
 
-```
-  <!-- Pick which batch -->
-  <div class="fg" style="margin-bottom:.65rem">
-    <label class="fl">Select Stock Batch</label>
-    <select class="fi np" id="s_batch" onchange="onBatchSelect()">
-      <option value="">— Choose batch to sell from —</option>
-    </select>
-  </div>
-  <div id="batchInfo" style="display:none" class="info-box"></div>
+      <!-- Pick which batch -->
+      <div class="fg" style="margin-bottom:.65rem">
+        <label class="fl">Select Stock Batch</label>
+        <select class="fi np" id="s_batch" onchange="onBatchSelect()">
+          <option value="">— Choose batch to sell from —</option>
+        </select>
+      </div>
+      <div id="batchInfo" style="display:none" class="info-box"></div>
 
-  <div class="frow">
-    <div class="fg"><label class="fl">Pieces to Sell</label><div class="fi-wrap"><input class="fi np pr" id="s_pcs" type="number" inputmode="numeric" placeholder="17" oninput="onSellInput()"><span class="fi-suf">pcs</span></div></div>
-    <div class="fg"><label class="fl">Sell Price ₹/kg <span style="font-weight:400;text-transform:none;font-size:.65rem">(net weight)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_sellkg" type="number" inputmode="decimal" placeholder="e.g. 240" oninput="onSellInput()"></div></div>
-  </div>
-  <div class="fg" style="margin-bottom:.65rem"><label class="fl">= ₹/piece <span style="font-weight:400;text-transform:none;font-size:.65rem">(auto-calculated)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_sellpc" type="number" inputmode="decimal" placeholder="auto" style="background:var(--card2);color:var(--mu)" readonly></div></div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Pieces to Sell</label><div class="fi-wrap"><input class="fi np pr" id="s_pcs" type="number" inputmode="numeric" placeholder="17" oninput="onSellInput()"><span class="fi-suf">pcs</span></div></div>
+        <div class="fg"><label class="fl">Sell Price ₹/kg <span style="font-weight:400;text-transform:none;font-size:.65rem">(net weight)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_sellkg" type="number" inputmode="decimal" placeholder="e.g. 240" oninput="onSellInput()"></div></div>
+      </div>
+      <div class="fg" style="margin-bottom:.65rem"><label class="fl">= ₹/piece <span style="font-weight:400;text-transform:none;font-size:.65rem">(auto-calculated)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_sellpc" type="number" inputmode="decimal" placeholder="auto" style="background:var(--card2);color:var(--mu)" readonly></div></div>
 
-  <div id="sellPreview" style="display:none" class="info-box green"></div>
+      <div id="sellPreview" style="display:none" class="info-box green"></div>
 
-  <!-- Payment collection -->
-  <div class="pay-split">
-    <div class="pay-split-ttl">💵 Cash Collected Now</div>
-    <div class="pay-split-row">
-      <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_cash" type="number" inputmode="decimal" placeholder="0" oninput="updateSellPaid()"></div></div>
-      <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_upi" type="number" inputmode="decimal" placeholder="0" oninput="updateSellPaid()"></div></div>
+      <!-- Payment collection -->
+      <div class="pay-split">
+        <div class="pay-split-ttl">💵 Cash Collected Now</div>
+        <div class="pay-split-row">
+          <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_cash" type="number" inputmode="decimal" placeholder="0" oninput="updateSellPaid()"></div></div>
+          <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_upi" type="number" inputmode="decimal" placeholder="0" oninput="updateSellPaid()"></div></div>
+        </div>
+        <div class="pay-total-line" id="sellPaidLine">Collected: ₹0 · Pending: ₹0</div>
+      </div>
+      <div class="frow c1"><div class="fg"><label class="fl">Note (optional)</label><input class="fi np" id="s_note" type="text" placeholder="Customer name, order…"></div></div>
+      <button class="btn primary btn-lg btn-full" onclick="saveSell()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Sale
+      </button>
     </div>
-    <div class="pay-total-line" id="sellPaidLine">Collected: ₹0 · Pending: ₹0</div>
-  </div>
-  <div class="frow c1"><div class="fg"><label class="fl">Note (optional)</label><input class="fi np" id="s_note" type="text" placeholder="Customer name, order…"></div></div>
-  <button class="btn primary btn-lg btn-full" onclick="saveSell()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-    Save Sale
-  </button>
-</div>
-```
-
   </div>
 
   <!-- SUPPLIER PAYMENT -->
-
   <div id="suppPayForm" style="display:none">
     <div class="card card-pad">
       <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Record Supplier Payment</div>
@@ -463,7 +446,6 @@ body { padding: 0; background: #fff; color: #000 }
 </div><!-- /vEntry -->
 
 <!-- ████ LEDGER ████ -->
-
 <div class="view" id="vLedger">
   <div class="datenav">
     <button class="datenav-btn" onclick="shiftDate(-1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -478,7 +460,6 @@ body { padding: 0; background: #fff; color: #000 }
 </div>
 
 <!-- ████ ANALYTICS ████ -->
-
 <div class="view" id="vAnalytics">
   <div class="pill-tabs" id="aTabs">
     <button class="ptab on" onclick="setPeriod('today')">Today</button>
@@ -495,7 +476,6 @@ body { padding: 0; background: #fff; color: #000 }
 </div>
 
 <!-- ████ UDHAAR ████ -->
-
 <div class="view" id="vUdhaar">
   <div class="card card-pad">
     <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Add Udhaar Entry</div>
@@ -523,7 +503,6 @@ body { padding: 0; background: #fff; color: #000 }
 </div><!-- /app -->
 
 <!-- Bottom Nav -->
-
 <nav class="bnav">
   <button class="nb on" id="nHome" onclick="nav('Home')">
     <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -549,7 +528,6 @@ body { padding: 0; background: #fff; color: #000 }
 </nav>
 
 <!-- MODAL -->
-
 <div class="modal-bg" id="modalBg" onclick="closeMBg(event)">
   <div class="modal" id="modalBox">
     <div class="modal-title"><span id="mTitle">Action</span><button class="modal-close btn" onclick="closeModal()">✕</button></div>
@@ -679,6 +657,7 @@ function setEntryType(t){
 }
 
 /* ════ BUY ════ */
+let suppDueManual = false;
 function setWaste(v){$('b_waste').value=v;onBuyInput()}
 function onBuyInput(){
   const pcs=parseFloat($('b_pcs').value)||0,kg=parseFloat($('b_kg').value)||0;
@@ -692,8 +671,10 @@ function onBuyInput(){
       `<strong>Avg bird:</strong> ${avgL.toFixed(3)} kg live → ${avgN.toFixed(3)} kg net after ${waste}% wastage<br>`+
       `<strong>Total cost:</strong> ${buy>0?fmt(totalCost)+` · Cost/piece: ${fmt(cpc)}`:'Enter buy price to calculate'}`;
     el.style.display='block';
-    // Auto-fill supplier due
-    if(buy>0&&!$('b_suppdue').value)$('b_suppdue').value=Math.round(totalCost);
+    // Always sync supplier due unless user manually typed their own value
+    if(buy>0&&!suppDueManual){
+      $('b_suppdue').value=Math.round(totalCost);
+    }
     updateSuppPaid();
   } else {el.style.display='none'}
 }
@@ -715,7 +696,7 @@ function saveBuy(){
     note:$('b_note').value.trim()};
   const buys=getBuys();buys.push(rec);sa(KB,buys);
   ['b_pcs','b_kg','b_buy','b_suppdue','b_suppCash','b_suppUpi','b_note'].forEach(id=>{const e=$(id);if(e)e.value=''});
-  $('b_supplier').value='';$('b_waste').value=30;onBuyInput();
+  $('b_supplier').value='';$('b_waste').value=30;suppDueManual=false;onBuyInput();
   toast('✅ Purchase saved!');
   setEntryToday();
   setTimeout(()=>nav('Ledger'),700);
@@ -1061,24 +1042,26 @@ function renderLedger(){
 
   const buys=getBuys(),allSales=getSales(),allSuppays=getSuppays();
   const dayBuys=buys.filter(b=>b.date===ledgerDateKey);
-  const daySales=allSales.filter(s=>s.date===ledgerDateKey);
+  // Sales recorded on this date (for day-level cash/UPI summary)
+  const daySalesRec=allSales.filter(s=>s.date===ledgerDateKey);
   const daySuppays=allSuppays.filter(p=>p.date===ledgerDateKey);
 
-  // P&L for this day
-  const dayRevenue=daySales.filter(s=>!s.isCollectionOnly).reduce((a,s)=>{
+  // Day summary uses only cash actually collected today (not batch profit)
+  const dayCash=daySalesRec.reduce((a,s)=>a+(s.cash||0),0);
+  const dayUpi=daySalesRec.reduce((a,s)=>a+(s.upi||0),0);
+  const dayColl=dayCash+dayUpi;
+  const daySuppPaid=daySuppays.reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
+  // Revenue from sales recorded today (for day summary)
+  const dayRevToday=daySalesRec.filter(s=>!s.isCollectionOnly).reduce((a,s)=>{
     const b=buys.find(x=>x.id===s.buyId);if(!b)return a;
-    const{netKgPerPc}=buyCalc(b);return a+(s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0));
+    const{netKgPerPc}=buyCalc(b);
+    return a+(s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0));
   },0);
   const dayBuyCost=dayBuys.reduce((a,b)=>a+buyCalc(b).totalCost,0);
-  const dayColl=daySales.reduce((a,s)=>a+(s.cash||0)+(s.upi||0),0);
-  const dayCash=daySales.reduce((a,s)=>a+(s.cash||0),0);
-  const dayUpi=daySales.reduce((a,s)=>a+(s.upi||0),0);
-  const dayProfit=dayRevenue-dayBuyCost;
-  const daySuppPaid=daySuppays.reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
 
   let html='';
 
-  // Day summary
+  // ── Day Summary card ──
   html+=`<div class="card card-pad">
     <div class="card-head" style="margin-bottom:.75rem">
       <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Day Summary</div>
@@ -1086,9 +1069,9 @@ function renderLedger(){
     </div>
     <div class="stat-row c4">
       <div class="stat orange"><div class="stat-lbl">Invested</div><div class="stat-val" style="font-size:.95rem">${fmt(dayBuyCost)}</div></div>
-      <div class="stat blue"><div class="stat-lbl">Revenue</div><div class="stat-val" style="font-size:.95rem">${fmt(dayRevenue)}</div></div>
-      <div class="stat ${dayProfit>=0?'green':'red'}"><div class="stat-lbl">Profit</div><div class="stat-val" style="font-size:.95rem">${dayRevenue>0?fmtD(dayProfit):'—'}</div></div>
-      <div class="stat green"><div class="stat-lbl">Collected</div><div class="stat-val" style="font-size:.95rem">${fmt(dayColl)}</div></div>
+      <div class="stat blue"><div class="stat-lbl">Sold Today</div><div class="stat-val" style="font-size:.95rem">${dayRevToday>0?fmt(dayRevToday):'—'}</div></div>
+      <div class="stat ${(dayRevToday-dayBuyCost)>=0&&dayRevToday>0?'green':'neutral'}"><div class="stat-lbl">Day Profit</div><div class="stat-val" style="font-size:.95rem">${dayRevToday>0?fmtD(dayRevToday-dayBuyCost):'—'}</div></div>
+      <div class="stat ${dayColl>0?'green':'neutral'}"><div class="stat-lbl">Collected</div><div class="stat-val" style="font-size:.95rem">${dayColl>0?fmt(dayColl):'—'}</div></div>
     </div>
     ${dayCash>0||dayUpi>0?`<div style="display:flex;gap:.5rem;margin-top:.5rem">
       <div class="stat green" style="flex:1;padding:.5rem .6rem"><div class="stat-lbl">Cash</div><div class="stat-val" style="font-size:.88rem">${fmt(dayCash)}</div></div>
@@ -1097,100 +1080,149 @@ function renderLedger(){
     </div>`:''}
   </div>`;
 
-  // Purchases
+  // ── Batch cards (purchases on this date) ──
+  // Each batch shows its FULL sale history across ALL dates as a breakdown
   if(dayBuys.length){
-    html+=`<div class="card card-pad"><div class="section-label">🛒 Purchases on this day</div>`;
+    html+=`<div class="card card-pad"><div class="section-label">🛒 Batches Purchased</div>`;
     dayBuys.forEach((b,i)=>{
-      const u=unsoldPcs(b),sold=soldPcs(b),{netKgPerPc,totalCost,costPerPc}=buyCalc(b);
+      const u=unsoldPcs(b),sold=soldPcs(b);
+      const{netKgPerPc,totalCost,costPerPc,netKgTotal}=buyCalc(b);
+      const allBatchSales=salesOf(b.id).filter(s=>!s.isCollectionOnly);
       const rev=totalRevenue(b),pend=pendingCash(b),profit=rev-totalCost;
       const pct=b.pcs>0?Math.min(100,sold/b.pcs*100):0;
       const suppInfo=suppTotal(b);
+      const totalColl=totalCollected(b);
+
+      // Build per-sale breakdown rows
+      let salesBreakdown='';
+      if(allBatchSales.length){
+        salesBreakdown+=`<div style="margin-top:.65rem;border-top:1px solid var(--div);padding-top:.6rem">
+          <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-bottom:.45rem">Sale Breakdown</div>`;
+        allBatchSales.forEach((s,si)=>{
+          const sRev=s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0);
+          const sCost=s.pcs*costPerPc;
+          const sProfit=sRev-sCost;
+          const sColl=(s.cash||0)+(s.upi||0);
+          const isPast=s.date!==ledgerDateKey;
+          salesBreakdown+=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;padding:.45rem .6rem;background:${isPast?'var(--card2)':'var(--greenL)'};border-radius:.5rem;margin-bottom:.3rem;border:1px solid ${isPast?'var(--bdr)':'var(--green)'}">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:.68rem;font-weight:700;color:var(--mu);margin-bottom:.12rem">Sale ${si+1}${isPast?` · <span style="color:var(--orange)">${keyShort(s.date)}</span>`:' · Today'}${s.note?' · '+s.note:''}</div>
+              <div style="font-size:.82rem;font-weight:700;color:var(--tx)">${s.pcs} pcs @ ₹${s.sellKg||0}/kg</div>
+              <div style="font-size:.68rem;color:var(--mu);margin-top:.1rem">= ₹${(s.sellPc||0).toFixed(1)}/piece · Net ${(s.pcs*netKgPerPc).toFixed(2)} kg sold</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:.9rem;font-weight:800;font-family:var(--mo);color:var(--pri)">${fmt(sRev)}</div>
+              <div style="font-size:.65rem;font-weight:700;color:${sProfit>=0?'var(--green)':'var(--red)'}">${fmtD(sProfit)}</div>
+              <div style="font-size:.62rem;color:${sColl>=sRev?'var(--green)':'var(--red)'}">Coll: ${fmt(sColl)}</div>
+              <button style="font-size:.58rem;margin-top:.2rem;padding:.15rem .35rem;border-radius:.35rem;background:var(--redL);color:var(--red);border:1px solid var(--red);cursor:pointer" onclick="deleteSale(${s.id})">Del</button>
+            </div>
+          </div>`;
+        });
+        // Totals row
+        salesBreakdown+=`<div style="display:flex;justify-content:space-between;padding:.4rem .6rem;background:var(--off,var(--card2));border-radius:.5rem;border:1px solid var(--bdr)">
+          <div style="font-size:.7rem;color:var(--mu)">
+            Total: ${sold}/${b.pcs} pieces sold
+            ${u>0?`<span style="color:var(--orange);font-weight:700"> · ${u} still unsold</span>`:'<span style="color:var(--green);font-weight:700"> · All sold ✅</span>'}
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:.78rem;font-weight:800;font-family:var(--mo);color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</div>
+            ${pend>0.5?`<div style="font-size:.63rem;color:var(--red);font-weight:700">₹${Math.round(pend)} pending</div>`:`<div style="font-size:.63rem;color:var(--green);font-weight:700">Fully collected ✅</div>`}
+          </div>
+        </div>`;
+        salesBreakdown+='</div>';
+      } else {
+        salesBreakdown=`<div style="margin-top:.55rem;padding:.5rem .7rem;background:var(--orangeL);border-radius:.5rem;border:1px solid var(--orange);font-size:.75rem;color:var(--orange);font-weight:600">No sales yet for this batch</div>`;
+      }
+
       html+=`<div class="entry">
         <div class="entry-head">
           <div class="entry-left">
             <div class="entry-label">Batch ${i+1}${b.supplier?' · '+b.supplier:''}${b.note?' · '+b.note:''}</div>
-            <div class="entry-main">🐔 ${b.pcs} pieces · ${b.liveKg} kg live · ₹${b.buyPrice}/kg</div>
-            <div class="entry-sub">Cost: ${fmt(totalCost)} · Net ${netKgPerPc.toFixed(3)} kg/pc · Cost/pc: ${fmt(costPerPc)}<br>
-            ${u>0?`<span style="color:var(--orange)">⚠️ ${u} pieces unsold</span>`:`<span style="color:var(--green)">✅ All ${b.pcs} sold</span>`}
-            ${suppInfo.remaining>0.5?` · <span style="color:var(--red)">Supplier: ${fmt(suppInfo.remaining)} pending</span>`:` · <span style="color:var(--green)">Supplier paid ✅</span>`}
-            </div>
+            <div class="entry-main">🐔 ${b.pcs} pcs · ${b.liveKg} kg live · ₹${b.buyPrice}/kg</div>
+            <div class="entry-sub">Total cost: <strong>${fmt(totalCost)}</strong> · Net ${netKgPerPc.toFixed(3)} kg/pc · ₹${costPerPc.toFixed(0)}/pc<br>
+            ${suppInfo.remaining>0.5?`<span style="color:var(--red)">Supplier: ${fmt(suppInfo.remaining)} pending</span>`:`<span style="color:var(--green)">Supplier paid ✅</span>`}</div>
           </div>
           <div class="entry-right">
             <div class="entry-amount" style="color:var(--orange)">${fmt(totalCost)}</div>
-            ${rev>0?`<div class="entry-status" style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</div>`:''}
-            ${pend>0.5?`<div class="entry-status" style="color:var(--red)">Pend: ${fmt(pend)}</div>`:''}
+            ${rev>0?`<div class="entry-status" style="color:${profit>=0?'var(--green)':'var(--red)'};font-weight:800">${fmtD(profit)}</div>`:'<div class="entry-status" style="color:var(--mu)">No sales</div>'}
           </div>
         </div>
-        ${sold>0?`<div class="entry-prog"><div style="display:flex;justify-content:space-between;font-size:.63rem;color:var(--mu)"><span>Sold ${sold}/${b.pcs}</span><span>${pct.toFixed(0)}%</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>`:''}
+        ${sold>0?`<div class="entry-prog"><div style="display:flex;justify-content:space-between;font-size:.63rem;color:var(--mu)"><span>Sold ${sold}/${b.pcs} pieces (${pct.toFixed(0)}%)</span><span>Collected ${fmt(totalColl)}</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>`:''}
+        <div style="padding:.3rem .9rem .1rem">${salesBreakdown}</div>
         <div class="entry-actions">
-          ${u>0?`<button class="btn warn btn-sm" onclick="quickSell(${b.id})">Sell ${u} pcs</button>`:''}
-          ${pend>0.5?`<button class="btn blue btn-sm" onclick="quickCollect(${b.id})">Collect ${fmt(pend)}</button>`:''}
-          <button class="btn ghost btn-sm" onclick="deleteBatch(${b.id})">Delete</button>
+          ${u>0?`<button class="btn warn btn-sm" onclick="quickSell(${b.id})">🐔 Sell ${u} remaining</button>`:''}
+          ${pend>0.5?`<button class="btn blue btn-sm" onclick="quickCollect(${b.id})">💰 Collect ${fmt(pend)}</button>`:''}
+          <button class="btn ghost btn-sm" onclick="deleteBatch(${b.id})">Delete batch</button>
         </div>
       </div>`;
     });
     html+='</div>';
   }
 
-  // Sales on this day (from other dates' batches)
-  const crossDaySales=daySales.filter(s=>!s.isCollectionOnly&&!dayBuys.find(b=>b.id===s.buyId));
-  if(crossDaySales.length){
-    html+=`<div class="card card-pad"><div class="section-label">💰 Sales (from previous batches)</div>`;
-    crossDaySales.forEach(s=>{
+  // ── Cross-day sales recorded today (from batches bought on OTHER dates) ──
+  // Show only as a simple reference line — full breakdown lives on the batch's purchase date
+  const crossSalesRec=daySalesRec.filter(s=>!s.isCollectionOnly&&!dayBuys.find(b=>b.id===s.buyId));
+  if(crossSalesRec.length){
+    html+=`<div class="card card-pad">
+      <div class="section-label">💰 Sales Recorded Today (from other batches)</div>
+      <div style="font-size:.72rem;color:var(--mu);margin-bottom:.55rem;padding:.45rem .6rem;background:var(--card2);border-radius:.5rem;border:1px solid var(--bdr)">
+        These sales belong to batches bought on other days. Tap that batch's date in the ledger for the full breakdown.
+      </div>`;
+    crossSalesRec.forEach(s=>{
       const b=buys.find(x=>x.id===s.buyId);if(!b)return;
       const{netKgPerPc,costPerPc}=buyCalc(b);
-      const rev=s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0);
-      const cost=s.pcs*costPerPc,profit=rev-cost;
-      html+=`<div class="entry">
-        <div class="entry-head">
-          <div class="entry-left">
-            <div class="entry-label">Batch from ${keyDisp(b.date)}${s.note?' · '+s.note:''}</div>
-            <div class="entry-main">${s.pcs} pieces sold @ ${s.sellPc?fmt(s.sellPc)+'/pc':fmt(s.sellKg||0)+'/kg'}</div>
-            <div class="entry-sub">Revenue: ${fmt(rev)} · Profit on these: <span style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</span></div>
-          </div>
-          <div class="entry-right">
-            <div class="entry-amount" style="color:var(--pri)">${fmt(rev)}</div>
-            <div class="entry-status" style="color:var(--mu)">Cash: ${fmt(s.cash||0)} · UPI: ${fmt(s.upi||0)}</div>
-          </div>
+      const sRev=s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0);
+      const sProfit=sRev-s.pcs*costPerPc;
+      html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .65rem;background:var(--card2);border-radius:.5rem;border:1px solid var(--bdr);margin-bottom:.35rem">
+        <div>
+          <div style="font-size:.75rem;font-weight:700">${s.pcs} pcs @ ₹${s.sellKg||0}/kg${s.note?' · '+s.note:''}</div>
+          <div style="font-size:.65rem;color:var(--mu)">From <button onclick="ledgerDateKey='${b.date}';renderLedger()" style="color:var(--pri);font-weight:700;font-size:.65rem;text-decoration:underline;background:none;border:none;cursor:pointer;padding:0">${keyDisp(b.date)} batch</button> · <span style="color:${sProfit>=0?'var(--green)':'var(--red)'}">${fmtD(sProfit)}</span></div>
         </div>
-        <div class="entry-actions"><button class="btn ghost btn-sm" onclick="deleteSale(${s.id})">Delete</button></div>
+        <div style="text-align:right">
+          <div style="font-size:.88rem;font-weight:800;font-family:var(--mo);color:var(--pri)">${fmt(sRev)}</div>
+          <button style="font-size:.6rem;margin-top:.2rem;padding:.15rem .35rem;border-radius:.35rem;background:var(--redL);color:var(--red);border:1px solid var(--red);cursor:pointer" onclick="deleteSale(${s.id})">Del</button>
+        </div>
       </div>`;
     });
     html+='</div>';
   }
 
-  // Collections on this day
-  const dayColl2=daySales.filter(s=>s.isCollectionOnly);
+  // ── Collections today (payment-only records) ──
+  const dayColl2=daySalesRec.filter(s=>s.isCollectionOnly);
   if(dayColl2.length){
-    html+=`<div class="card card-pad"><div class="section-label">💵 Collections</div>`;
+    html+=`<div class="card card-pad"><div class="section-label">💵 Collections Recorded Today</div>`;
     dayColl2.forEach(s=>{
       const b=buys.find(x=>x.id===s.buyId);
-      html+=`<div class="entry"><div class="entry-head">
-        <div class="entry-left"><div class="entry-label">From ${b?keyDisp(b.date)+' batch':'batch'}</div>
-        <div class="entry-main">${s.note||'Payment collected'}</div></div>
-        <div class="entry-right"><div class="entry-amount" style="color:var(--green)">${fmt((s.cash||0)+(s.upi||0))}</div>
-        <div class="entry-status" style="color:var(--mu)">Cash: ${fmt(s.cash||0)} · UPI: ${fmt(s.upi||0)}</div></div>
-      </div></div>`;
+      const amt=(s.cash||0)+(s.upi||0);
+      html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .65rem;background:var(--greenL);border-radius:.5rem;border:1px solid var(--green);margin-bottom:.35rem">
+        <div>
+          <div style="font-size:.75rem;font-weight:700">${s.note||'Payment received'}</div>
+          <div style="font-size:.65rem;color:var(--mu)">From <button onclick="ledgerDateKey='${b?.date}';renderLedger()" style="color:var(--pri);font-weight:700;font-size:.65rem;text-decoration:underline;background:none;border:none;cursor:pointer;padding:0">${b?keyDisp(b.date)+' batch':'batch'}</button> · Cash: ${fmt(s.cash||0)} · UPI: ${fmt(s.upi||0)}</div>
+        </div>
+        <div style="font-size:.95rem;font-weight:800;font-family:var(--mo);color:var(--green)">${fmt(amt)}</div>
+      </div>`;
     });
     html+='</div>';
   }
 
-  // Supplier payments on this day
+  // ── Supplier payments today ──
   if(daySuppays.length){
     html+=`<div class="card card-pad"><div class="section-label">🏭 Supplier Payments</div>`;
     daySuppays.forEach(p=>{
       const b=buys.find(x=>x.id===p.buyId);
-      html+=`<div class="entry"><div class="entry-head">
-        <div class="entry-left"><div class="entry-label">To ${b?.supplier||'Supplier'} · ${b?keyDisp(b.date)+' batch':''}</div>
-        <div class="entry-main">${p.note||'Supplier payment'}</div></div>
-        <div class="entry-right"><div class="entry-amount" style="color:var(--gold)">${fmt((p.cash||0)+(p.upi||0))}</div>
-        <div class="entry-status" style="color:var(--mu)">Cash: ${fmt(p.cash||0)} · UPI: ${fmt(p.upi||0)}</div></div>
-      </div></div>`;
+      const amt=(p.cash||0)+(p.upi||0);
+      html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .65rem;background:var(--goldL);border-radius:.5rem;border:1px solid var(--gold);margin-bottom:.35rem">
+        <div>
+          <div style="font-size:.75rem;font-weight:700">${p.note||'Supplier payment'}</div>
+          <div style="font-size:.65rem;color:var(--mu)">To ${b?.supplier||'Supplier'} · ${b?keyDisp(b.date)+' batch':''} · Cash: ${fmt(p.cash||0)} · UPI: ${fmt(p.upi||0)}</div>
+        </div>
+        <div style="font-size:.95rem;font-weight:800;font-family:var(--mo);color:var(--gold)">${fmt(amt)}</div>
+      </div>`;
     });
     html+='</div>';
   }
 
-  if(!dayBuys.length&&!daySales.length&&!daySuppays.length){
+  if(!dayBuys.length&&!crossSalesRec.length&&!dayColl2.length&&!daySuppays.length){
     html+=`<div class="empty"><div class="empty-icon">📅</div><p>No activity on this day.<br>Use ← → to browse other dates.</p></div>`;
   }
 
@@ -1347,6 +1379,5 @@ renderHome();
 updateUdBadge();
 document.querySelectorAll('#aTabs .ptab').forEach((t,i)=>t.classList.toggle('on',i===0));
 </script>
-
 </body>
 </html>
