@@ -79,6 +79,8 @@ input, select { font-family: inherit; font-size: inherit; font-weight: inherit; 
 .hdr-right { display: flex; align-items: center; gap: .5rem }
 .hdr-date { font-size: .7rem; background: rgba(255,255,255,.18); padding: .28rem .65rem; border-radius: 20px; font-weight: 600 }
 .theme-btn { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center }
+.lang-btn { height: 28px; padding: 0 10px; border-radius: 20px; background: rgba(255,255,255,.2); color: #fff; font-size: .72rem; font-weight: 800; letter-spacing: .06em; border: 1.5px solid rgba(255,255,255,.4); cursor: pointer; display: flex; align-items: center }
+.lang-btn:hover { background: rgba(255,255,255,.3) }
 
 /* ── APP ── */
 .app { max-width: 640px; margin: 0 auto; padding: .9rem 1rem 0 }
@@ -290,10 +292,11 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
       <path d="M12 2C8 2 5 5 5 9c0 2.5 1.5 4.5 3 6l1 5h6l1-5c1.5-1.5 3-3.5 3-6 0-4-3-7-7-7z"/>
       <path d="M9 20h6"/><path d="M8 9c0 2.2 1.8 4 4 4s4-1.8 4-4"/>
     </svg>
-    <div><div class="hdr-title">ChickenCalc</div><div class="hdr-sub">Live Stock Ledger</div></div>
+    <div><div class="hdr-title">ChickenCalc</div><div class="hdr-sub" data-i18n="subtitle">Live Stock Ledger</div></div>
   </div>
   <div class="hdr-right">
     <div class="hdr-date" id="todayBadge"></div>
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">HI</button>
     <button class="theme-btn" id="themeBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
   </div>
 </header>
@@ -312,34 +315,34 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
   <!-- Date picker for entry -->
   <div class="card card-pad" style="margin-bottom:.75rem">
     <div class="card-head" style="margin-bottom:.6rem">
-      <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Entry Date</div>
+      <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span data-i18n="entry_date">Entry Date</span></div>
     </div>
     <div class="frow">
-      <div class="fg"><label class="fl">Date</label><input class="fi np ok" id="entryDate" type="date"></div>
+      <div class="fg"><label class="fl"><span data-i18n="date">Date</span></label><input class="fi np ok" id="entryDate" type="date"></div>
       <div class="fg" style="justify-content: flex-end; padding-bottom: .05rem">
-        <button class="btn ghost btn-md btn-full" onclick="setEntryToday()">Set Today</button>
+        <button class="btn ghost btn-md btn-full" onclick="setEntryToday()"><span data-i18n="set_today">Set Today</span></button>
       </div>
     </div>
   </div>
 
   <!-- What to add -->
   <div class="pill-tabs" id="entryTypeTabs">
-    <button class="ptab on" onclick="setEntryType('buy')">🛒 Buy Stock</button>
-    <button class="ptab" onclick="setEntryType('sell')">💰 Sell Stock</button>
-    <button class="ptab" onclick="setEntryType('supplier')">🏭 Supplier Pay</button>
+    <button class="ptab on" onclick="setEntryType('buy')">🛒 <span data-i18n="buy_stock">Buy Stock</span></button>
+    <button class="ptab" onclick="setEntryType('sell')">💰 <span data-i18n="sell_stock">Sell Stock</span></button>
+    <button class="ptab" onclick="setEntryType('supplier')">🏭 <span data-i18n="supplier_pay">Supplier Pay</span></button>
   </div>
 
   <!-- BUY STOCK -->
   <div id="buyForm">
     <div class="card card-pad">
-      <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Stock Purchase Details</div>
+      <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span data-i18n="purchase_details">Stock Purchase Details</span></div>
       <div class="frow">
-        <div class="fg"><label class="fl">Pieces Bought</label><div class="fi-wrap"><input class="fi np pr" id="b_pcs" type="number" inputmode="numeric" placeholder="22" oninput="onBuyInput()"><span class="fi-suf">pcs</span></div></div>
-        <div class="fg"><label class="fl">Total Live Weight</label><div class="fi-wrap"><input class="fi np pr" id="b_kg" type="number" inputmode="decimal" step="0.1" placeholder="40.9" oninput="onBuyInput()"><span class="fi-suf">kg</span></div></div>
+        <div class="fg"><label class="fl"><span data-i18n="pieces_bought">Pieces Bought</span></label><div class="fi-wrap"><input class="fi np pr" id="b_pcs" type="number" inputmode="numeric" placeholder="22" oninput="onBuyInput()"><span class="fi-suf">pcs</span></div></div>
+        <div class="fg"><label class="fl"><span data-i18n="total_weight">Total Live Weight</span></label><div class="fi-wrap"><input class="fi np pr" id="b_kg" type="number" inputmode="decimal" step="0.1" placeholder="40.9" oninput="onBuyInput()"><span class="fi-suf">kg</span></div></div>
       </div>
       <div class="frow">
-        <div class="fg"><label class="fl">Buy Price ₹/kg</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_buy" type="number" inputmode="decimal" placeholder="130" oninput="onBuyInput()"></div></div>
-        <div class="fg"><label class="fl">Wastage %</label>
+        <div class="fg"><label class="fl"><span data-i18n="buy_price">Buy Price ₹/kg</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_buy" type="number" inputmode="decimal" placeholder="130" oninput="onBuyInput()"></div></div>
+        <div class="fg"><label class="fl"><span data-i18n="wastage">Wastage %</span></label>
           <div style="display:flex;gap:.35rem;align-items:center">
             <div class="fi-wrap" style="flex:1"><input class="fi np pr" id="b_waste" type="number" inputmode="decimal" value="30" min="0" max="60" oninput="onBuyInput()"><span class="fi-suf">%</span></div>
           </div>
@@ -359,23 +362,23 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
 
       <!-- Supplier payment -->
       <div class="divider"></div>
-      <div class="section-label">🏭 Supplier Payment</div>
+      <div class="section-label">🏭 <span data-i18n="supplier_section">Supplier Payment</span></div>
       <div class="frow">
-        <div class="fg"><label class="fl">Supplier Name</label><input class="fi np" id="b_supplier" type="text" placeholder="e.g. Ahmed bhai"></div>
-        <div class="fg"><label class="fl">Total Amount Due ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppdue" type="number" inputmode="decimal" placeholder="auto-calc" oninput="suppDueManual=true;updateSuppPaid()"></div></div>
+        <div class="fg"><label class="fl"><span data-i18n="supplier_name">Supplier Name</span></label><input class="fi np" id="b_supplier" type="text" placeholder="e.g. Ahmed bhai"></div>
+        <div class="fg"><label class="fl"><span data-i18n="supp_due">Total Amount Due ₹</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppdue" type="number" inputmode="decimal" placeholder="auto-calc" oninput="suppDueManual=true;updateSuppPaid()"></div></div>
       </div>
       <div class="pay-split">
-        <div class="pay-split-ttl">💵 Paid Now (optional)</div>
+        <div class="pay-split-ttl">💵 <span data-i18n="paid_now">Paid Now (optional)</span></div>
         <div class="pay-split-row">
-          <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppCash" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPaid()"></div></div>
-          <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppUpi" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPaid()"></div></div>
+          <div class="fg"><label class="fl"><span data-i18n="cash">Cash ₹</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppCash" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPaid()"></div></div>
+          <div class="fg"><label class="fl"><span data-i18n="upi">UPI ₹</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="b_suppUpi" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPaid()"></div></div>
         </div>
         <div class="pay-total-line" id="suppPaidLine">Paid: ₹0 · Remaining: ₹0</div>
       </div>
-      <div class="frow c1"><div class="fg"><label class="fl">Note (optional)</label><input class="fi np" id="b_note" type="text" placeholder="Batch name, time, order…"></div></div>
+      <div class="frow c1"><div class="fg"><label class="fl"><span data-i18n="note_opt">Note (optional)</span></label><input class="fi np" id="b_note" type="text" placeholder="Batch name, time, order…"></div></div>
       <button class="btn primary btn-lg btn-full" onclick="saveBuy()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Save Purchase
+        <span data-i18n="save_purchase">Save Purchase</span>
       </button>
     </div>
   </div>
@@ -383,11 +386,11 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
   <!-- SELL STOCK -->
   <div id="sellForm" style="display:none">
     <div class="card card-pad">
-      <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Sell From Stock</div>
+      <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span data-i18n="sell_from_stock">Sell From Stock</span></div>
 
       <!-- Pick which batch -->
       <div class="fg" style="margin-bottom:.65rem">
-        <label class="fl">Select Stock Batch</label>
+        <label class="fl"><span data-i18n="select_batch">Select Stock Batch</span></label>
         <select class="fi np" id="s_batch" onchange="onBatchSelect()">
           <option value="">— Choose batch to sell from —</option>
         </select>
@@ -395,7 +398,7 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
       <div id="batchInfo" style="display:none" class="info-box"></div>
 
       <div class="frow">
-        <div class="fg"><label class="fl">Pieces to Sell</label><div class="fi-wrap"><input class="fi np pr" id="s_pcs" type="number" inputmode="numeric" placeholder="17" oninput="onSellInput()"><span class="fi-suf">pcs</span></div></div>
+        <div class="fg"><label class="fl"><span data-i18n="pieces_to_sell">Pieces to Sell</span></label><div class="fi-wrap"><input class="fi np pr" id="s_pcs" type="number" inputmode="numeric" placeholder="17" oninput="onSellInput()"><span class="fi-suf">pcs</span></div></div>
         <div class="fg"><label class="fl">Sell Price ₹/kg <span style="font-weight:400;text-transform:none;font-size:.65rem">(net weight)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_sellkg" type="number" inputmode="decimal" placeholder="e.g. 240" oninput="onSellInput()"></div></div>
       </div>
       <div class="fg" style="margin-bottom:.65rem"><label class="fl">= ₹/piece <span style="font-weight:400;text-transform:none;font-size:.65rem">(auto-calculated)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_sellpc" type="number" inputmode="decimal" placeholder="auto" style="background:var(--card2);color:var(--mu)" readonly></div></div>
@@ -404,17 +407,17 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
 
       <!-- Payment collection -->
       <div class="pay-split">
-        <div class="pay-split-ttl">💵 Cash Collected Now</div>
+        <div class="pay-split-ttl">💵 <span data-i18n="cash_collected_now">Cash Collected Now</span></div>
         <div class="pay-split-row">
           <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_cash" type="number" inputmode="decimal" placeholder="0" oninput="updateSellPaid()"></div></div>
           <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="s_upi" type="number" inputmode="decimal" placeholder="0" oninput="updateSellPaid()"></div></div>
         </div>
         <div class="pay-total-line" id="sellPaidLine">Collected: ₹0 · Pending: ₹0</div>
       </div>
-      <div class="frow c1"><div class="fg"><label class="fl">Note (optional)</label><input class="fi np" id="s_note" type="text" placeholder="Customer name, order…"></div></div>
+      <div class="frow c1"><div class="fg"><label class="fl"><span data-i18n="note_opt">Note (optional)</span></label><input class="fi np" id="s_note" type="text" placeholder="Customer name, order…"></div></div>
       <button class="btn primary btn-lg btn-full" onclick="saveSell()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Save Sale
+        <span data-i18n="save_sale">Save Sale</span>
       </button>
     </div>
   </div>
@@ -422,20 +425,20 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
   <!-- SUPPLIER PAYMENT -->
   <div id="suppPayForm" style="display:none">
     <div class="card card-pad">
-      <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Record Supplier Payment</div>
+      <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span data-i18n="record_supp_pay">Record Supplier Payment</span></div>
       <div id="suppPayBatchSel"></div>
       <div class="pay-split" style="margin-top:.5rem">
-        <div class="pay-split-ttl">💵 Payment Made</div>
+        <div class="pay-split-ttl">💵 <span data-i18n="payment_made">Payment Made</span></div>
         <div class="pay-split-row">
           <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="sp_cash" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPayLine()"></div></div>
           <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="sp_upi" type="number" inputmode="decimal" placeholder="0" oninput="updateSuppPayLine()"></div></div>
         </div>
         <div class="pay-total-line" id="suppPayLine">Total: ₹0</div>
       </div>
-      <div class="frow c1"><div class="fg"><label class="fl">Note</label><input class="fi np" id="sp_note" type="text" placeholder="e.g. full payment, advance…"></div></div>
+      <div class="frow c1"><div class="fg"><label class="fl"><span data-i18n="note">Note</span></label><input class="fi np" id="sp_note" type="text" placeholder="e.g. full payment, advance…"></div></div>
       <button class="btn primary btn-lg btn-full" onclick="saveSuppPay()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Save Payment
+        <span data-i18n="save_payment">Save Payment</span>
       </button>
     </div>
   </div>
@@ -459,15 +462,15 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
 <!-- ████ ANALYTICS ████ -->
 <div class="view" id="vAnalytics">
   <div class="pill-tabs" id="aTabs">
-    <button class="ptab on" onclick="setPeriod('today')">Today</button>
-    <button class="ptab" onclick="setPeriod('week')">Week</button>
-    <button class="ptab" onclick="setPeriod('month')">Month</button>
-    <button class="ptab" onclick="setPeriod('year')">Year</button>
-    <button class="ptab" onclick="setPeriod('custom')">Custom</button>
+    <button class="ptab on" onclick="setPeriod('today')"><span data-i18n="today">Today</span></button>
+    <button class="ptab" onclick="setPeriod('week')"><span data-i18n="week">Week</span></button>
+    <button class="ptab" onclick="setPeriod('month')"><span data-i18n="month">Month</span></button>
+    <button class="ptab" onclick="setPeriod('year')"><span data-i18n="year">Year</span></button>
+    <button class="ptab" onclick="setPeriod('custom')"><span data-i18n="custom">Custom</span></button>
   </div>
   <div id="customRangePick" style="display:none;gap:.5rem;margin-bottom:.75rem" class="frow">
-    <div class="fg"><label class="fl">From</label><input class="fi np" id="cFrom" type="date" onchange="renderAnalytics()"></div>
-    <div class="fg"><label class="fl">To</label><input class="fi np" id="cTo" type="date" onchange="renderAnalytics()"></div>
+    <div class="fg"><label class="fl"><span data-i18n="from">From</span></label><input class="fi np" id="cFrom" type="date" onchange="renderAnalytics()"></div>
+    <div class="fg"><label class="fl"><span data-i18n="to">To</span></label><input class="fi np" id="cTo" type="date" onchange="renderAnalytics()"></div>
   </div>
   <div id="analyticsContent"></div>
 </div>
@@ -475,22 +478,22 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
 <!-- ████ UDHAAR ████ -->
 <div class="view" id="vUdhaar">
   <div class="card card-pad">
-    <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Add Udhaar Entry</div>
+    <div class="card-title" style="margin-bottom:.85rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span data-i18n="add_udhaar_title">Add Udhaar Entry</span></div>
     <div class="frow">
-      <div class="fg"><label class="fl">Customer Name</label><input class="fi np" id="u_name" type="text" placeholder="Ramesh bhai"></div>
-      <div class="fg"><label class="fl">Amount ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="u_amt" type="number" inputmode="decimal" placeholder="1250"></div></div>
+      <div class="fg"><label class="fl"><span data-i18n="customer_name">Customer Name</span></label><input class="fi np" id="u_name" type="text" placeholder="Ramesh bhai"></div>
+      <div class="fg"><label class="fl"><span data-i18n="amount">Amount ₹</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="u_amt" type="number" inputmode="decimal" placeholder="1250"></div></div>
     </div>
-    <div class="frow c1" style="margin-bottom:.75rem"><div class="fg"><label class="fl">Note</label><input class="fi np" id="u_note" type="text" placeholder="5 kg chicken, will pay tomorrow"></div></div>
+    <div class="frow c1" style="margin-bottom:.75rem"><div class="fg"><label class="fl"><span data-i18n="note">Note</span></label><input class="fi np" id="u_note" type="text" placeholder="5 kg chicken, will pay tomorrow"></div></div>
     <button class="btn primary btn-lg btn-full" onclick="addUdhaar()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add Udhaar
+      <span data-i18n="add_udhaar_btn">Add Udhaar</span>
     </button>
   </div>
   <div class="card" id="udCard">
     <div class="card-pad" style="padding-bottom:.5rem">
       <div class="card-head" style="margin-bottom:0">
-        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Udhaar Ledger</div>
-        <div id="udTotalWrap" style="display:none"><span style="font-size:.7rem;color:var(--mu)">Pending: </span><span id="udTotalVal" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-weight:800;color:var(--red)">₹0</span></div>
+        <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><span data-i18n="udhaar_ledger">Udhaar Ledger</span></div>
+        <div id="udTotalWrap" style="display:none"><span style="font-size:.7rem;color:var(--mu)"><span data-i18n="pending">Pending</span>: </span><span id="udTotalVal" style="font-family:ui-monospace, Menlo, Consolas, monospace;font-weight:800;color:var(--red)">₹0</span></div>
       </div>
     </div>
     <div id="udList"></div>
@@ -503,24 +506,24 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
 <nav class="bnav">
   <button class="nb on" id="nHome" onclick="nav('Home')">
     <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    Today
+    <span data-i18n="nav_today">Today</span>
   </button>
   <button class="nb" id="nEntry" onclick="nav('Entry')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-    Add Entry
+    <span data-i18n="nav_entry">Add Entry</span>
   </button>
   <button class="nb" id="nLedger" onclick="nav('Ledger')">
     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    Ledger
+    <span data-i18n="nav_ledger">Ledger</span>
   </button>
   <button class="nb" id="nAnalytics" onclick="nav('Analytics')">
     <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    Reports
+    <span data-i18n="nav_reports">Reports</span>
   </button>
   <button class="nb" id="nUdhaar" onclick="nav('Udhaar')">
     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     <span id="udBadge" class="dot" style="display:none"></span>
-    Udhaar
+    <span data-i18n="nav_udhaar">Udhaar</span>
   </button>
 </nav>
 
@@ -532,9 +535,35 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
   </div>
 </div>
 
+<!-- Firebase SDK v9.23.0 (stable compat build) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
+/* ════ FIREBASE CONFIG ════
+   Replace with YOUR Firebase project config.
+   Get it: Firebase Console → Project Settings → Your apps → Web app
+   App works 100% offline without Firebase. Sync is optional.
+═══════════════════════════ */
+/* ════ GLOBAL ERROR HANDLER ════ */
+window.addEventListener('unhandledrejection',e=>{
+  console.warn('Promise rejection:',e.reason);
+  e.preventDefault();
+});
+
+const FB_CONFIG={
+  apiKey:"AIzaSyCD2OtS092LQmUst0EzV19I5G61vVo-bgE",
+  authDomain:"chick-cal.firebaseapp.com",
+  projectId:"chick-cal",
+  storageBucket:"chick-cal.firebasestorage.app",
+  messagingSenderId:"298062038081",
+  appId:"1:298062038081:web:01af5f285ddcdd6c5572c0"
+};
+
 /* ════ KEYS ════ */
-const KB='cc5_buys', KS='cc5_sales', KSP='cc5_suppays', KU='cc5_ud', KT='cc5_theme', KM='cc5_thm', IB='cc5_ib';
+const KB='cc5_buys',KS='cc5_sales',KSP='cc5_suppays',KU='cc5_ud';
+const KT='cc5_theme',KM='cc5_thm',IB='cc5_ib',KL='cc5_lang';
+const K_SHOPID='cc5_shopid',K_SYNC_ON='cc5_sync_on';
 
 /* ════ UTILS ════ */
 const $=id=>document.getElementById(id);
@@ -542,26 +571,197 @@ const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 const SDAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const FMON=['January','February','March','April','May','June','July','August','September','October','November','December'];
-
 function todayKey(){const d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
 function p2(n){return String(n).padStart(2,'0')}
 function keyDisp(k){if(!k)return '—';const[y,m,d]=k.split('-').map(Number);return d+' '+FMON[m-1]+' '+y}
 function keyShort(k){if(!k)return '—';const[y,m,d]=k.split('-').map(Number);return d+' '+MON[m-1]}
-function keyDay(k){if(!k)return '';const[y,m,d]=k.split('-').map(Number);return DAYS[new Date(y,m-1,d).getDay()]}
 function fmt(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
 function fmtD(n){return n>=0?'+₹'+Math.round(n).toLocaleString('en-IN'):'−₹'+Math.round(-n).toLocaleString('en-IN')}
-function fkg(n,d=2){return n.toFixed(d)+' kg'}
+
+/* ── localStorage (always kept, never removed) ── */
 function la(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch{return[]}}
 function sa(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 let _id=parseInt(localStorage.getItem('cc5_id')||'1');
 function nid(){const i=_id++;localStorage.setItem('cc5_id',_id);return i}
 
+/* ════ FIREBASE SYNC ENGINE ════ */
+let db=null,shopId=null,syncEnabled=false,syncStatus='offline';
+let _unsub=[];
+function fbOk(){return FB_CONFIG.apiKey!=='YOUR_API_KEY'}
+function initFirebase(){
+  if(!fbOk())return false;
+  if(typeof firebase==='undefined'){console.warn('Firebase SDK not loaded');return false;}
+  try{
+    if(!firebase.apps.length)firebase.initializeApp(FB_CONFIG);
+    db=firebase.firestore();
+    return true;
+  }catch(e){console.warn('Firebase init:',e.message);db=null;return false;}
+}
+function getShopId(){return localStorage.getItem(K_SHOPID)||null}
+function isSyncOn(){return localStorage.getItem(K_SYNC_ON)==='1'}
+function setSyncStatus(s){
+  syncStatus=s;
+  const dot=$('syncHdrDot'),txt=$('syncHdrTxt');if(!dot||!txt)return;
+  dot.className='sync-hdr-dot'+(s==='connected'?' on':s==='syncing'?' spin':'');
+  const lbl={connected:()=>t('sync_synced'),syncing:()=>t('sync_syncing')+'…',error:'Error',offline:()=>t('sync_offline')};
+  txt.textContent=typeof lbl[s]==='function'?lbl[s]():lbl[s]||s;
+}
+/* merge: id-based dedup, higher ts wins */
+function mergeArr(local,remote){
+  const map={};
+  local.forEach(r=>{map[r.id]=r});
+  remote.forEach(r=>{if(!map[r.id]||(r.ts||0)>(map[r.id].ts||0))map[r.id]=r});
+  return Object.values(map);
+}
+async function fsSet(col,rec){
+  if(!db||!shopId||!syncEnabled)return;
+  try{await db.collection('shops').doc(shopId).collection(col).doc(String(rec.id)).set(rec)}catch(e){}
+}
+async function fsDel(col,id){
+  if(!db||!shopId||!syncEnabled)return;
+  try{await db.collection('shops').doc(shopId).collection(col).doc(String(id)).delete()}catch(e){}
+}
+/* saSync: always writes localStorage, also writes Firebase when enabled */
+function saSync(k,v,rec=null,delId=null){
+  sa(k,v);
+  if(!db||!shopId||!syncEnabled)return;
+  const colMap={[KB]:'buys',[KS]:'sales',[KSP]:'suppays',[KU]:'udhaar'};
+  const col=colMap[k];if(!col)return;
+  if(delId!=null)fsDel(col,delId);
+  else if(rec)fsSet(col,rec);
+}
+async function pullFromCloud(){
+  if(!db||!shopId)return;
+  setSyncStatus('syncing');
+  try{
+    for(const[k,n] of [[KB,'buys'],[KS,'sales'],[KSP,'suppays'],[KU,'udhaar']]){
+      const snap=await db.collection('shops').doc(shopId).collection(n).get();
+      if(snap.empty)continue;
+      const remote=snap.docs.map(d=>d.data());
+      const merged=mergeArr(la(k),remote);
+      sa(k,merged);
+      const maxId=merged.reduce((m,r)=>Math.max(m,r.id||0),0);
+      if(maxId>=_id){_id=maxId+1;localStorage.setItem('cc5_id',_id)}
+    }
+    setSyncStatus('connected');
+    renderHome();
+    if($('vLedger').classList.contains('on'))renderLedger();
+    if($('vUdhaar').classList.contains('on'))renderUdhaar();
+  }catch(e){setSyncStatus('error')}
+}
+async function pushAllToCloud(){
+  if(!db||!shopId||!syncEnabled)return;
+  setSyncStatus('syncing');
+  try{
+    for(const[k,n] of [[KB,'buys'],[KS,'sales'],[KSP,'suppays'],[KU,'udhaar']]){
+      const data=la(k);if(!data.length)continue;
+      const batch=db.batch();
+      data.forEach(r=>batch.set(db.collection('shops').doc(shopId).collection(n).doc(String(r.id)),r));
+      await batch.commit();
+    }
+    setSyncStatus('connected');
+  }catch(e){setSyncStatus('error')}
+}
+function attachListeners(){
+  _unsub.forEach(u=>u());_unsub=[];
+  if(!db||!shopId||!syncEnabled)return;
+  [[KB,'buys'],[KS,'sales'],[KSP,'suppays'],[KU,'udhaar']].forEach(([k,n])=>{
+    const u=db.collection('shops').doc(shopId).collection(n).onSnapshot(snap=>{
+      if(snap.metadata.hasPendingWrites)return;
+      const remote=snap.docs.map(d=>d.data());
+      const local=la(k);
+      const merged=mergeArr(local,remote);
+      const a=JSON.stringify([...local].sort((a,b)=>a.id-b.id));
+      const b=JSON.stringify([...merged].sort((a,b)=>a.id-b.id));
+      if(a!==b){
+        sa(k,merged);
+        const maxId=merged.reduce((m,r)=>Math.max(m,r.id||0),0);
+        if(maxId>=_id){_id=maxId+1;localStorage.setItem('cc5_id',_id)}
+        renderHome();
+        if($('vLedger').classList.contains('on'))renderLedger();
+        if($('vUdhaar').classList.contains('on'))renderUdhaar();
+      }
+      setSyncStatus('connected');
+    },()=>setSyncStatus('error'));
+    _unsub.push(u);
+  });
+}
+function initSync(){
+  shopId=getShopId();syncEnabled=isSyncOn();
+  if(!shopId||!syncEnabled||!fbOk()){setSyncStatus('offline');return}
+  if(initFirebase())pullFromCloud().then(()=>attachListeners());
+}
+
+/* ── Sync Modal ── */
+function openSyncModal(){
+  const id=getShopId(),on=isSyncOn();
+  openModal(t('sync_title'),`
+    ${!fbOk()?`<div class="info-box red" style="margin-bottom:.85rem">
+      <strong>⚠️ Firebase not configured yet</strong><br>
+      <span style="font-size:.68rem">Open this file, find FB_CONFIG at the top, paste your Firebase values. App works fully offline without it.</span>
+    </div>`:''}
+    <div style="font-size:.76rem;color:var(--mu);margin-bottom:.85rem;line-height:1.7">${t('sync_desc')}</div>
+    ${id?`
+      <div class="sync-code-display">${id}</div>
+      <div style="text-align:center;font-size:.68rem;color:var(--mu);margin-bottom:.85rem">${t('sync_code_hint')}</div>
+      <div style="display:flex;gap:.5rem;margin-bottom:.55rem">
+        <button class="btn ${on?'danger':'success'} btn-md" style="flex:1" onclick="toggleSyncOn()">
+          ${on?'⏸ '+t('sync_disable'):'▶ '+t('sync_enable')}</button>
+        <button class="btn ghost btn-md" style="flex:1" onclick="changeCode()">${t('sync_change')}</button>
+      </div>
+      <div style="display:flex;gap:.5rem;margin-bottom:.85rem">
+        <button class="btn blue btn-md" style="flex:1" onclick="doManualPull()">⬇ ${t('sync_pull')}</button>
+        <button class="btn warn btn-md" style="flex:1" onclick="doManualPush()">⬆ ${t('sync_push')}</button>
+      </div>
+      <div style="font-size:.68rem;color:var(--mu);text-align:center">${t('sync_status')}: <strong>${syncStatus}</strong></div>`
+    :`
+      <div class="fg" style="margin-bottom:.6rem">
+        <label class="fl">${t('sync_enter_code')}</label>
+        <input class="fi np" id="newCode" type="text" maxlength="12" placeholder="e.g. MANDI01"
+          style="text-transform:uppercase;font-size:1.1rem;letter-spacing:.18em;text-align:center"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+      </div>
+      <div style="font-size:.68rem;color:var(--mu);margin-bottom:.85rem">${t('sync_code_tip')}</div>
+      <button class="btn primary btn-lg btn-full" onclick="activateSync()">${t('sync_activate')}</button>`}
+    ${!fbOk()?`<div style="margin-top:.85rem;padding:.75rem;background:var(--card2);border-radius:var(--r);border:1px solid var(--bdr)">
+      <div style="font-size:.7rem;font-weight:700;color:var(--mu);margin-bottom:.4rem">📋 Firebase Setup (5 steps)</div>
+      <div style="font-size:.65rem;color:var(--mu);line-height:2.1">
+        1. <strong>console.firebase.google.com</strong> → New Project<br>
+        2. Add Web App → Copy the config object<br>
+        3. Paste values into FB_CONFIG at top of this file<br>
+        4. Firestore Database → Create → Test mode (30 days)<br>
+        5. Use same code on all devices → synced! ☁️
+      </div></div>`:''}
+  `);
+}
+async function activateSync(){
+  const code=$('newCode')?.value?.trim().toUpperCase();
+  if(!code||code.length<3){toast(t('sync_code_short'));return}
+  if(!fbOk()){toast('Configure Firebase first in the FB_CONFIG section');return}
+  shopId=code;localStorage.setItem(K_SHOPID,shopId);
+  localStorage.setItem(K_SYNC_ON,'1');syncEnabled=true;
+  closeModal();toast(`🔗 ${t('sync_connecting')} ${shopId}…`);
+  initFirebase();
+  await pullFromCloud();
+  await pushAllToCloud();
+  attachListeners();
+  openSyncModal();
+}
+async function toggleSyncOn(){
+  syncEnabled=!syncEnabled;
+  localStorage.setItem(K_SYNC_ON,syncEnabled?'1':'0');
+  if(syncEnabled){attachListeners();await pullFromCloud();}
+  else{_unsub.forEach(u=>u());_unsub=[];setSyncStatus('offline');}
+  closeModal();openSyncModal();
+}
+function changeCode(){localStorage.removeItem(K_SHOPID);shopId=null;_unsub.forEach(u=>u());_unsub=[];setSyncStatus('offline');closeModal();openSyncModal()}
+async function doManualPull(){closeModal();await pullFromCloud();toast('⬇ '+t('sync_pulled'))}
+async function doManualPush(){closeModal();await pushAllToCloud();toast('⬆ '+t('sync_pushed'))}
+
 /* ════ DOMAIN ════ */
 function getBuys(){return la(KB)}
 function getSales(){return la(KS)}
 function getSuppays(){return la(KSP)}
-
-/* Per-buy calculations */
 function buyCalc(b){
   const totalCost=(b.liveKg||0)*(b.buyPrice||0);
   const netKgTotal=(b.liveKg||0)*(1-(b.wastage||30)/100);
@@ -581,7 +781,10 @@ function totalRevenue(b){
     return a+s.pcs*netKgPerPc*(s.sellKg||0);
   },0);
 }
-function totalCollected(b){return salesOf(b.id).reduce((a,s)=>a+(s.cash||0)+(s.upi||0),0)}
+function totalCollected(b){
+  const id=typeof b==='object'?b.id:b;
+  return getSales().filter(s=>s.buyId===id).reduce((a,s)=>a+(s.cash||0)+(s.upi||0),0);
+}
 function pendingCash(b){return Math.max(0,totalRevenue(b)-totalCollected(b))}
 function suppTotal(b){
   const totalPaid=suppaysOf(b.id).reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
@@ -589,42 +792,36 @@ function suppTotal(b){
   return{due,paid:totalPaid+(b.suppInitCash||0)+(b.suppInitUpi||0),remaining:due-totalPaid-(b.suppInitCash||0)-(b.suppInitUpi||0)};
 }
 
-/* ════ TOAST ════ */
-function toast(msg,ms=2400){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),ms)}
-
-/* ════ MODAL ════ */
+/* ════ TOAST / MODAL ════ */
+function toast(msg,ms=2400){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),ms)}
 function openModal(title,html){$('mTitle').textContent=title;$('mBody').innerHTML=html;$('modalBg').classList.add('on')}
 function closeModal(){$('modalBg').classList.remove('on')}
 function closeMBg(e){if(e.target===$('modalBg'))closeModal()}
 
-/* ════ THEME ════ */
+/* ════ THEME (auto dark after 7pm) ════ */
 (function(){
   const btn=$('themeBtn'),root=document.documentElement;
   const hr=new Date().getHours();
   const m=localStorage.getItem(KM);
-  let t=m?localStorage.getItem(KT)||'light':(hr>=19||hr<6)?'dark':matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
-  apply(t);
-  btn.addEventListener('click',()=>{t=t==='dark'?'light':'dark';apply(t);localStorage.setItem(KT,t);localStorage.setItem(KM,'1')});
-  function apply(t){
-    root.setAttribute('data-theme',t);$('metaTheme').content=t==='dark'?'#141a14':'#2d6a4f';
-    btn.innerHTML=t==='dark'
+  let th=m?localStorage.getItem(KT)||'light':(hr>=19||hr<6)?'dark':matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  apply(th);
+  btn.addEventListener('click',()=>{th=th==='dark'?'light':'dark';apply(th);localStorage.setItem(KT,th);localStorage.setItem(KM,'1')});
+  function apply(th){
+    root.setAttribute('data-theme',th);$('metaTheme').content=th==='dark'?'#141a14':'#2d6a4f';
+    btn.innerHTML=th==='dark'
       ?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
       :'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
   }
 })();
 
-/* ════ DATE BADGE ════ */
+/* ════ DATE BADGE + PWA ════ */
 (()=>{const d=new Date();$('todayBadge').textContent=SDAYS[d.getDay()]+', '+d.getDate()+' '+MON[d.getMonth()]})();
-
-/* ════ PWA ════ */
 (()=>{
   const ic=`%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%232d6a4f'/%3E%3Cpath d='M96 28C70 28 50 48 50 74c0 16 9 28 18 37l6 31h44l6-31c9-9 18-21 18-37 0-26-20-46-46-46z' fill='white'/%3E%3C/svg%3E`;
   const m={name:'ChickenCalc',short_name:'ChickenCalc',start_url:'./',display:'standalone',background_color:'#f0f2f0',theme_color:'#2d6a4f',icons:[{src:'data:image/svg+xml,'+ic,sizes:'192x192',type:'image/svg+xml'}]};
   const blob=new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
   const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(blob);document.head.appendChild(l);
 })();
-let dPr=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dPr=e});
 
 /* ════ NAV ════ */
 function nav(name){
@@ -639,51 +836,40 @@ function nav(name){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/* ════ ENTRY DATE ════ */
+/* ════ ENTRY ════ */
+let entryType='buy';
+function setEntryType(tp){
+  entryType=tp;
+  document.querySelectorAll('#entryTypeTabs .ptab').forEach((b,i)=>b.classList.toggle('on',['buy','sell','supplier'][i]===tp));
+  $('buyForm').style.display=tp==='buy'?'':'none';
+  $('sellForm').style.display=tp==='sell'?'':'none';
+  $('suppPayForm').style.display=tp==='supplier'?'':'none';
+}
 (()=>{$('entryDate').value=todayKey();$('entryDate').max=todayKey()})();
 function setEntryToday(){$('entryDate').value=todayKey()}
-
-/* ════ ENTRY TYPE ════ */
-let entryType='buy';
-function setEntryType(t){
-  entryType=t;
-  document.querySelectorAll('#entryTypeTabs .ptab').forEach((b,i)=>b.classList.toggle('on',['buy','sell','supplier'][i]===t));
-  $('buyForm').style.display=t==='buy'?'':'none';
-  $('sellForm').style.display=t==='sell'?'':'none';
-  $('suppPayForm').style.display=t==='supplier'?'':'none';
-}
-
-/* ════ BUY ════ */
-let suppDueManual = false;
+let suppDueManual=false;
 function setWaste(v){$('b_waste').value=v;onBuyInput()}
 function onBuyInput(){
   const pcs=parseFloat($('b_pcs').value)||0,kg=parseFloat($('b_kg').value)||0;
   const buy=parseFloat($('b_buy').value)||0,waste=parseFloat($('b_waste').value)||30;
   const el=$('buyPreview');
   if(pcs>0&&kg>0){
-    const avgL=kg/pcs,netKg=kg*(1-waste/100),avgN=netKg/pcs;
-    const totalCost=kg*buy;
-    const cpc=buy>0?totalCost/pcs:0;
-    $('buyPreviewTxt').innerHTML=
-      `<strong>Avg bird:</strong> ${avgL.toFixed(3)} kg live → ${avgN.toFixed(3)} kg net after ${waste}% wastage<br>`+
-      `<strong>Total cost:</strong> ${buy>0?fmt(totalCost)+` · Cost/piece: ${fmt(cpc)}`:'Enter buy price to calculate'}`;
+    const avgL=kg/pcs,netKg=kg*(1-waste/100),avgN=netKg/pcs,totalCost=kg*buy,cpc=buy>0?totalCost/pcs:0;
+    $('buyPreviewTxt').innerHTML=`Avg: ${avgL.toFixed(3)}kg live → ${avgN.toFixed(3)}kg net (${waste}% waste)<br>${t('d_total_cost')}: ${buy>0?fmt(totalCost)+` · ${t('d_cost_pc')}: ${fmt(cpc)}`:'—'}`;
     el.style.display='block';
-    // Always sync supplier due unless user manually typed their own value
-    if(buy>0&&!suppDueManual){
-      $('b_suppdue').value=Math.round(totalCost);
-    }
+    if(buy>0&&!suppDueManual)$('b_suppdue').value=Math.round(totalCost);
     updateSuppPaid();
-  } else {el.style.display='none'}
+  }else{el.style.display='none'}
 }
 function updateSuppPaid(){
   const due=parseFloat($('b_suppdue').value)||0;
   const cash=parseFloat($('b_suppCash').value)||0,upi=parseFloat($('b_suppUpi').value)||0;
   const paid=cash+upi,rem=Math.max(0,due-paid);
-  $('suppPaidLine').textContent=`Paid Now: ${fmt(paid)} · Still Owed: ${fmt(rem)}`;
+  $('suppPaidLine').textContent=`${t('d_invested')}: ${fmt(paid)} · ${t('d_still_pend')}: ${fmt(rem)}`;
 }
 function saveBuy(){
   const pcs=parseFloat($('b_pcs').value),kg=parseFloat($('b_kg').value),buy=parseFloat($('b_buy').value);
-  if(!pcs||!kg||!buy){toast('Fill pieces, weight and buy price');return}
+  if(!pcs||!kg||!buy){toast(t('t_fill_buy'));return}
   const rec={id:nid(),date:$('entryDate').value,ts:Date.now(),
     pcs,liveKg:kg,buyPrice:buy,wastage:parseFloat($('b_waste').value)||30,
     supplier:$('b_supplier').value.trim(),
@@ -691,136 +877,105 @@ function saveBuy(){
     suppInitCash:parseFloat($('b_suppCash').value)||0,
     suppInitUpi:parseFloat($('b_suppUpi').value)||0,
     note:$('b_note').value.trim()};
-  const buys=getBuys();buys.push(rec);sa(KB,buys);
+  const buys=getBuys();buys.push(rec);
+  saSync(KB,buys,rec);
   ['b_pcs','b_kg','b_buy','b_suppdue','b_suppCash','b_suppUpi','b_note'].forEach(id=>{const e=$(id);if(e)e.value=''});
   $('b_supplier').value='';$('b_waste').value=30;suppDueManual=false;onBuyInput();
-  toast('✅ Purchase saved!');
-  setEntryToday();
-  setTimeout(()=>nav('Ledger'),700);
+  toast(t('t_purchase_saved'));setEntryToday();setTimeout(()=>nav('Ledger'),700);
 }
 
 /* ════ SELL ════ */
 function populateSellBatches(){
   const buys=getBuys().sort((a,b)=>b.date.localeCompare(a.date));
-  const opts=buys.filter(b=>unsoldPcs(b)>0).map(b=>`<option value="${b.id}">${keyShort(b.date)} — ${unsoldPcs(b)} pcs remaining (of ${b.pcs})</option>`);
-  $('s_batch').innerHTML=`<option value="">— Choose batch —</option>`+opts.join('');
-  if(opts.length===0)$('s_batch').innerHTML=`<option value="">No stock available</option>`;
+  const opts=buys.filter(b=>unsoldPcs(b)>0).map(b=>`<option value="${b.id}">${keyShort(b.date)} — ${unsoldPcs(b)} pcs (of ${b.pcs})</option>`);
+  $('s_batch').innerHTML=`<option value="">${t('d_choose_batch_sell')}</option>`+opts.join('');
+  if(!opts.length)$('s_batch').innerHTML=`<option value="">${t('d_no_stock')}</option>`;
   onBatchSelect();
 }
 function onBatchSelect(){
   const id=parseInt($('s_batch').value);
   const buys=getBuys(),b=buys.find(x=>x.id===id);
   if(!b){$('batchInfo').style.display='none';return}
-  const{netKgPerPc,liveKgPerPc,costPerPc}=buyCalc(b);
-  const u=unsoldPcs(b);
-  $('batchInfo').innerHTML=
-    `<strong>${b.pcs} pcs bought</strong> on ${keyDisp(b.date)} · ${b.liveKg} kg live<br>`+
-    `Buy: ${fmt(b.buyPrice)}/kg · Wastage: ${b.wastage}%<br>`+
-    `<strong style="color:var(--orange)">${u} pieces still unsold</strong> · Net ${netKgPerPc.toFixed(3)} kg/piece · Cost: ${fmt(costPerPc)}/piece`;
+  const{netKgPerPc,costPerPc}=buyCalc(b);
+  $('batchInfo').innerHTML=`<strong>${b.pcs} pcs</strong> · ${keyDisp(b.date)} · ₹${b.buyPrice}/kg<br><strong style="color:var(--orange)">${t('d_pcs_remaining',unsoldPcs(b))}</strong> · Net ${netKgPerPc.toFixed(3)} kg/pc · ${t('d_cost_pc2')}: ${fmt(costPerPc)}`;
   $('batchInfo').style.display='block';
-  // Pre-fill sell price from previous sales of this batch
   const prev=salesOf(id).filter(s=>s.sellKg>0).slice(-1)[0];
   if(prev){$('s_sellkg').value=prev.sellKg||'';$('s_sellpc').value='';onSellInput()}
 }
 function onSellInput(){
   const id=parseInt($('s_batch').value);
-  const buys=getBuys(),b=buys.find(x=>x.id===id);
-  if(!b)return;
+  const buys=getBuys(),b=buys.find(x=>x.id===id);if(!b)return;
   const{netKgPerPc,costPerPc}=buyCalc(b);
-  const pcs=parseFloat($('s_pcs').value)||0;
-  const sk=parseFloat($('s_sellkg').value)||0;
-  // auto-fill ₹/piece from ₹/kg × avg net kg/piece
+  const pcs=parseFloat($('s_pcs').value)||0,sk=parseFloat($('s_sellkg').value)||0;
   const sp=sk>0&&netKgPerPc>0?sk*netKgPerPc:0;
-  if(sp>0)$('s_sellpc').value=sp.toFixed(1);
-  else $('s_sellpc').value='';
-  const rev=pcs*sp,cost=pcs*costPerPc,profit=rev-cost;
-  const el=$('sellPreview');
+  if(sp>0)$('s_sellpc').value=sp.toFixed(1);else $('s_sellpc').value='';
+  const rev=pcs*sp,cost=pcs*costPerPc,profit=rev-cost,el=$('sellPreview');
   if(pcs>0&&sk>0){
-    const breakeven=costPerPc/netKgPerPc;
-    el.innerHTML=`<strong>${pcs} pcs × ₹${sk}/kg × ${netKgPerPc.toFixed(3)}kg net = ₹${sp.toFixed(1)}/piece</strong><br>`+
-      `Revenue: <strong>${fmt(rev)}</strong> · Cost: <strong>${fmt(cost)}</strong> · Profit: <strong style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</strong><br>`+
-      `Break-even: ₹${breakeven.toFixed(1)}/kg`;
-    el.className='info-box '+(profit>=0?'green':'red');
-    el.style.display='block';
-  } else {el.style.display='none'}
+    el.innerHTML=`${pcs}pcs × ₹${sk}/kg = ₹${sp.toFixed(1)}/pc · ${t('d_revenue')}: <strong>${fmt(rev)}</strong> · ${t('d_profit')}: <strong style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</strong>`;
+    el.className='info-box '+(profit>=0?'green':'red');el.style.display='block';
+  }else{el.style.display='none'}
   updateSellPaid();
 }
 function updateSellPaid(){
   const id=parseInt($('s_batch').value);
   const buys=getBuys(),b=buys.find(x=>x.id===id);
-  const pcs=parseFloat($('s_pcs').value)||0;
-  const sk=parseFloat($('s_sellkg').value)||0;
+  const pcs=parseFloat($('s_pcs').value)||0,sk=parseFloat($('s_sellkg').value)||0;
   const netKgPerPc=b?buyCalc(b).netKgPerPc:0;
   const sp=sk>0&&netKgPerPc>0?sk*netKgPerPc:0;
   const rev=pcs*sp,cash=parseFloat($('s_cash').value)||0,upi=parseFloat($('s_upi').value)||0;
   const coll=cash+upi,pend=Math.max(0,rev-coll);
-  $('sellPaidLine').textContent=`Collected: ${fmt(coll)} · Pending: ${fmt(pend)}`;
+  $('sellPaidLine').textContent=`${t('d_collected')}: ${fmt(coll)} · ${t('pending')}: ${fmt(pend)}`;
 }
 function saveSell(){
   const buyId=parseInt($('s_batch').value);
-  if(!buyId){toast('Select a batch');return}
+  if(!buyId){toast(t('t_select_batch'));return}
   const buys=getBuys(),b=buys.find(x=>x.id===buyId);
-  if(!b){toast('Batch not found');return}
-  const pcs=parseFloat($('s_pcs').value);
-  const sk=parseFloat($('s_sellkg').value)||0;
-  if(!pcs||pcs<=0){toast('Enter pieces to sell');return}
-  if(!sk){toast('Enter sell price ₹/kg');return}
-  if(pcs>unsoldPcs(b)){toast(`Only ${unsoldPcs(b)} pieces available`);return}
+  if(!b){toast(t('t_batch_not_found'));return}
+  const pcs=parseFloat($('s_pcs').value),sk=parseFloat($('s_sellkg').value)||0;
+  if(!pcs||pcs<=0){toast(t('t_enter_pcs'));return}
+  if(!sk){toast(t('t_enter_price'));return}
+  if(pcs>unsoldPcs(b)){toast(t('t_only_pcs',unsoldPcs(b)));return}
   const{netKgPerPc}=buyCalc(b);
-  const sp=sk*netKgPerPc;
-  const sales=getSales();
-  sales.push({id:nid(),buyId,date:$('entryDate').value,ts:Date.now(),
-    pcs,sellKg:sk,sellPc:parseFloat(sp.toFixed(2)),
-    cash:parseFloat($('s_cash').value)||0,upi:parseFloat($('s_upi').value)||0,
-    note:$('s_note').value.trim()});
-  sa(KS,sales);
+  const sp=parseFloat((sk*netKgPerPc).toFixed(2));
+  const rec={id:nid(),buyId,date:$('entryDate').value,ts:Date.now(),pcs,sellKg:sk,sellPc:sp,
+    cash:parseFloat($('s_cash').value)||0,upi:parseFloat($('s_upi').value)||0,note:$('s_note').value.trim()};
+  const sales=getSales();sales.push(rec);
+  saSync(KS,sales,rec);
   ['s_pcs','s_sellkg','s_sellpc','s_cash','s_upi','s_note'].forEach(id=>{const e=$(id);if(e)e.value=''});
   $('sellPreview').style.display='none';$('batchInfo').style.display='none';$('s_batch').value='';
-  toast('✅ Sale saved!');
-  populateSellBatches();
-  setTimeout(()=>nav('Ledger'),700);
+  toast(t('t_sale_saved'));populateSellBatches();setTimeout(()=>nav('Ledger'),700);
 }
 
 /* ════ SUPPLIER PAY ════ */
 function populateSuppBatches(){
   const buys=getBuys().sort((a,b)=>b.date.localeCompare(a.date));
   const opts=buys.filter(b=>suppTotal(b).remaining>0.5);
-  if(!opts.length){$('suppPayBatchSel').innerHTML=`<div class="info-box green">✅ No outstanding supplier payments!</div>`;return}
-  let html='<div class="fg" style="margin-bottom:.7rem"><label class="fl">Select Batch</label><select class="fi np" id="sp_batch">';
-  html+=`<option value="">— Choose batch —</option>`;
-  opts.forEach(b=>{const s=suppTotal(b);html+=`<option value="${b.id}">${keyShort(b.date)} — ${b.supplier||'Supplier'} — Remaining: ${fmt(s.remaining)}</option>`});
+  if(!opts.length){$('suppPayBatchSel').innerHTML=`<div class="info-box green">✅ ${t('t_no_supp_due')}</div>`;return}
+  let html=`<div class="fg" style="margin-bottom:.7rem"><label class="fl">${t('select_batch')}</label><select class="fi np" id="sp_batch">`;
+  html+=`<option value="">${t('d_choose_batch')}</option>`;
+  opts.forEach(b=>{const s=suppTotal(b);html+=`<option value="${b.id}">${keyShort(b.date)} — ${b.supplier||'Supplier'} — ${fmt(s.remaining)}</option>`});
   html+='</select></div>';
   $('suppPayBatchSel').innerHTML=html;
 }
-function updateSuppPayLine(){
-  const c=parseFloat($('sp_cash').value)||0,u=parseFloat($('sp_upi').value)||0;
-  $('suppPayLine').textContent=`Total: ${fmt(c+u)}`;
-}
+function updateSuppPayLine(){const c=parseFloat($('sp_cash').value)||0,u=parseFloat($('sp_upi').value)||0;$('suppPayLine').textContent=`Total: ${fmt(c+u)}`}
 function saveSuppPay(){
   const buyId=parseInt($('sp_batch')?.value||0);
-  if(!buyId){toast('Select a batch');return}
+  if(!buyId){toast(t('t_select_batch'));return}
   const c=parseFloat($('sp_cash').value)||0,u=parseFloat($('sp_upi').value)||0;
-  if(!c&&!u){toast('Enter amount paid');return}
-  const sp=getSuppays();
-  sp.push({id:nid(),buyId,date:$('entryDate').value,ts:Date.now(),cash:c,upi:u,note:$('sp_note').value.trim()});
-  sa(KSP,sp);
-  toast('✅ Supplier payment saved!');
-  populateSuppBatches();
+  if(!c&&!u){toast(t('t_enter_amt'));return}
+  const rec={id:nid(),buyId,date:$('entryDate').value,ts:Date.now(),cash:c,upi:u,note:$('sp_note').value.trim()};
+  const sp=getSuppays();sp.push(rec);
+  saSync(KSP,sp,rec);
+  toast(t('save_payment'));populateSuppBatches();
   if($('sp_cash'))$('sp_cash').value='';if($('sp_upi'))$('sp_upi').value='';
 }
 
 /* ════ HOME ════ */
 function renderHome(){
   const buys=getBuys(),today=todayKey();
-  // Global alerts: unsold stock + pending cash
-  const allUnsold=buys.filter(b=>unsoldPcs(b)>0);
-  const allPendCash=buys.filter(b=>pendingCash(b)>0.5);
-  const allPendSupp=buys.filter(b=>suppTotal(b).remaining>0.5);
-  const totUnsold=allUnsold.reduce((a,b)=>a+unsoldPcs(b),0);
-  const totPendCash=allPendCash.reduce((a,b)=>a+pendingCash(b),0);
-  const totPendSupp=allPendSupp.reduce((a,b)=>a+suppTotal(b).remaining,0);
-
-  // Today's numbers
+  const totUnsold=buys.reduce((a,b)=>a+unsoldPcs(b),0);
+  const totPendCash=buys.reduce((a,b)=>a+pendingCash(b),0);
+  const totPendSupp=buys.reduce((a,b)=>a+suppTotal(b).remaining,0);
   const todayBuys=buys.filter(b=>b.date===today);
   const todaySales=getSales().filter(s=>s.date===today);
   const todaySuppays=getSuppays().filter(p=>p.date===today);
@@ -834,439 +989,333 @@ function renderHome(){
   const todayUpi=todaySales.reduce((a,s)=>a+(s.upi||0),0);
   const todayProfit=todayRevenue-todayCost;
   const todaySuppPaid=todaySuppays.reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
-
-  let html='';
-
-  // Alerts
+  const shopCode=getShopId();
+  const syncBar=shopCode&&isSyncOn()
+    ?`<div class="sync-bar ${syncStatus}"><span class="sync-dot"></span><span>${syncStatus==='connected'?`☁️ ${t('sync_synced')} · ${shopCode}`:syncStatus==='syncing'?`⏳ ${t('sync_syncing')}…`:`📵 ${t('sync_offline')}`}</span><span class="sync-bar-right"><button class="btn ghost btn-sm" onclick="openSyncModal()" style="font-size:.62rem;padding:.2rem .45rem">⚙</button></span></div>`
+    :`<div class="sync-bar offline"><span class="sync-dot"></span><span>📵 ${t('sync_offline_tip')}</span><span class="sync-bar-right"><button class="btn blue btn-sm" onclick="openSyncModal()" style="font-size:.62rem;padding:.2rem .5rem">+ ${t('sync_enable')}</button></span></div>`;
+  let html=syncBar;
   if(totUnsold>0||totPendCash>0.5||totPendSupp>0.5){
     html+=`<div class="card card-pad" style="border-color:var(--orange);background:var(--orangeL)">
-      <div class="card-title" style="margin-bottom:.7rem;color:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Pending Actions</div>`;
-    if(totUnsold>0)html+=`<div class="info-box orange" style="margin-bottom:.45rem">🐔 <strong>${totUnsold} pieces unsold</strong> — tap Ledger to sell them at today's price</div>`;
-    if(totPendCash>0.5)html+=`<div class="info-box orange" style="margin-bottom:.45rem">💰 <strong>${fmt(totPendCash)} pending from customers</strong> — collect and record payment</div>`;
-    if(totPendSupp>0.5)html+=`<div class="info-box red" style="margin-bottom:0">🏭 <strong>${fmt(totPendSupp)} owed to supplier</strong> — pay and record in Add Entry</div>`;
-    html+='</div>';
+      <div class="card-title" style="margin-bottom:.7rem;color:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${t('d_pending_actions')}</div>
+      ${totUnsold>0?`<div class="info-box orange" style="margin-bottom:.4rem">${t('d_unsold_alert',totUnsold)}</div>`:''}
+      ${totPendCash>0.5?`<div class="info-box orange" style="margin-bottom:.4rem">${t('d_cashpend_alert',fmt(totPendCash))}</div>`:''}
+      ${totPendSupp>0.5?`<div class="info-box red" style="margin-bottom:0">${t('d_supppend_alert',fmt(totPendSupp))}</div>`:''}
+    </div>`;
   }
-
-  // Today summary
   html+=`<div class="card card-pad">
-    <div class="card-title" style="margin-bottom:.75rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Today's Summary</div>
+    <div class="card-title" style="margin-bottom:.75rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${t('d_today_summary')}</div>
     <div class="stat-row c4">
-      <div class="stat ${todayCost>0?'orange':'neutral'}"><div class="stat-lbl">Invested</div><div class="stat-val" style="font-size:1rem">${todayCost>0?fmt(todayCost):'—'}</div></div>
-      <div class="stat ${todayRevenue>0?'blue':'neutral'}"><div class="stat-lbl">Revenue</div><div class="stat-val" style="font-size:1rem">${todayRevenue>0?fmt(todayRevenue):'—'}</div></div>
-      <div class="stat ${todayProfit>0?'green':todayProfit<0?'red':'neutral'}"><div class="stat-lbl">Profit</div><div class="stat-val" style="font-size:1rem">${todayRevenue>0?fmtD(todayProfit):'—'}</div></div>
-      <div class="stat ${todayCollected>0?'green':'neutral'}"><div class="stat-lbl">Collected</div><div class="stat-val" style="font-size:1rem">${todayCollected>0?fmt(todayCollected):'—'}</div></div>
-    </div>`;
-  if(todayCash>0||todayUpi>0){
-    html+=`<div style="display:flex;gap:.5rem;margin-top:.5rem">
-      <div class="stat green" style="flex:1;padding:.55rem .65rem"><div class="stat-lbl">Cash</div><div class="stat-val" style="font-size:.92rem">${fmt(todayCash)}</div></div>
+      <div class="stat ${todayCost>0?'orange':'neutral'}"><div class="stat-lbl">${t('d_invested')}</div><div class="stat-val" style="font-size:1rem">${todayCost>0?fmt(todayCost):'—'}</div></div>
+      <div class="stat ${todayRevenue>0?'blue':'neutral'}"><div class="stat-lbl">${t('d_revenue')}</div><div class="stat-val" style="font-size:1rem">${todayRevenue>0?fmt(todayRevenue):'—'}</div></div>
+      <div class="stat ${todayProfit>0?'green':todayProfit<0?'red':'neutral'}"><div class="stat-lbl">${t('d_profit')}</div><div class="stat-val" style="font-size:1rem">${todayRevenue>0?fmtD(todayProfit):'—'}</div></div>
+      <div class="stat ${todayCollected>0?'green':'neutral'}"><div class="stat-lbl">${t('d_collected')}</div><div class="stat-val" style="font-size:1rem">${todayCollected>0?fmt(todayCollected):'—'}</div></div>
+    </div>
+    ${todayCash>0||todayUpi>0?`<div style="display:flex;gap:.5rem;margin-top:.5rem">
+      <div class="stat green" style="flex:1;padding:.55rem .65rem"><div class="stat-lbl">${t('cash').replace(' ₹','')}</div><div class="stat-val" style="font-size:.92rem">${fmt(todayCash)}</div></div>
       <div class="stat blue" style="flex:1;padding:.55rem .65rem"><div class="stat-lbl">UPI</div><div class="stat-val" style="font-size:.92rem">${fmt(todayUpi)}</div></div>
-      ${todaySuppPaid>0?`<div class="stat gold" style="flex:1;padding:.55rem .65rem"><div class="stat-lbl">Supp. Paid</div><div class="stat-val" style="font-size:.92rem">${fmt(todaySuppPaid)}</div></div>`:''}
-    </div>`;
-  }
-  html+='</div>';
-
-  // Today's stock
+      ${todaySuppPaid>0?`<div class="stat gold" style="flex:1;padding:.55rem .65rem"><div class="stat-lbl">${t('supplier_section').split(' ')[0]}</div><div class="stat-val" style="font-size:.92rem">${fmt(todaySuppPaid)}</div></div>`:''}
+    </div>`:''}
+  </div>`;
   if(todayBuys.length){
-    html+=`<div class="card card-pad"><div class="card-title" style="margin-bottom:.7rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Today's Purchase</div>`;
+    html+=`<div class="card card-pad"><div class="card-title" style="margin-bottom:.7rem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>${t('d_today_purchase')}</div>`;
     todayBuys.forEach((b,i)=>{
       const u=unsoldPcs(b),sold=soldPcs(b),rev=totalRevenue(b),{totalCost,netKgPerPc}=buyCalc(b),profit=rev-totalCost;
       const pct=b.pcs>0?Math.min(100,sold/b.pcs*100):0;
-      html+=`<div class="entry">
-        <div class="entry-head">
-          <div class="entry-left">
-            <div class="entry-label">Batch ${i+1}${b.note?' · '+b.note:''}</div>
-            <div class="entry-main">🐔 ${b.pcs} pieces · ${b.liveKg} kg live</div>
-            <div class="entry-sub">Buy: ${fmt(b.buyPrice)}/kg · Wastage: ${b.wastage}% · Net ${netKgPerPc.toFixed(3)} kg/pc<br>
-            ${u>0?`<span style="color:var(--orange);font-weight:700">${u} pieces unsold</span>`:'<span style="color:var(--green);font-weight:700">All sold ✓</span>'}</div>
-          </div>
-          <div class="entry-right">
-            <div class="entry-amount" style="color:var(--orange)">${fmt(totalCost)}</div>
-            <div class="entry-status" style="color:${profit>=0?'var(--green)':'var(--red)'}">${rev>0?fmtD(profit)+' profit':'No sales yet'}</div>
-          </div>
+      html+=`<div class="entry"><div class="entry-head">
+        <div class="entry-left">
+          <div class="entry-label">${t('d_batch')} ${i+1}${b.note?' · '+b.note:''}</div>
+          <div class="entry-main">🐔 ${b.pcs} ${t('d_pieces')} · ${b.liveKg} kg ${t('d_live')}</div>
+          <div class="entry-sub">${t('d_buy')}: ${fmt(b.buyPrice)}/kg · ${t('d_wst')}: ${b.wastage}% · Net ${netKgPerPc.toFixed(3)} kg/pc<br>
+          ${u>0?`<span style="color:var(--orange);font-weight:700">${t('d_unsold',u)}</span>`:`<span style="color:var(--green);font-weight:700">${t('d_all_sold')}</span>`}</div>
         </div>
-        ${sold>0?`<div class="entry-prog">
-          <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--mu)"><span>Sold ${sold}/${b.pcs} pieces</span><span>${pct.toFixed(0)}%</span></div>
-          <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
-        </div>`:''}
-        <div class="entry-actions">
-          ${u>0?`<button class="btn warn btn-sm" onclick="quickSell(${b.id})">🐔 Sell ${u} pieces</button>`:''}
-          ${pendingCash(b)>0.5?`<button class="btn blue btn-sm" onclick="quickCollect(${b.id})">💰 Collect ${fmt(pendingCash(b))}</button>`:''}
+        <div class="entry-right">
+          <div class="entry-amount" style="color:var(--orange)">${fmt(totalCost)}</div>
+          <div class="entry-status" style="color:${profit>=0?'var(--green)':'var(--red)'}">${rev>0?fmtD(profit)+' '+t('d_profit'):'—'}</div>
         </div>
-      </div>`;
+      </div>
+      ${sold>0?`<div class="entry-prog"><div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--mu)"><span>${t('d_sold')} ${sold}/${b.pcs}</span><span>${pct.toFixed(0)}%</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>`:''}
+      <div class="entry-actions">
+        ${u>0?`<button class="btn warn btn-sm" onclick="quickSell(${b.id})">${t('d_sell_rem',u)}</button>`:''}
+        ${pendingCash(b)>0.5?`<button class="btn blue btn-sm" onclick="quickCollect(${b.id})">💰 ${t('d_collect')} ${fmt(pendingCash(b))}</button>`:''}
+      </div></div>`;
     });
     html+='</div>';
   }
-
   if(!todayBuys.length&&!totUnsold&&!totPendCash){
-    html+=`<div class="empty"><div class="empty-icon">🐔</div><p>Nothing here yet.<br>Tap <strong>Add Entry</strong> to record today's purchase.</p></div>`;
+    html+=`<div class="empty"><div class="empty-icon">🐔</div><p>${t('d_nothing_yet')}<br>${t('d_add_first_purchase')}</p></div>`;
   }
-
   $('homeContent').innerHTML=html;
 }
 
-/* ════ QUICK SELL MODAL ════ */
+/* ════ QUICK SELL ════ */
 function quickSell(buyId){
   const buys=getBuys(),b=buys.find(x=>x.id===buyId);if(!b)return;
   const u=unsoldPcs(b),{netKgPerPc,costPerPc}=buyCalc(b);
-  // Get last sell price for this batch
-  const lastSale=salesOf(buyId).slice(-1)[0];
-  const lastPc=lastSale?.sellPc||'';
-  openModal(`Sell from ${keyDisp(b.date)} batch`,`
-    <div class="info-box" style="margin-bottom:.8rem">
-      <strong>${b.pcs} pieces</strong> bought at ₹${b.buyPrice}/kg on ${keyDisp(b.date)}<br>
-      <strong style="color:var(--orange)">${u} pieces remaining unsold</strong><br>
-      Net weight per piece: <strong>${netKgPerPc.toFixed(3)} kg</strong> · Cost/piece: <strong>${fmt(costPerPc)}</strong>
-    </div>
+  const lastSale=salesOf(buyId).filter(s=>s.sellKg>0).slice(-1)[0];
+  openModal(t('d_sell_from',keyDisp(b.date)),`
+    <div class="info-box" style="margin-bottom:.8rem"><strong>${b.pcs} ${t('d_pieces')}</strong> · ₹${b.buyPrice}/kg · ${keyDisp(b.date)}<br>
+      <strong style="color:var(--orange)">${t('d_pcs_remaining',u)}</strong><br>
+      ${t('d_net_per_pc')}: <strong>${netKgPerPc.toFixed(3)} kg</strong> · ${t('d_cost_pc2')}: <strong>${fmt(costPerPc)}</strong></div>
     <div class="frow" style="margin-bottom:.6rem">
-      <div class="fg"><label class="fl">Pieces to Sell</label><div class="fi-wrap"><input class="fi np pr" id="qs_pcs" type="number" inputmode="numeric" value="${u}" placeholder="${u}" oninput="qsPreview(${buyId})"><span class="fi-suf">pcs</span></div></div>
-      <div class="fg"><label class="fl">Sell Price ₹/kg <span style="font-weight:400;text-transform:none;font-size:.62rem">(net weight)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_kg" type="number" inputmode="decimal" value="${lastSale?.sellKg||''}" placeholder="e.g. 240" oninput="qsPreview(${buyId})"></div></div>
+      <div class="fg"><label class="fl">${t('pieces_to_sell')}</label><div class="fi-wrap"><input class="fi np pr" id="qs_pcs" type="number" inputmode="numeric" value="${u}" oninput="qsPreview(${buyId})"><span class="fi-suf">pcs</span></div></div>
+      <div class="fg"><label class="fl">Sell ₹/kg</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_kg" type="number" inputmode="decimal" value="${lastSale?.sellKg||''}" placeholder="e.g. 240" oninput="qsPreview(${buyId})"></div></div>
     </div>
-    <div class="fg" style="margin-bottom:.6rem"><label class="fl">= ₹/piece <span style="font-weight:400;text-transform:none;font-size:.62rem">(auto-calculated)</span></label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_pc" type="number" inputmode="decimal" placeholder="auto" style="background:var(--card2);color:var(--mu)" readonly></div></div>
-    <div class="fg" style="margin-bottom:.6rem"><label class="fl">Sale Date</label><input class="fi np" id="qs_date" type="date" value="${todayKey()}" max="${todayKey()}"></div>
+    <div class="fg" style="margin-bottom:.6rem"><label class="fl">= ₹/${t('d_piece')} (auto)</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_pc" type="number" placeholder="auto" style="background:var(--card2);color:var(--mu)" readonly></div></div>
+    <div class="fg" style="margin-bottom:.6rem"><label class="fl">${t('d_sale_date')}</label><input class="fi np" id="qs_date" type="date" value="${todayKey()}" max="${todayKey()}"></div>
     <div id="qsPreviewBox" style="display:none;margin-bottom:.6rem"></div>
     <div class="pay-split" style="margin-bottom:.75rem">
-      <div class="pay-split-ttl">💵 Cash Collected Now</div>
+      <div class="pay-split-ttl">💵 ${t('cash_collected_now')}</div>
       <div class="pay-split-row">
-        <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_cash" type="number" inputmode="decimal" placeholder="0" oninput="qsPreview(${buyId})"></div></div>
+        <div class="fg"><label class="fl">${t('cash')}</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_cash" type="number" inputmode="decimal" placeholder="0" oninput="qsPreview(${buyId})"></div></div>
         <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_upi" type="number" inputmode="decimal" placeholder="0" oninput="qsPreview(${buyId})"></div></div>
       </div>
-      <div class="pay-total-line" id="qsPaidLine">Collected: ₹0 · Pending: ₹0</div>
+      <div class="pay-total-line" id="qsPaidLine">${t('d_collected')}: ₹0 · ${t('pending')}: ₹0</div>
     </div>
-    <div class="fg" style="margin-bottom:.85rem"><label class="fl">Note</label><input class="fi np" id="qs_note" type="text" placeholder="Customer name…"></div>
-    <button class="btn primary btn-lg btn-full" onclick="confirmQuickSell(${buyId})">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-      Save Sale
-    </button>
+    <div class="fg" style="margin-bottom:.85rem"><label class="fl">${t('note_opt')}</label><input class="fi np" id="qs_note" type="text" placeholder="Customer…"></div>
+    <button class="btn primary btn-lg btn-full" onclick="confirmQuickSell(${buyId})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>${t('save_sale')}</button>
   `);
   setTimeout(()=>qsPreview(buyId),50);
 }
 function qsPreview(buyId){
   const buys=getBuys(),b=buys.find(x=>x.id===buyId);if(!b)return;
   const{netKgPerPc,costPerPc}=buyCalc(b);
-  const pcs=parseFloat($('qs_pcs')?.value)||0;
-  const sk=parseFloat($('qs_kg')?.value)||0;
+  const pcs=parseFloat($('qs_pcs')?.value)||0,sk=parseFloat($('qs_kg')?.value)||0;
   const sp=sk>0&&netKgPerPc>0?sk*netKgPerPc:0;
-  // update piece price display
   const pcEl=$('qs_pc');if(pcEl)pcEl.value=sp>0?sp.toFixed(1):'';
   const cash=parseFloat($('qs_cash')?.value)||0,upi=parseFloat($('qs_upi')?.value)||0;
   const rev=pcs*sp,cost=pcs*costPerPc,profit=rev-cost,coll=cash+upi;
   const pb=$('qsPreviewBox');
   if(pb&&pcs>0&&sk>0){
-    const be=costPerPc/netKgPerPc;
-    pb.innerHTML=`${pcs} pcs × ₹${sk}/kg × ${netKgPerPc.toFixed(3)}kg = <strong>₹${sp.toFixed(1)}/pc</strong><br>Revenue: <strong>${fmt(rev)}</strong> · Profit: <strong style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</strong><br>Break-even: ₹${be.toFixed(1)}/kg`;
+    pb.innerHTML=`${pcs}pcs × ₹${sk}/kg = ₹${sp.toFixed(1)}/pc · ${t('d_profit')}: <strong style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</strong>`;
     pb.className='info-box '+(profit>=0?'green':'red');pb.style.display='block';
   }
-  const pl=$('qsPaidLine');
-  if(pl)pl.textContent=`Collected: ${fmt(coll)} · Pending: ${fmt(Math.max(0,rev-coll))}`;
+  const pl=$('qsPaidLine');if(pl)pl.textContent=`${t('d_collected')}: ${fmt(coll)} · ${t('pending')}: ${fmt(Math.max(0,rev-coll))}`;
 }
 function confirmQuickSell(buyId){
-  const pcs=parseFloat($('qs_pcs')?.value)||0;
-  const sk=parseFloat($('qs_kg')?.value)||0;
-  if(!pcs||pcs<=0){toast('Enter pieces');return}
-  if(!sk){toast('Enter sell price ₹/kg');return}
+  const pcs=parseFloat($('qs_pcs')?.value)||0,sk=parseFloat($('qs_kg')?.value)||0;
+  if(!pcs||pcs<=0){toast(t('t_enter_pcs'));return}
+  if(!sk){toast(t('t_enter_price'));return}
   const buys=getBuys(),b=buys.find(x=>x.id===buyId);
-  if(pcs>unsoldPcs(b)){toast(`Only ${unsoldPcs(b)} pieces available`);return}
+  if(pcs>unsoldPcs(b)){toast(t('t_only_pcs',unsoldPcs(b)));return}
   const{netKgPerPc}=buyCalc(b);
-  const sp=sk*netKgPerPc;
-  const sales=getSales();
-  sales.push({id:nid(),buyId,date:$('qs_date')?.value||todayKey(),ts:Date.now(),
-    pcs,sellKg:sk,sellPc:parseFloat(sp.toFixed(2)),
-    cash:parseFloat($('qs_cash')?.value)||0,upi:parseFloat($('qs_upi')?.value)||0,
-    note:$('qs_note')?.value.trim()||''});
-  sa(KS,sales);closeModal();toast('✅ Sale saved!');renderHome();
+  const sp=parseFloat((sk*netKgPerPc).toFixed(2));
+  const rec={id:nid(),buyId,date:$('qs_date')?.value||todayKey(),ts:Date.now(),pcs,sellKg:sk,sellPc:sp,
+    cash:parseFloat($('qs_cash')?.value)||0,upi:parseFloat($('qs_upi')?.value)||0,note:$('qs_note')?.value.trim()||''};
+  const sales=getSales();sales.push(rec);
+  saSync(KS,sales,rec);closeModal();toast(t('t_sale_saved'));renderHome();
 }
 
-/* ════ QUICK COLLECT MODAL ════ */
+/* ════ QUICK COLLECT ════ */
 function quickCollect(buyId){
   const buys=getBuys(),b=buys.find(x=>x.id===buyId);if(!b)return;
   const rev=totalRevenue(b),coll=totalCollected(b),pend=pendingCash(b);
-  openModal(`Collect Payment`,`
-    <div class="info-box" style="margin-bottom:.8rem">
-      Total revenue: <strong>${fmt(rev)}</strong><br>
-      Already collected: <strong style="color:var(--green)">${fmt(coll)}</strong><br>
-      <strong style="color:var(--red)">Still pending: ${fmt(pend)}</strong>
-    </div>
+  openModal(t('d_collect_payment'),`
+    <div class="info-box" style="margin-bottom:.8rem">${t('d_total_rev')}: <strong>${fmt(rev)}</strong><br>${t('d_already_coll')}: <strong style="color:var(--green)">${fmt(coll)}</strong><br><strong style="color:var(--red)">${t('d_still_pend')}: ${fmt(pend)}</strong></div>
     <div class="pay-split" style="margin-bottom:.75rem">
-      <div class="pay-split-ttl">💵 Collecting Now</div>
+      <div class="pay-split-ttl">💵 ${t('d_collecting_now')}</div>
       <div class="pay-split-row">
-        <div class="fg"><label class="fl">Cash ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qc_cash" type="number" inputmode="decimal" value="${Math.round(pend)}" oninput="qcLine()"></div></div>
+        <div class="fg"><label class="fl">${t('cash')}</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qc_cash" type="number" inputmode="decimal" value="${Math.round(pend)}" oninput="qcLine()"></div></div>
         <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qc_upi" type="number" inputmode="decimal" placeholder="0" oninput="qcLine()"></div></div>
       </div>
       <div class="pay-total-line" id="qcLine">Total: ${fmt(pend)}</div>
     </div>
-    <div class="fg" style="margin-bottom:.85rem"><label class="fl">Note</label><input class="fi np" id="qc_note" type="text" placeholder="Cash, UPI, partial…"></div>
-    <button class="btn primary btn-lg btn-full" onclick="confirmCollect(${buyId})">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-      Confirm Collection
-    </button>
+    <div class="fg" style="margin-bottom:.85rem"><label class="fl">${t('note_opt')}</label><input class="fi np" id="qc_note" type="text" placeholder="Cash, UPI…"></div>
+    <button class="btn primary btn-lg btn-full" onclick="confirmCollect(${buyId})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>${t('d_confirm_coll')}</button>
   `);
 }
-function qcLine(){
-  const c=parseFloat($('qc_cash')?.value)||0,u=parseFloat($('qc_upi')?.value)||0;
-  const pl=$('qcLine');if(pl)pl.textContent=`Total: ${fmt(c+u)}`;
-}
+function qcLine(){const c=parseFloat($('qc_cash')?.value)||0,u=parseFloat($('qc_upi')?.value)||0;const pl=$('qcLine');if(pl)pl.textContent=`Total: ${fmt(c+u)}`}
 function confirmCollect(buyId){
   const c=parseFloat($('qc_cash')?.value)||0,u=parseFloat($('qc_upi')?.value)||0;
-  if(!c&&!u){toast('Enter amount');return}
-  const sales=getSales(),lastSale=salesOf(buyId).slice(-1)[0];
-  if(!lastSale){toast('No sales found for this batch');return}
-  // Add as a payment against the last sale (or create a general collect)
-  const allSales=getSales();
-  // Find first sale with pending
-  let added=false;
-  const buys=getBuys(),b=buys.find(x=>x.id===buyId);
-  // We attach the payment to the batch via a new collection-only sale record
-  allSales.push({id:nid(),buyId,date:todayKey(),ts:Date.now(),pcs:0,sellPc:0,sellKg:0,cash:c,upi:u,isCollectionOnly:true,note:$('qc_note')?.value.trim()||''});
-  sa(KS,allSales);closeModal();toast(`✅ ${fmt(c+u)} collected!`);renderHome();
+  if(!c&&!u){toast(t('t_enter_amt'));return}
+  const rec={id:nid(),buyId,date:todayKey(),ts:Date.now(),pcs:0,sellPc:0,sellKg:0,cash:c,upi:u,isCollectionOnly:true,note:$('qc_note')?.value.trim()||''};
+  const allSales=getSales();allSales.push(rec);
+  saSync(KS,allSales,rec);closeModal();toast(t('t_collected',fmt(c+u)));renderHome();
 }
 
 /* ════ LEDGER ════ */
 let ledgerDateKey=todayKey();
-function shiftDate(d){
-  const dt=new Date(ledgerDateKey);dt.setDate(dt.getDate()+d);
-  const nk=dt.toISOString().slice(0,10);
-  if(nk>todayKey())return;
-  ledgerDateKey=nk;renderLedger();
-}
+function shiftDate(d){const dt=new Date(ledgerDateKey);dt.setDate(dt.getDate()+d);const nk=dt.toISOString().slice(0,10);if(nk>todayKey())return;ledgerDateKey=nk;renderLedger()}
 function openDatePicker(){$('dpInput').max=todayKey();$('dpInput').value=ledgerDateKey;$('dpInput').click()}
 function setDateFromPicker(v){if(v){ledgerDateKey=v;renderLedger()}}
 
 function renderLedger(){
   const[y,m,d]=ledgerDateKey.split('-').map(Number);
   const isToday=ledgerDateKey===todayKey();
-  $('dnavMain').innerHTML=d+' '+FMON[m-1]+' '+y+(isToday?` <span class="datenav-today">Today</span>`:'');
+  $('dnavMain').innerHTML=d+' '+FMON[m-1]+' '+y+(isToday?` <span class="datenav-today">${t('today')}</span>`:'');
   $('dnavSub').textContent=DAYS[new Date(y,m-1,d).getDay()];
-
   const buys=getBuys(),allSales=getSales(),allSuppays=getSuppays();
   const dayBuys=buys.filter(b=>b.date===ledgerDateKey);
-  // Sales recorded on this date (for day-level cash/UPI summary)
   const daySalesRec=allSales.filter(s=>s.date===ledgerDateKey);
   const daySuppays=allSuppays.filter(p=>p.date===ledgerDateKey);
-
-  // Day summary uses only cash actually collected today (not batch profit)
   const dayCash=daySalesRec.reduce((a,s)=>a+(s.cash||0),0);
   const dayUpi=daySalesRec.reduce((a,s)=>a+(s.upi||0),0);
-  const dayColl=dayCash+dayUpi;
-  const daySuppPaid=daySuppays.reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
-  // Revenue from sales recorded today (for day summary)
+  const dayColl=dayCash+dayUpi,daySuppPaid=daySuppays.reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
   const dayRevToday=daySalesRec.filter(s=>!s.isCollectionOnly).reduce((a,s)=>{
     const b=buys.find(x=>x.id===s.buyId);if(!b)return a;
-    const{netKgPerPc}=buyCalc(b);
-    return a+(s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0));
+    const{netKgPerPc}=buyCalc(b);return a+(s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0));
   },0);
   const dayBuyCost=dayBuys.reduce((a,b)=>a+buyCalc(b).totalCost,0);
-
-  let html='';
-
-  // ── Day Summary card ──
-  html+=`<div class="card card-pad">
+  let html=`<div class="card card-pad">
     <div class="card-head" style="margin-bottom:.75rem">
-      <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Day Summary</div>
-      <button class="btn danger btn-sm" onclick="deleteDay('${ledgerDateKey}')">🗑 Delete Day</button>
+      <div class="card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>${t('d_day_summary')}</div>
+      <button class="btn danger btn-sm" onclick="deleteDay('${ledgerDateKey}')">${t('d_delete_day')}</button>
     </div>
     <div class="stat-row c4">
-      <div class="stat orange"><div class="stat-lbl">Invested</div><div class="stat-val" style="font-size:.95rem">${fmt(dayBuyCost)}</div></div>
-      <div class="stat blue"><div class="stat-lbl">Sold Today</div><div class="stat-val" style="font-size:.95rem">${dayRevToday>0?fmt(dayRevToday):'—'}</div></div>
-      <div class="stat ${(dayRevToday-dayBuyCost)>=0&&dayRevToday>0?'green':'neutral'}"><div class="stat-lbl">Day Profit</div><div class="stat-val" style="font-size:.95rem">${dayRevToday>0?fmtD(dayRevToday-dayBuyCost):'—'}</div></div>
-      <div class="stat ${dayColl>0?'green':'neutral'}"><div class="stat-lbl">Collected</div><div class="stat-val" style="font-size:.95rem">${dayColl>0?fmt(dayColl):'—'}</div></div>
+      <div class="stat orange"><div class="stat-lbl">${t('d_invested')}</div><div class="stat-val" style="font-size:.95rem">${fmt(dayBuyCost)}</div></div>
+      <div class="stat blue"><div class="stat-lbl">${t('d_sold_today')}</div><div class="stat-val" style="font-size:.95rem">${dayRevToday>0?fmt(dayRevToday):'—'}</div></div>
+      <div class="stat ${(dayRevToday-dayBuyCost)>=0&&dayRevToday>0?'green':'neutral'}"><div class="stat-lbl">${t('d_day_profit')}</div><div class="stat-val" style="font-size:.95rem">${dayRevToday>0?fmtD(dayRevToday-dayBuyCost):'—'}</div></div>
+      <div class="stat ${dayColl>0?'green':'neutral'}"><div class="stat-lbl">${t('d_collected')}</div><div class="stat-val" style="font-size:.95rem">${dayColl>0?fmt(dayColl):'—'}</div></div>
     </div>
     ${dayCash>0||dayUpi>0?`<div style="display:flex;gap:.5rem;margin-top:.5rem">
-      <div class="stat green" style="flex:1;padding:.5rem .6rem"><div class="stat-lbl">Cash</div><div class="stat-val" style="font-size:.88rem">${fmt(dayCash)}</div></div>
+      <div class="stat green" style="flex:1;padding:.5rem .6rem"><div class="stat-lbl">${t('cash').replace(' ₹','')}</div><div class="stat-val" style="font-size:.88rem">${fmt(dayCash)}</div></div>
       <div class="stat blue" style="flex:1;padding:.5rem .6rem"><div class="stat-lbl">UPI</div><div class="stat-val" style="font-size:.88rem">${fmt(dayUpi)}</div></div>
-      ${daySuppPaid>0?`<div class="stat gold" style="flex:1;padding:.5rem .6rem"><div class="stat-lbl">Supp.</div><div class="stat-val" style="font-size:.88rem">${fmt(daySuppPaid)}</div></div>`:''}
+      ${daySuppPaid>0?`<div class="stat gold" style="flex:1;padding:.5rem .6rem"><div class="stat-lbl">${t('supplier_section').split(' ')[0]}</div><div class="stat-val" style="font-size:.88rem">${fmt(daySuppPaid)}</div></div>`:''}
     </div>`:''}
   </div>`;
-
-  // ── Batch cards (purchases on this date) ──
-  // Each batch shows its FULL sale history across ALL dates as a breakdown
   if(dayBuys.length){
-    html+=`<div class="card card-pad"><div class="section-label">🛒 Batches Purchased</div>`;
+    html+=`<div class="card card-pad"><div class="section-label">${t('d_batches_purchased')}</div>`;
     dayBuys.forEach((b,i)=>{
       const u=unsoldPcs(b),sold=soldPcs(b);
-      const{netKgPerPc,totalCost,costPerPc,netKgTotal}=buyCalc(b);
+      const{netKgPerPc,totalCost,costPerPc}=buyCalc(b);
       const allBatchSales=salesOf(b.id).filter(s=>!s.isCollectionOnly);
       const rev=totalRevenue(b),pend=pendingCash(b),profit=rev-totalCost;
       const pct=b.pcs>0?Math.min(100,sold/b.pcs*100):0;
-      const suppInfo=suppTotal(b);
-      const totalColl=totalCollected(b);
-
-      // Build per-sale breakdown rows
-      let salesBreakdown='';
+      const suppInfo=suppTotal(b),totalColl2=totalCollected(b);
+      let sbd='';
       if(allBatchSales.length){
-        salesBreakdown+=`<div style="margin-top:.65rem;border-top:1px solid var(--div);padding-top:.6rem">
-          <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-bottom:.45rem">Sale Breakdown</div>`;
+        sbd=`<div style="margin-top:.65rem;border-top:1px solid var(--div);padding-top:.6rem"><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-bottom:.45rem">${t('d_sale_breakdown')}</div>`;
         allBatchSales.forEach((s,si)=>{
           const sRev=s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0);
-          const sCost=s.pcs*costPerPc;
-          const sProfit=sRev-sCost;
-          const sColl=(s.cash||0)+(s.upi||0);
+          const sCost=s.pcs*costPerPc,sProfit=sRev-sCost,sColl=(s.cash||0)+(s.upi||0);
           const isPast=s.date!==ledgerDateKey;
-          salesBreakdown+=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;padding:.45rem .6rem;background:${isPast?'var(--card2)':'var(--greenL)'};border-radius:.5rem;margin-bottom:.3rem;border:1px solid ${isPast?'var(--bdr)':'var(--green)'}">
+          sbd+=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;padding:.45rem .6rem;background:${isPast?'var(--card2)':'var(--greenL)'};border-radius:.5rem;margin-bottom:.3rem;border:1px solid ${isPast?'var(--bdr)':'var(--green)'}">
             <div style="flex:1;min-width:0">
-              <div style="font-size:.68rem;font-weight:700;color:var(--mu);margin-bottom:.12rem">Sale ${si+1}${isPast?` · <span style="color:var(--orange)">${keyShort(s.date)}</span>`:' · Today'}${s.note?' · '+s.note:''}</div>
+              <div style="font-size:.68rem;font-weight:700;color:var(--mu);margin-bottom:.12rem">${t('d_sale')} ${si+1}${isPast?` · <span style="color:var(--orange)">${keyShort(s.date)}</span>`:`· ${t('today')}`}${s.note?' · '+s.note:''}</div>
               <div style="font-size:.82rem;font-weight:700;color:var(--tx)">${s.pcs} pcs @ ₹${s.sellKg||0}/kg</div>
-              <div style="font-size:.68rem;color:var(--mu);margin-top:.1rem">= ₹${(s.sellPc||0).toFixed(1)}/piece · Net ${(s.pcs*netKgPerPc).toFixed(2)} kg sold</div>
+              <div style="font-size:.68rem;color:var(--mu)">= ₹${(s.sellPc||0).toFixed(1)}/pc · Net ${(s.pcs*netKgPerPc).toFixed(2)} kg</div>
             </div>
             <div style="text-align:right;flex-shrink:0">
-              <div style="font-size:.9rem;font-weight:800;font-family:ui-monospace, Menlo, Consolas, monospace;color:var(--pri)">${fmt(sRev)}</div>
+              <div style="font-size:.9rem;font-weight:800;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--pri)">${fmt(sRev)}</div>
               <div style="font-size:.65rem;font-weight:700;color:${sProfit>=0?'var(--green)':'var(--red)'}">${fmtD(sProfit)}</div>
               <div style="font-size:.62rem;color:${sColl>=sRev?'var(--green)':'var(--red)'}">Coll: ${fmt(sColl)}</div>
-              <button style="font-size:.58rem;margin-top:.2rem;padding:.15rem .35rem;border-radius:.35rem;background:var(--redL);color:var(--red);border:1px solid var(--red);cursor:pointer" onclick="deleteSale(${s.id})">Del</button>
+              <button style="font-size:.58rem;margin-top:.2rem;padding:.15rem .35rem;border-radius:.35rem;background:var(--redL);color:var(--red);border:1px solid var(--red);cursor:pointer" onclick="deleteSale(${s.id})">${t('d_del')}</button>
             </div>
           </div>`;
         });
-        // Totals row
-        salesBreakdown+=`<div style="display:flex;justify-content:space-between;padding:.4rem .6rem;background:var(--off,var(--card2));border-radius:.5rem;border:1px solid var(--bdr)">
-          <div style="font-size:.7rem;color:var(--mu)">
-            Total: ${sold}/${b.pcs} pieces sold
-            ${u>0?`<span style="color:var(--orange);font-weight:700"> · ${u} still unsold</span>`:'<span style="color:var(--green);font-weight:700"> · All sold ✅</span>'}
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:.78rem;font-weight:800;font-family:ui-monospace, Menlo, Consolas, monospace;color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</div>
-            ${pend>0.5?`<div style="font-size:.63rem;color:var(--red);font-weight:700">₹${Math.round(pend)} pending</div>`:`<div style="font-size:.63rem;color:var(--green);font-weight:700">Fully collected ✅</div>`}
-          </div>
-        </div>`;
-        salesBreakdown+='</div>';
+        sbd+=`<div style="display:flex;justify-content:space-between;padding:.4rem .6rem;background:var(--card2);border-radius:.5rem;border:1px solid var(--bdr)">
+          <div style="font-size:.7rem;color:var(--mu)">${t('d_sold')} ${sold}/${b.pcs}${u>0?` · <span style="color:var(--orange);font-weight:700">${t('d_unsold',u)}</span>`:`· <span style="color:var(--green);font-weight:700">${t('d_all_sold_long',b.pcs)}</span>`}</div>
+          <div style="text-align:right"><div style="font-size:.78rem;font-weight:800;font-family:ui-monospace,Menlo,Consolas,monospace;color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</div>
+          ${pend>0.5?`<div style="font-size:.63rem;color:var(--red);font-weight:700">${t('d_pending_amt',fmt(pend))}</div>`:`<div style="font-size:.63rem;color:var(--green);font-weight:700">${t('d_fully_collected')}</div>`}</div>
+        </div></div>`;
       } else {
-        salesBreakdown=`<div style="margin-top:.55rem;padding:.5rem .7rem;background:var(--orangeL);border-radius:.5rem;border:1px solid var(--orange);font-size:.75rem;color:var(--orange);font-weight:600">No sales yet for this batch</div>`;
+        sbd=`<div style="margin-top:.55rem;padding:.5rem .7rem;background:var(--orangeL);border-radius:.5rem;border:1px solid var(--orange);font-size:.75rem;color:var(--orange);font-weight:600">${t('d_no_sales_batch')}</div>`;
       }
-
-      html+=`<div class="entry">
-        <div class="entry-head">
-          <div class="entry-left">
-            <div class="entry-label">Batch ${i+1}${b.supplier?' · '+b.supplier:''}${b.note?' · '+b.note:''}</div>
-            <div class="entry-main">🐔 ${b.pcs} pcs · ${b.liveKg} kg live · ₹${b.buyPrice}/kg</div>
-            <div class="entry-sub">Total cost: <strong>${fmt(totalCost)}</strong> · Net ${netKgPerPc.toFixed(3)} kg/pc · ₹${costPerPc.toFixed(0)}/pc<br>
-            ${suppInfo.remaining>0.5?`<span style="color:var(--red)">Supplier: ${fmt(suppInfo.remaining)} pending</span>`:`<span style="color:var(--green)">Supplier paid ✅</span>`}</div>
-          </div>
-          <div class="entry-right">
-            <div class="entry-amount" style="color:var(--orange)">${fmt(totalCost)}</div>
-            ${rev>0?`<div class="entry-status" style="color:${profit>=0?'var(--green)':'var(--red)'};font-weight:800">${fmtD(profit)}</div>`:'<div class="entry-status" style="color:var(--mu)">No sales</div>'}
-          </div>
+      html+=`<div class="entry"><div class="entry-head">
+        <div class="entry-left">
+          <div class="entry-label">${t('d_batch')} ${i+1}${b.supplier?' · '+b.supplier:''}${b.note?' · '+b.note:''}</div>
+          <div class="entry-main">🐔 ${b.pcs} pcs · ${b.liveKg} kg · ₹${b.buyPrice}/kg</div>
+          <div class="entry-sub">${t('d_total_cost')}: <strong>${fmt(totalCost)}</strong> · Net ${netKgPerPc.toFixed(3)} kg/pc<br>
+          ${suppInfo.remaining>0.5?`<span style="color:var(--red)">${t('d_supp_pending',fmt(suppInfo.remaining))}</span>`:`<span style="color:var(--green)">${t('d_supp_paid')}</span>`}</div>
         </div>
-        ${sold>0?`<div class="entry-prog"><div style="display:flex;justify-content:space-between;font-size:.63rem;color:var(--mu)"><span>Sold ${sold}/${b.pcs} pieces (${pct.toFixed(0)}%)</span><span>Collected ${fmt(totalColl)}</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>`:''}
-        <div style="padding:.3rem .9rem .1rem">${salesBreakdown}</div>
-        <div class="entry-actions">
-          ${u>0?`<button class="btn warn btn-sm" onclick="quickSell(${b.id})">🐔 Sell ${u} remaining</button>`:''}
-          ${pend>0.5?`<button class="btn blue btn-sm" onclick="quickCollect(${b.id})">💰 Collect ${fmt(pend)}</button>`:''}
-          <button class="btn ghost btn-sm" onclick="deleteBatch(${b.id})">Delete batch</button>
+        <div class="entry-right">
+          <div class="entry-amount" style="color:var(--orange)">${fmt(totalCost)}</div>
+          ${rev>0?`<div class="entry-status" style="color:${profit>=0?'var(--green)':'var(--red)'};font-weight:800">${fmtD(profit)}</div>`:'<div class="entry-status" style="color:var(--mu)">—</div>'}
         </div>
-      </div>`;
+      </div>
+      ${sold>0?`<div class="entry-prog"><div style="display:flex;justify-content:space-between;font-size:.63rem;color:var(--mu)"><span>${t('d_sold')} ${sold}/${b.pcs} (${pct.toFixed(0)}%)</span><span>${t('d_collected')} ${fmt(totalColl2)}</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>`:''}
+      <div style="padding:.3rem .9rem .1rem">${sbd}</div>
+      <div class="entry-actions">
+        ${u>0?`<button class="btn warn btn-sm" onclick="quickSell(${b.id})">${t('d_sell_rem',u)}</button>`:''}
+        ${pend>0.5?`<button class="btn blue btn-sm" onclick="quickCollect(${b.id})">💰 ${t('d_collect')} ${fmt(pend)}</button>`:''}
+        <button class="btn ghost btn-sm" onclick="deleteBatch(${b.id})">${t('d_del')}</button>
+      </div></div>`;
     });
     html+='</div>';
   }
-
-  // ── Cross-day sales recorded today (from batches bought on OTHER dates) ──
-  // Show only as a simple reference line — full breakdown lives on the batch's purchase date
   const crossSalesRec=daySalesRec.filter(s=>!s.isCollectionOnly&&!dayBuys.find(b=>b.id===s.buyId));
   if(crossSalesRec.length){
-    html+=`<div class="card card-pad">
-      <div class="section-label">💰 Sales Recorded Today (from other batches)</div>
-      <div style="font-size:.72rem;color:var(--mu);margin-bottom:.55rem;padding:.45rem .6rem;background:var(--card2);border-radius:.5rem;border:1px solid var(--bdr)">
-        These sales belong to batches bought on other days. Tap that batch's date in the ledger for the full breakdown.
-      </div>`;
+    html+=`<div class="card card-pad"><div class="section-label">${t('d_cross_sales')}</div><div style="font-size:.72rem;color:var(--mu);margin-bottom:.55rem;padding:.45rem .6rem;background:var(--card2);border-radius:.5rem;border:1px solid var(--bdr)">${t('d_cross_note')}</div>`;
     crossSalesRec.forEach(s=>{
       const b=buys.find(x=>x.id===s.buyId);if(!b)return;
       const{netKgPerPc,costPerPc}=buyCalc(b);
       const sRev=s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0);
-      const sProfit=sRev-s.pcs*costPerPc;
+      const sP=sRev-s.pcs*costPerPc;
       html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .65rem;background:var(--card2);border-radius:.5rem;border:1px solid var(--bdr);margin-bottom:.35rem">
-        <div>
-          <div style="font-size:.75rem;font-weight:700">${s.pcs} pcs @ ₹${s.sellKg||0}/kg${s.note?' · '+s.note:''}</div>
-          <div style="font-size:.65rem;color:var(--mu)">From <button onclick="ledgerDateKey='${b.date}';renderLedger()" style="color:var(--pri);font-weight:700;font-size:.65rem;text-decoration:underline;background:none;border:none;cursor:pointer;padding:0">${keyDisp(b.date)} batch</button> · <span style="color:${sProfit>=0?'var(--green)':'var(--red)'}">${fmtD(sProfit)}</span></div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:.88rem;font-weight:800;font-family:ui-monospace, Menlo, Consolas, monospace;color:var(--pri)">${fmt(sRev)}</div>
-          <button style="font-size:.6rem;margin-top:.2rem;padding:.15rem .35rem;border-radius:.35rem;background:var(--redL);color:var(--red);border:1px solid var(--red);cursor:pointer" onclick="deleteSale(${s.id})">Del</button>
-        </div>
+        <div><div style="font-size:.75rem;font-weight:700">${s.pcs} pcs @ ₹${s.sellKg||0}/kg${s.note?' · '+s.note:''}</div>
+          <div style="font-size:.65rem;color:var(--mu)">${t('d_from_batch',keyDisp(b.date))} · <span style="color:${sP>=0?'var(--green)':'var(--red)'}">${fmtD(sP)}</span></div></div>
+        <div style="text-align:right"><div style="font-size:.88rem;font-weight:800;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--pri)">${fmt(sRev)}</div>
+          <button style="font-size:.6rem;margin-top:.2rem;padding:.15rem .35rem;border-radius:.35rem;background:var(--redL);color:var(--red);border:1px solid var(--red);cursor:pointer" onclick="deleteSale(${s.id})">${t('d_del')}</button></div>
       </div>`;
     });
     html+='</div>';
   }
-
-  // ── Collections today (payment-only records) ──
   const dayColl2=daySalesRec.filter(s=>s.isCollectionOnly);
   if(dayColl2.length){
-    html+=`<div class="card card-pad"><div class="section-label">💵 Collections Recorded Today</div>`;
-    dayColl2.forEach(s=>{
-      const b=buys.find(x=>x.id===s.buyId);
-      const amt=(s.cash||0)+(s.upi||0);
+    html+=`<div class="card card-pad"><div class="section-label">${t('d_collections')}</div>`;
+    dayColl2.forEach(s=>{const b=buys.find(x=>x.id===s.buyId);const amt=(s.cash||0)+(s.upi||0);
       html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .65rem;background:var(--greenL);border-radius:.5rem;border:1px solid var(--green);margin-bottom:.35rem">
-        <div>
-          <div style="font-size:.75rem;font-weight:700">${s.note||'Payment received'}</div>
-          <div style="font-size:.65rem;color:var(--mu)">From <button onclick="ledgerDateKey='${b?.date}';renderLedger()" style="color:var(--pri);font-weight:700;font-size:.65rem;text-decoration:underline;background:none;border:none;cursor:pointer;padding:0">${b?keyDisp(b.date)+' batch':'batch'}</button> · Cash: ${fmt(s.cash||0)} · UPI: ${fmt(s.upi||0)}</div>
-        </div>
-        <div style="font-size:.95rem;font-weight:800;font-family:ui-monospace, Menlo, Consolas, monospace;color:var(--green)">${fmt(amt)}</div>
-      </div>`;
-    });
-    html+='</div>';
+        <div><div style="font-size:.75rem;font-weight:700">${s.note||t('d_collections')}</div>
+          <div style="font-size:.65rem;color:var(--mu)">${b?t('d_from_batch',keyDisp(b.date))+' · ':''} Cash: ${fmt(s.cash||0)} · UPI: ${fmt(s.upi||0)}</div></div>
+        <div style="font-size:.95rem;font-weight:800;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--green)">${fmt(amt)}</div></div>`;
+    });html+='</div>';
   }
-
-  // ── Supplier payments today ──
   if(daySuppays.length){
-    html+=`<div class="card card-pad"><div class="section-label">🏭 Supplier Payments</div>`;
-    daySuppays.forEach(p=>{
-      const b=buys.find(x=>x.id===p.buyId);
-      const amt=(p.cash||0)+(p.upi||0);
+    html+=`<div class="card card-pad"><div class="section-label">${t('d_supp_payments')}</div>`;
+    daySuppays.forEach(p=>{const b=buys.find(x=>x.id===p.buyId);const amt=(p.cash||0)+(p.upi||0);
       html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .65rem;background:var(--goldL);border-radius:.5rem;border:1px solid var(--gold);margin-bottom:.35rem">
-        <div>
-          <div style="font-size:.75rem;font-weight:700">${p.note||'Supplier payment'}</div>
-          <div style="font-size:.65rem;color:var(--mu)">To ${b?.supplier||'Supplier'} · ${b?keyDisp(b.date)+' batch':''} · Cash: ${fmt(p.cash||0)} · UPI: ${fmt(p.upi||0)}</div>
-        </div>
-        <div style="font-size:.95rem;font-weight:800;font-family:ui-monospace, Menlo, Consolas, monospace;color:var(--gold)">${fmt(amt)}</div>
-      </div>`;
-    });
-    html+='</div>';
+        <div><div style="font-size:.75rem;font-weight:700">${p.note||t('d_supp_payments')}</div>
+          <div style="font-size:.65rem;color:var(--mu)">→ ${b?.supplier||'Supplier'}${b?' · '+keyDisp(b.date):''}</div></div>
+        <div style="font-size:.95rem;font-weight:800;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--gold)">${fmt(amt)}</div></div>`;
+    });html+='</div>';
   }
-
   if(!dayBuys.length&&!crossSalesRec.length&&!dayColl2.length&&!daySuppays.length){
-    html+=`<div class="empty"><div class="empty-icon">📅</div><p>No activity on this day.<br>Use ← → to browse other dates.</p></div>`;
+    html+=`<div class="empty"><div class="empty-icon">📅</div><p>${t('d_no_activity')}<br>${t('d_browse_dates')}</p></div>`;
   }
-
   $('ledgerContent').innerHTML=html;
 }
 
 function deleteDay(dateKey){
-  if(!confirm(`Delete ALL entries for ${keyDisp(dateKey)}? This cannot be undone.`))return;
+  if(!confirm(t('d_delete_day_q',keyDisp(dateKey))))return;
   const buyIds=getBuys().filter(b=>b.date===dateKey).map(b=>b.id);
+  if(db&&shopId&&syncEnabled){
+    buyIds.forEach(id=>fsDel('buys',id));
+    getSales().filter(s=>s.date===dateKey||buyIds.includes(s.buyId)).forEach(s=>fsDel('sales',s.id));
+    getSuppays().filter(p=>p.date===dateKey||buyIds.includes(p.buyId)).forEach(p=>fsDel('suppays',p.id));
+  }
   sa(KB,getBuys().filter(b=>b.date!==dateKey));
   sa(KS,getSales().filter(s=>s.date!==dateKey&&!buyIds.includes(s.buyId)));
   sa(KSP,getSuppays().filter(p=>p.date!==dateKey&&!buyIds.includes(p.buyId)));
-  toast('Day deleted');renderLedger();renderHome();
+  toast(t('t_day_deleted'));renderLedger();renderHome();
 }
 function deleteBatch(id){
-  if(!confirm('Delete this batch and all its sales?'))return;
-  sa(KB,getBuys().filter(b=>b.id!==id));
-  sa(KS,getSales().filter(s=>s.buyId!==id));
-  sa(KSP,getSuppays().filter(p=>p.buyId!==id));
-  toast('Batch deleted');renderLedger();
+  if(!confirm(t('d_delete_batch_q')))return;
+  if(db&&shopId&&syncEnabled){fsDel('buys',id);getSales().filter(s=>s.buyId===id).forEach(s=>fsDel('sales',s.id));getSuppays().filter(p=>p.buyId===id).forEach(p=>fsDel('suppays',p.id))}
+  sa(KB,getBuys().filter(b=>b.id!==id));sa(KS,getSales().filter(s=>s.buyId!==id));sa(KSP,getSuppays().filter(p=>p.buyId!==id));
+  toast(t('t_batch_deleted'));renderLedger();
 }
 function deleteSale(id){
-  if(!confirm('Delete this sale?'))return;
-  sa(KS,getSales().filter(s=>s.id!==id));
-  toast('Sale deleted');renderLedger();
+  if(!confirm(t('d_delete_sale_q')))return;
+  if(db&&shopId&&syncEnabled)fsDel('sales',id);
+  sa(KS,getSales().filter(s=>s.id!==id));toast(t('t_sale_deleted'));renderLedger();
 }
 
 /* ════ ANALYTICS ════ */
 let aPeriod='today';
 function setPeriod(p){
   aPeriod=p;
-  document.querySelectorAll('#aTabs .ptab').forEach((t,i)=>t.classList.toggle('on',['today','week','month','year','custom'][i]===p));
+  document.querySelectorAll('#aTabs .ptab').forEach((tp,i)=>tp.classList.toggle('on',['today','week','month','year','custom'][i]===p));
   $('customRangePick').style.display=p==='custom'?'grid':'none';
-  if(p==='custom'&&!$('cFrom').value){const t=todayKey();$('cTo').value=t;const d=new Date();d.setDate(d.getDate()-29);$('cFrom').value=d.toISOString().slice(0,10)}
+  if(p==='custom'&&!$('cFrom').value){const today=todayKey();$('cTo').value=today;const d=new Date();d.setDate(d.getDate()-29);$('cFrom').value=d.toISOString().slice(0,10)}
   renderAnalytics();
 }
 function renderAnalytics(){
-  const buys=getBuys(),sales=getSales(),suppays=getSuppays();
-  if(!buys.length){$('analyticsContent').innerHTML=`<div class="empty"><div class="empty-icon">📊</div><p>No data yet.<br>Add your first purchase to see reports.</p></div>`;return}
-  const today=todayKey();
-  let from=today,to=today;
+  const buys=getBuys(),sales=getSales();
+  if(!buys.length){$('analyticsContent').innerHTML=`<div class="empty"><div class="empty-icon">📊</div><p>${t('d_no_data')}<br>${t('d_add_first')}</p></div>`;return}
+  const today=todayKey();let from=today,to=today;
   if(aPeriod==='week'){const d=new Date();d.setDate(d.getDate()-d.getDay()+1);from=d.toISOString().slice(0,10)}
   else if(aPeriod==='month')from=today.slice(0,7)+'-01';
   else if(aPeriod==='year')from=today.slice(0,4)+'-01-01';
   else if(aPeriod==='custom'){from=$('cFrom').value||today;to=$('cTo').value||today}
-  
-  // Group by date
   const gk={};
   buys.filter(b=>b.date>=from&&b.date<=to).forEach(b=>{
     if(!gk[b.date])gk[b.date]={date:b.date,cost:0,revenue:0,coll:0,cash:0,upi:0,pieces:0,kg:0};
@@ -1282,53 +1331,36 @@ function renderAnalytics(){
   const rows=Object.values(gk).sort((a,b)=>b.date.localeCompare(a.date));
   const tCost=rows.reduce((a,r)=>a+r.cost,0),tRev=rows.reduce((a,r)=>a+r.revenue,0);
   const tColl=rows.reduce((a,r)=>a+r.coll,0),tCash=rows.reduce((a,r)=>a+r.cash,0),tUpi=rows.reduce((a,r)=>a+r.upi,0);
-  const tProfit=tRev-tCost,margin=tCost>0?(tProfit/tCost)*100:0;
-  const maxRev=Math.max(...rows.map(r=>r.revenue),1);
-  // Global pending
-  const totalPendCash=buys.reduce((a,b)=>a+pendingCash(b),0);
-  const totalPendSupp=buys.reduce((a,b)=>a+suppTotal(b).remaining,0);
-
-  let html=`
-    <div class="stat-row">
-      <div class="stat ${tCost>0?'orange':'neutral'}"><div class="stat-lbl">Total Cost</div><div class="stat-val">${fmt(tCost)}</div></div>
-      <div class="stat blue"><div class="stat-lbl">Revenue</div><div class="stat-val">${fmt(tRev)}</div></div>
-    </div>
-    <div class="stat-row c3">
-      <div class="stat ${tProfit>=0?'green':'red'}"><div class="stat-lbl">${tProfit>=0?'Profit':'Loss'}</div><div class="stat-val" style="font-size:1.1rem">${fmtD(tProfit)}</div><div class="stat-sub">Margin ${margin.toFixed(1)}%</div></div>
-      <div class="stat green"><div class="stat-lbl">Collected</div><div class="stat-val" style="font-size:1.1rem">${fmt(tColl)}</div></div>
-      <div class="stat ${totalPendCash>0.5?'red':'green'}"><div class="stat-lbl">Pending</div><div class="stat-val" style="font-size:1.1rem">${fmt(totalPendCash)}</div></div>
-    </div>
-    <div class="stat-row">
-      <div class="stat green"><div class="stat-lbl">Cash</div><div class="stat-val">${fmt(tCash)}</div></div>
-      <div class="stat blue"><div class="stat-lbl">UPI</div><div class="stat-val">${fmt(tUpi)}</div></div>
-    </div>`;
-
+  const tProfit=tRev-tCost,margin=tCost>0?(tProfit/tCost)*100:0,maxRev=Math.max(...rows.map(r=>r.revenue),1);
+  const totalPendCash=buys.reduce((a,b)=>a+pendingCash(b),0),totalPendSupp=buys.reduce((a,b)=>a+suppTotal(b).remaining,0);
+  let html=`<div class="stat-row"><div class="stat ${tCost>0?'orange':'neutral'}"><div class="stat-lbl">${t('d_total_cost_lbl')}</div><div class="stat-val">${fmt(tCost)}</div></div>
+    <div class="stat blue"><div class="stat-lbl">${t('d_revenue')}</div><div class="stat-val">${fmt(tRev)}</div></div></div>
+    <div class="stat-row c3"><div class="stat ${tProfit>=0?'green':'red'}"><div class="stat-lbl">${tProfit>=0?t('d_profit_lbl'):t('d_loss_lbl')}</div><div class="stat-val" style="font-size:1.1rem">${fmtD(tProfit)}</div><div class="stat-sub">${t('d_margin',margin.toFixed(1))}</div></div>
+      <div class="stat green"><div class="stat-lbl">${t('d_collected')}</div><div class="stat-val" style="font-size:1.1rem">${fmt(tColl)}</div></div>
+      <div class="stat ${totalPendCash>0.5?'red':'green'}"><div class="stat-lbl">${t('pending')}</div><div class="stat-val" style="font-size:1.1rem">${fmt(totalPendCash)}</div></div></div>
+    <div class="stat-row"><div class="stat green"><div class="stat-lbl">${t('cash').replace(' ₹','')}</div><div class="stat-val">${fmt(tCash)}</div></div>
+    <div class="stat blue"><div class="stat-lbl">UPI</div><div class="stat-val">${fmt(tUpi)}</div></div></div>`;
   if(rows.length){
-    html+=`<div class="card" style="overflow:hidden">
-      <div class="card-pad" style="padding-bottom:.5rem"><div class="section-label">Day-wise Breakdown</div></div>
-      <div style="overflow-x:auto"><table class="a-table">
-        <thead><tr><th>Date</th><th>Cost</th><th>Revenue</th><th>Profit</th><th>Collected</th><th>Chart</th></tr></thead>
-        <tbody>`;
+    html+=`<div class="card" style="overflow:hidden"><div class="card-pad" style="padding-bottom:.5rem"><div class="section-label">${t('d_day_breakdown')}</div></div>
+      <div style="overflow-x:auto"><table class="a-table"><thead><tr>
+        <th>${t('d_date')}</th><th>${t('d_cost')}</th><th>${t('d_revenue')}</th><th>${t('d_profit_lbl')}</th><th>${t('d_collected')}</th><th>${t('d_chart')}</th>
+      </tr></thead><tbody>`;
     rows.forEach(r=>{
       const pr=r.revenue-r.cost,pct=Math.max(0,Math.min(100,r.revenue/maxRev*100));
-      html+=`<tr>
-        <td>${keyShort(r.date)}${r.date===today?` <span style="font-size:.58rem;color:var(--pri);font-weight:700;background:var(--priL);padding:.05rem .35rem;border-radius:20px">Today</span>`:''}</td>
+      html+=`<tr><td>${keyShort(r.date)}${r.date===today?` <span style="font-size:.58rem;color:var(--pri);font-weight:700;background:var(--priL);padding:.05rem .35rem;border-radius:20px">${t('today')}</span>`:''}</td>
         <td style="color:var(--orange)">${fmt(r.cost)}</td><td style="color:var(--blue)">${fmt(r.revenue)}</td>
-        <td class="${pr>=0?'gc':'rc'}">${fmtD(pr)}</td>
-        <td style="color:var(--green)">${fmt(r.coll)}</td>
-        <td><div class="bar"><div class="bar-f" style="width:${pct}%;background:${pr>=0?'var(--green)':'var(--red)'}"></div></div></td>
-      </tr>`;
+        <td class="${pr>=0?'gc':'rc'}">${fmtD(pr)}</td><td style="color:var(--green)">${fmt(r.coll)}</td>
+        <td><div class="bar"><div class="bar-f" style="width:${pct}%;background:${pr>=0?'var(--green)':'var(--red)'}"></div></div></td></tr>`;
     });
     html+=`</tbody></table></div></div>`;
     if(rows.length>1){
       const best=rows.reduce((a,b)=>(b.revenue-b.cost)>(a.revenue-a.cost)?b:a);
-      html+=`<div class="card card-pad"><div class="section-label">💡 Insights</div>
+      html+=`<div class="card card-pad"><div class="section-label">${t('d_insights')}</div>
         <div style="font-size:.8rem;color:var(--tx);line-height:2.1">
-          🏆 Best day: <strong>${keyDisp(best.date)}</strong> — Profit ${fmtD(best.revenue-best.cost)}<br>
-          📦 Total live kg bought: <strong>${rows.reduce((a,r)=>a+r.kg,0).toFixed(1)} kg</strong><br>
-          ${totalPendSupp>0.5?`🏭 Supplier balance due: <strong style="color:var(--red)">${fmt(totalPendSupp)}</strong><br>`:'🏭 Supplier: <strong style="color:var(--green)">All paid ✅</strong><br>'}
-        </div>
-      </div>`;
+          ${t('d_best_day',keyDisp(best.date),fmtD(best.revenue-best.cost))}<br>
+          ${t('d_total_kg',rows.reduce((a,r)=>a+r.kg,0).toFixed(1))}<br>
+          ${totalPendSupp>0.5?t('d_supp_bal_due',fmt(totalPendSupp)):t('d_supp_all_paid')}
+        </div></div>`;
     }
   }
   $('analyticsContent').innerHTML=html;
@@ -1337,44 +1369,78 @@ function renderAnalytics(){
 /* ════ UDHAAR ════ */
 function addUdhaar(){
   const name=$('u_name').value.trim(),amt=parseFloat($('u_amt').value);
-  if(!name){toast('Enter name');return}if(!amt||amt<=0){toast('Enter amount');return}
-  const ud=la(KU);
-  ud.push({id:nid(),ts:Date.now(),date:todayKey(),name,amount:amt,note:$('u_note').value.trim(),paid:false});
-  sa(KU,ud);$('u_name').value='';$('u_amt').value='';$('u_note').value='';
-  renderUdhaar();updateUdBadge();toast('Udhaar added for '+name);
+  if(!name){toast(t('t_enter_name'));return}if(!amt||amt<=0){toast(t('t_enter_amt'));return}
+  const rec={id:nid(),ts:Date.now(),date:todayKey(),name,amount:amt,note:$('u_note').value.trim(),paid:false};
+  const ud=la(KU);ud.push(rec);saSync(KU,ud,rec);
+  $('u_name').value='';$('u_amt').value='';$('u_note').value='';
+  renderUdhaar();updateUdBadge();toast(t('t_udhaar_added',name));
 }
-function markPaid(id){sa(KU,la(KU).map(u=>u.id===id?{...u,paid:true}:u));renderUdhaar();updateUdBadge();toast('Marked paid ✅')}
-function markUnpaid(id){sa(KU,la(KU).map(u=>u.id===id?{...u,paid:false}:u));renderUdhaar();updateUdBadge()}
-function delUdhaar(id){if(!confirm('Delete?'))return;sa(KU,la(KU).filter(u=>u.id!==id));renderUdhaar();updateUdBadge()}
+function markPaid(id){const ud=la(KU).map(u=>u.id===id?{...u,paid:true,ts:Date.now()}:u);saSync(KU,ud,ud.find(u=>u.id===id));renderUdhaar();updateUdBadge();toast(t('t_marked_paid'))}
+function markUnpaid(id){const ud=la(KU).map(u=>u.id===id?{...u,paid:false,ts:Date.now()}:u);saSync(KU,ud,ud.find(u=>u.id===id));renderUdhaar();updateUdBadge()}
+function delUdhaar(id){
+  if(!confirm(t('d_delete_q')))return;
+  if(db&&shopId&&syncEnabled)fsDel('udhaar',id);
+  sa(KU,la(KU).filter(u=>u.id!==id));renderUdhaar();updateUdBadge();
+}
 function renderUdhaar(){
   const data=la(KU).sort((a,b)=>b.ts-a.ts);
   const pend=data.filter(u=>!u.paid),tot=pend.reduce((a,u)=>a+u.amount,0);
   $('udTotalWrap').style.display=pend.length?'block':'none';
   if(pend.length)$('udTotalVal').textContent=fmt(tot);
-  if(!data.length){$('udList').innerHTML=`<div class="empty"><div class="empty-icon">😊</div><p>No udhaar entries.<br>All payments are clear!</p></div>`;return}
-  $('udList').innerHTML=data.map(u=>`
-    <div class="ud-row">
-      <div class="ud-av ${u.paid?'paid':''}">${u.name[0].toUpperCase()}</div>
-      <div class="ud-info">
-        <div class="ud-name">${u.name}</div>
-        ${u.note?`<div class="ud-note">${u.note}</div>`:''}
-        <div class="ud-date">${keyDisp(u.date)}</div>
-      </div>
-      <div class="ud-right">
-        <div class="ud-amt ${u.paid?'paid':''}">${fmt(u.amount)}</div>
-        ${u.paid
-          ?`<div style="font-size:.65rem;color:var(--green);font-weight:700;margin-top:.15rem">✅ Paid</div><button class="btn ghost btn-sm" style="margin-top:.2rem;font-size:.62rem" onclick="markUnpaid(${u.id})">Undo</button>`
-          :`<button class="btn success btn-sm" style="margin-top:.2rem;font-size:.65rem" onclick="markPaid(${u.id})">Mark Paid</button>`}
-        <button class="btn danger btn-sm" style="margin-top:.18rem;font-size:.6rem;padding:.22rem .45rem" onclick="delUdhaar(${u.id})">Del</button>
-      </div>
-    </div>`).join('');
+  if(!data.length){$('udList').innerHTML=`<div class="empty"><div class="empty-icon">😊</div><p>${t('d_no_udhaar')}</p></div>`;return}
+  $('udList').innerHTML=data.map(u=>`<div class="ud-row">
+    <div class="ud-av ${u.paid?'paid':''}">${u.name[0].toUpperCase()}</div>
+    <div class="ud-info"><div class="ud-name">${u.name}</div>${u.note?`<div class="ud-note">${u.note}</div>`:''}<div class="ud-date">${keyDisp(u.date)}</div></div>
+    <div class="ud-right"><div class="ud-amt ${u.paid?'paid':''}">${fmt(u.amount)}</div>
+      ${u.paid?`<div style="font-size:.65rem;color:var(--green);font-weight:700;margin-top:.15rem">${t('d_paid')}</div><button class="btn ghost btn-sm" style="margin-top:.2rem;font-size:.62rem" onclick="markUnpaid(${u.id})">${t('d_undo')}</button>`
+        :`<button class="btn success btn-sm" style="margin-top:.2rem;font-size:.65rem" onclick="markPaid(${u.id})">${t('d_mark_paid')}</button>`}
+      <button class="btn danger btn-sm" style="margin-top:.18rem;font-size:.6rem;padding:.22rem .45rem" onclick="delUdhaar(${u.id})">${t('d_del')}</button>
+    </div></div>`).join('');
 }
 function updateUdBadge(){const c=la(KU).filter(u=>!u.paid).length;$('udBadge').style.display=c?'block':'none'}
 
+/* ════ TRANSLATIONS ════ */
+let lang=localStorage.getItem(KL)||'en';
+const T={
+en:{subtitle:'Live Stock Ledger',nav_today:'Today',nav_entry:'Add Entry',nav_ledger:'Ledger',nav_reports:'Reports',nav_udhaar:'Udhaar',entry_date:'Entry Date',date:'Date',set_today:'Set Today',buy_stock:'Buy Stock',sell_stock:'Sell Stock',supplier_pay:'Supplier Pay',purchase_details:'Stock Purchase Details',pieces_bought:'Pieces Bought',total_weight:'Total Live Weight',buy_price:'Buy Price ₹/kg',wastage:'Wastage %',supplier_section:'Supplier Payment',supplier_name:'Supplier Name',supp_due:'Total Amount Due ₹',paid_now:'Paid Now (optional)',note_opt:'Note (optional)',note:'Note',save_purchase:'Save Purchase',cash:'Cash ₹',upi:'UPI ₹',sell_from_stock:'Sell From Stock',select_batch:'Select Stock Batch',pieces_to_sell:'Pieces to Sell',cash_collected_now:'Cash Collected Now',save_sale:'Save Sale',record_supp_pay:'Record Supplier Payment',payment_made:'Payment Made',save_payment:'Save Payment',today:'Today',week:'Week',month:'Month',year:'Year',custom:'Custom',from:'From',to:'To',add_udhaar_title:'Add Udhaar Entry',customer_name:'Customer Name',amount:'Amount ₹',add_udhaar_btn:'Add Udhaar',udhaar_ledger:'Udhaar Ledger',pending:'Pending',
+sync_title:'☁️ Cloud Sync',sync_desc:'Enter a sync code to link all devices. Same code = same data on all phones/laptops.',sync_code_hint:'Share this code with your other devices.',sync_enable:'Enable Sync',sync_disable:'Disable Sync',sync_change:'Change Code',sync_pull:'Pull from Cloud',sync_push:'Push to Cloud',sync_enter_code:'Enter Your Sync Code',sync_code_tip:'Use same code on all devices. E.g. MANDI01 or AHMED123',sync_activate:'Connect & Sync',sync_connecting:'Connecting to',sync_synced:'Synced',sync_syncing:'Syncing',sync_error:'Error',sync_offline:'Offline',sync_offline_tip:'Offline — data saved locally',sync_pulled:'Pulled latest data',sync_pushed:'Pushed all data',sync_code_short:'Code must be 3+ characters',sync_status:'Status',
+d_pending_actions:'⚠️ Pending Actions',d_unsold_alert:(n)=>`🐔 ${n} pieces unsold — tap Ledger to sell`,d_cashpend_alert:(v)=>`💰 ${v} pending from customers`,d_supppend_alert:(v)=>`🏭 ${v} owed to supplier`,d_today_summary:"Today's Summary",d_invested:'Invested',d_revenue:'Revenue',d_profit:'Profit',d_collected:'Collected',d_today_purchase:"Today's Purchase",d_batch:'Batch',d_pieces:'pieces',d_live:'live',d_buy:'Buy',d_wst:'Wastage',d_net:'Net',d_all_sold:'All sold ✓',d_unsold:(n)=>`${n} pieces unsold`,d_no_sales:'No sales yet',d_sell_rem:(n)=>`🐔 Sell ${n} remaining`,d_collect:'Collect',d_nothing_yet:'Nothing here yet.',d_add_first_purchase:'Tap <strong>Add Entry</strong> to record today\'s purchase.',d_day_summary:'Day Summary',d_delete_day:'🗑 Delete Day',d_sold_today:'Sold Today',d_day_profit:'Day Profit',d_batches_purchased:'🛒 Batches Purchased',d_total_cost:'Total cost',d_cost_pc:'Cost/pc',d_supp_paid:'Supplier paid ✅',d_supp_pending:(v)=>`Supplier: ${v} pending`,d_all_sold_long:(n)=>`All ${n} sold ✅`,d_no_sales_batch:'No sales yet for this batch',d_sale_breakdown:'Sale Breakdown',d_sale:'Sale',d_piece:'piece',d_sold:'Sold',d_fully_collected:'Fully collected ✅',d_pending_amt:(v)=>`${v} pending`,d_cross_sales:'💰 Sales Recorded Today (from other batches)',d_cross_note:"These sales belong to batches bought on other days. Tap that batch's date in the ledger for full breakdown.",d_from_batch:(d)=>`From ${d} batch`,d_collections:'💵 Collections Recorded Today',d_supp_payments:'🏭 Supplier Payments',d_no_activity:'No activity on this day.',d_browse_dates:'Use ← → to browse other dates.',d_total_cost_lbl:'Total Cost',d_profit_lbl:'Profit',d_loss_lbl:'Loss',d_margin:(m)=>`Margin ${m}%`,d_day_breakdown:'Day-wise Breakdown',d_date:'Date',d_cost:'Cost',d_chart:'Chart',d_insights:'💡 Insights',d_best_day:(d,p)=>`🏆 Best day: <strong>${d}</strong> — Profit ${p}`,d_total_kg:(kg)=>`📦 Total live kg bought: <strong>${kg} kg</strong>`,d_supp_all_paid:'🏭 Supplier: <strong style="color:var(--green)">All paid ✅</strong>',d_supp_bal_due:(v)=>`🏭 Supplier balance due: <strong style="color:var(--red)">${v}</strong>`,d_no_data:'No data yet.',d_add_first:'Add your first purchase to see reports.',d_no_udhaar:'No udhaar entries.<br>All payments are clear!',d_paid:'✅ Paid',d_undo:'Undo',d_mark_paid:'Mark Paid',d_del:'Del',d_delete_q:'Delete?',d_delete_day_q:(d)=>`Delete ALL entries for ${d}? Cannot be undone.`,d_delete_batch_q:'Delete this batch and all its sales?',d_delete_sale_q:'Delete this sale?',d_no_stock:'No stock available',d_choose_batch:'— Choose batch —',d_choose_batch_sell:'— Choose batch to sell from —',d_sell_from:(d)=>`Sell from ${d} batch`,d_pcs_remaining:(n)=>`${n} pieces remaining unsold`,d_net_per_pc:'Net weight per piece',d_cost_pc2:'Cost/piece',d_sale_date:'Sale Date',d_save_sale:'Save Sale',d_collect_payment:'Collect Payment',d_total_rev:'Total revenue',d_already_coll:'Already collected',d_still_pend:'Still pending',d_collecting_now:'Collecting Now',d_confirm_coll:'Confirm Collection',
+t_fill_buy:'Fill pieces, weight and buy price',t_purchase_saved:'✅ Purchase saved!',t_select_batch:'Select a batch',t_batch_not_found:'Batch not found',t_enter_pcs:'Enter pieces to sell',t_enter_price:'Enter sell price ₹/kg',t_only_pcs:(n)=>`Only ${n} pieces available`,t_sale_saved:'✅ Sale saved!',t_enter_amt:'Enter amount',t_collected:(v)=>`✅ ${v} collected!`,t_enter_name:'Enter name',t_udhaar_added:(n)=>`Udhaar added for ${n}`,t_marked_paid:'Marked paid ✅',t_day_deleted:'Day deleted',t_batch_deleted:'Batch deleted',t_sale_deleted:'Sale deleted',t_rate_saved:'✅ Rate saved!',t_rate_cleared:'Rate cleared',t_enter_buy:'Enter buy price first',t_no_supp_due:'No outstanding supplier payments!'},
+hi:{subtitle:'लाइव स्टॉक बही खाता',nav_today:'आज',nav_entry:'दर्ज करें',nav_ledger:'बही खाता',nav_reports:'रिपोर्ट',nav_udhaar:'उधार',entry_date:'दिनांक',date:'तारीख',set_today:'आज की तारीख',buy_stock:'खरीद',sell_stock:'बिक्री',supplier_pay:'सप्लायर भुगतान',purchase_details:'खरीद विवरण',pieces_bought:'खरीदे टुकड़े',total_weight:'कुल जिंदा वजन',buy_price:'खरीद भाव ₹/किलो',wastage:'बर्बादी %',supplier_section:'सप्लायर भुगतान',supplier_name:'सप्लायर का नाम',supp_due:'कुल देय राशि ₹',paid_now:'अभी दिया (वैकल्पिक)',note_opt:'नोट (वैकल्पिक)',note:'नोट',save_purchase:'खरीद सेव करें',cash:'नकद ₹',upi:'UPI ₹',sell_from_stock:'स्टॉक से बेचें',select_batch:'बैच चुनें',pieces_to_sell:'बेचने के टुकड़े',cash_collected_now:'अभी मिली नकदी',save_sale:'बिक्री सेव करें',record_supp_pay:'सप्लायर भुगतान दर्ज करें',payment_made:'भुगतान किया',save_payment:'भुगतान सेव करें',today:'आज',week:'सप्ताह',month:'महीना',year:'साल',custom:'कस्टम',from:'से',to:'तक',add_udhaar_title:'उधार दर्ज करें',customer_name:'ग्राहक का नाम',amount:'राशि ₹',add_udhaar_btn:'उधार जोड़ें',udhaar_ledger:'उधार बही खाता',pending:'बाकी',
+sync_title:'☁️ क्लाउड सिंक',sync_desc:'सभी डिवाइस जोड़ने के लिए सिंक कोड डालें।',sync_code_hint:'यह कोड दूसरे डिवाइस में डालें।',sync_enable:'सिंक चालू',sync_disable:'सिंक बंद',sync_change:'कोड बदलें',sync_pull:'क्लाउड से लें',sync_push:'क्लाउड में डालें',sync_enter_code:'सिंक कोड डालें',sync_code_tip:'सभी डिवाइस में एक ही कोड। जैसे: MANDI01',sync_activate:'जोड़ें और सिंक करें',sync_connecting:'से जुड़ रहे हैं',sync_synced:'सिंक',sync_syncing:'सिंक हो रहा है',sync_error:'एरर',sync_offline:'ऑफलाइन',sync_offline_tip:'ऑफलाइन — डेटा फोन में',sync_pulled:'नया डेटा मिला',sync_pushed:'सारा डेटा भेजा',sync_code_short:'कोड 3+ अक्षर का होना चाहिए',sync_status:'स्थिति',
+d_pending_actions:'⚠️ बाकी काम',d_unsold_alert:(n)=>`🐔 ${n} टुकड़े नहीं बिके`,d_cashpend_alert:(v)=>`💰 ${v} ग्राहकों से बाकी`,d_supppend_alert:(v)=>`🏭 सप्लायर को ${v} देना है`,d_today_summary:'आज का सारांश',d_invested:'लागत',d_revenue:'आमदनी',d_profit:'मुनाफा',d_collected:'वसूली',d_today_purchase:'आज की खरीद',d_batch:'बैच',d_pieces:'टुकड़े',d_live:'जिंदा',d_buy:'खरीद',d_wst:'बर्बादी',d_net:'शुद्ध',d_all_sold:'सभी बिके ✓',d_unsold:(n)=>`${n} टुकड़े बाकी`,d_no_sales:'अभी बिक्री नहीं',d_sell_rem:(n)=>`🐔 ${n} बाकी बेचें`,d_collect:'वसूल',d_nothing_yet:'अभी कुछ नहीं।',d_add_first_purchase:'<strong>दर्ज करें</strong> दबाकर खरीद डालें।',d_day_summary:'दिन का सारांश',d_delete_day:'🗑 दिन हटाएं',d_sold_today:'आज बेचा',d_day_profit:'दिन का मुनाफा',d_batches_purchased:'🛒 खरीदे हुए बैच',d_total_cost:'कुल लागत',d_cost_pc:'लागत/टुकड़ा',d_supp_paid:'सप्लायर पेड ✅',d_supp_pending:(v)=>`सप्लायर: ${v} बाकी`,d_all_sold_long:(n)=>`सभी ${n} बिके ✅`,d_no_sales_batch:'इस बैच में बिक्री नहीं',d_sale_breakdown:'बिक्री विवरण',d_sale:'बिक्री',d_piece:'टुकड़ा',d_sold:'बिके',d_fully_collected:'पूरा वसूल ✅',d_pending_amt:(v)=>`${v} बाकी`,d_cross_sales:'💰 आज की बिक्री (पुराने बैच)',d_cross_note:'पूरा विवरण बैच की तारीख पर देखें।',d_from_batch:(d)=>`${d} बैच से`,d_collections:'💵 आज की वसूली',d_supp_payments:'🏭 सप्लायर भुगतान',d_no_activity:'इस दिन कोई काम नहीं।',d_browse_dates:'← → से तारीख बदलें।',d_total_cost_lbl:'कुल लागत',d_profit_lbl:'मुनाफा',d_loss_lbl:'नुकसान',d_margin:(m)=>`मार्जिन ${m}%`,d_day_breakdown:'दिन-वार विवरण',d_date:'तारीख',d_cost:'लागत',d_chart:'चार्ट',d_insights:'💡 जानकारी',d_best_day:(d,p)=>`🏆 सबसे अच्छा दिन: <strong>${d}</strong> — मुनाफा ${p}`,d_total_kg:(kg)=>`📦 कुल जिंदा किलो: <strong>${kg} किलो</strong>`,d_supp_all_paid:'🏭 <strong style="color:var(--green)">सप्लायर सब पेड ✅</strong>',d_supp_bal_due:(v)=>`🏭 सप्लायर को देना: <strong style="color:var(--red)">${v}</strong>`,d_no_data:'अभी कोई डेटा नहीं।',d_add_first:'पहली खरीद दर्ज करें।',d_no_udhaar:'कोई उधार नहीं।<br>सब साफ है! 🎉',d_paid:'✅ पेड',d_undo:'वापस',d_mark_paid:'पेड करें',d_del:'हटाएं',d_delete_q:'हटाएं?',d_delete_day_q:(d)=>`${d} का सारा डेटा हटाएं?`,d_delete_batch_q:'यह बैच हटाएं?',d_delete_sale_q:'यह बिक्री हटाएं?',d_no_stock:'स्टॉक नहीं',d_choose_batch:'— बैच चुनें —',d_choose_batch_sell:'— बेचने के लिए बैच चुनें —',d_sell_from:(d)=>`${d} बैच से बेचें`,d_pcs_remaining:(n)=>`${n} टुकड़े बाकी`,d_net_per_pc:'शुद्ध वजन/टुकड़ा',d_cost_pc2:'लागत/टुकड़ा',d_sale_date:'बिक्री की तारीख',d_save_sale:'बिक्री सेव करें',d_collect_payment:'भुगतान वसूल करें',d_total_rev:'कुल आमदनी',d_already_coll:'पहले वसूला',d_still_pend:'अभी बाकी',d_collecting_now:'अभी वसूल करें',d_confirm_coll:'वसूली की पुष्टि',
+t_fill_buy:'टुकड़े, वजन और खरीद भाव भरें',t_purchase_saved:'✅ खरीद सेव हो गई!',t_select_batch:'बैच चुनें',t_batch_not_found:'बैच नहीं मिला',t_enter_pcs:'बेचने के टुकड़े दर्ज करें',t_enter_price:'बिक्री भाव ₹/किलो दर्ज करें',t_only_pcs:(n)=>`केवल ${n} टुकड़े`,t_sale_saved:'✅ बिक्री सेव हो गई!',t_enter_amt:'राशि दर्ज करें',t_collected:(v)=>`✅ ${v} वसूल किया!`,t_enter_name:'नाम दर्ज करें',t_udhaar_added:(n)=>`${n} का उधार जोड़ा`,t_marked_paid:'पेड मार्क किया ✅',t_day_deleted:'दिन हटाया',t_batch_deleted:'बैच हटाया',t_sale_deleted:'बिक्री हटाई',t_rate_saved:'✅ रेट सेव!',t_rate_cleared:'रेट हटाया',t_enter_buy:'पहले खरीद भाव डालें',t_no_supp_due:'कोई सप्लायर भुगतान बाकी नहीं!'},
+rh:{subtitle:'Live Stock Bahi Khata',nav_today:'Aaj',nav_entry:'Entry Daalo',nav_ledger:'Bahi Khata',nav_reports:'Report',nav_udhaar:'Udhaar',entry_date:'Tarikh',date:'Date',set_today:'Aaj ki Tarikh',buy_stock:'Kharidi',sell_stock:'Bikri',supplier_pay:'Supplier Ko Do',purchase_details:'Kharidi ki Detail',pieces_bought:'Kharide Tukde',total_weight:'Kul Zinda Wazn',buy_price:'Kharidi Bhav ₹/kg',wastage:'Waste %',supplier_section:'Supplier Payment',supplier_name:'Supplier ka Naam',supp_due:'Kul Dena Hai ₹',paid_now:'Abhi Diya (optional)',note_opt:'Note (optional)',note:'Note',save_purchase:'Kharidi Save Karo',cash:'Nakit ₹',upi:'UPI ₹',sell_from_stock:'Stock Se Becho',select_batch:'Batch Chuno',pieces_to_sell:'Bechne ke Tukde',cash_collected_now:'Abhi Mili Raqam',save_sale:'Bikri Save Karo',record_supp_pay:'Supplier Payment Likho',payment_made:'Payment Kiya',save_payment:'Payment Save Karo',today:'Aaj',week:'Hafte',month:'Mahina',year:'Saal',custom:'Custom',from:'Se',to:'Tak',add_udhaar_title:'Udhaar Likho',customer_name:'Customer ka Naam',amount:'Raqam ₹',add_udhaar_btn:'Udhaar Daalo',udhaar_ledger:'Udhaar Bahi',pending:'Baaki',
+sync_title:'☁️ Cloud Sync',sync_desc:'Ek sync code daalo — sare devices pe same data dikhega.',sync_code_hint:'Yeh code doosre devices mein daalo.',sync_enable:'Sync On Karo',sync_disable:'Sync Band Karo',sync_change:'Code Badlo',sync_pull:'Cloud Se Lo',sync_push:'Cloud Mein Daalo',sync_enter_code:'Apna Sync Code Daalo',sync_code_tip:'Sabhi devices pe same code. Jaise: MANDI01',sync_activate:'Jodo aur Sync Karo',sync_connecting:'Se jud rahe hain',sync_synced:'Sync Ho Gaya',sync_syncing:'Sync Ho Raha Hai',sync_error:'Error',sync_offline:'Offline',sync_offline_tip:'Offline — data phone mein hai',sync_pulled:'Nayi data aa gayi',sync_pushed:'Sab data bhej diya',sync_code_short:'Code 3+ letters ka hona chahiye',sync_status:'Status',
+d_pending_actions:'⚠️ Baaki Kaam',d_unsold_alert:(n)=>`🐔 ${n} tukde nahi bike`,d_cashpend_alert:(v)=>`💰 Customers se ${v} lena baaki`,d_supppend_alert:(v)=>`🏭 Supplier ko ${v} dena hai`,d_today_summary:'Aaj ka Hisaab',d_invested:'Lagaaya',d_revenue:'Aamdani',d_profit:'Munafa',d_collected:'Mila',d_today_purchase:'Aaj ki Kharidi',d_batch:'Batch',d_pieces:'tukde',d_live:'zinda',d_buy:'Kharidi',d_wst:'Waste',d_net:'Net',d_all_sold:'Sab bik gaya ✓',d_unsold:(n)=>`${n} tukde bache`,d_no_sales:'Abhi bikri nahi',d_sell_rem:(n)=>`🐔 ${n} bache becho`,d_collect:'Lo',d_nothing_yet:'Abhi kuch nahi.',d_add_first_purchase:'<strong>Entry Daalo</strong> dabao kharidi ke liye.',d_day_summary:'Din ka Hisaab',d_delete_day:'🗑 Din Delete Karo',d_sold_today:'Aaj Bika',d_day_profit:'Din ka Munafa',d_batches_purchased:'🛒 Kharide Batch',d_total_cost:'Kul Lagaaya',d_cost_pc:'Lagat/Piece',d_supp_paid:'Supplier ko de diya ✅',d_supp_pending:(v)=>`Supplier: ${v} baaki`,d_all_sold_long:(n)=>`Sab ${n} bik gaye ✅`,d_no_sales_batch:'Is batch mein bikri nahi',d_sale_breakdown:'Bikri Detail',d_sale:'Bikri',d_piece:'tukda',d_sold:'Bika',d_fully_collected:'Pura vasool ✅',d_pending_amt:(v)=>`${v} baaki`,d_cross_sales:'💰 Aaj ki Bikri (purane batch se)',d_cross_note:'Poori detail us batch ki tarikh pe dekhein.',d_from_batch:(d)=>`${d} batch se`,d_collections:'💵 Aaj ki Vasoolee',d_supp_payments:'🏭 Supplier Payment',d_no_activity:'Is din koi kaam nahi.',d_browse_dates:'← → se tarikh badlo.',d_total_cost_lbl:'Kul Lagat',d_profit_lbl:'Munafa',d_loss_lbl:'Nuksaan',d_margin:(m)=>`Margin ${m}%`,d_day_breakdown:'Din-wise Detail',d_date:'Tarikh',d_cost:'Lagat',d_chart:'Chart',d_insights:'💡 Jaankari',d_best_day:(d,p)=>`🏆 Sabse achha din: <strong>${d}</strong> — Munafa ${p}`,d_total_kg:(kg)=>`📦 Kul zinda kg: <strong>${kg} kg</strong>`,d_supp_all_paid:'🏭 <strong style="color:var(--green)">Sab de diya ✅</strong>',d_supp_bal_due:(v)=>`🏭 Supplier ko dena: <strong style="color:var(--red)">${v}</strong>`,d_no_data:'Abhi koi data nahi.',d_add_first:'Pehli kharidi daalo.',d_no_udhaar:'Koi udhaar nahi.<br>Sab saaf hai! 🎉',d_paid:'✅ De diya',d_undo:'Wapas',d_mark_paid:'Paid Karo',d_del:'Hatao',d_delete_q:'Hatao?',d_delete_day_q:(d)=>`${d} ka saara data hatao?`,d_delete_batch_q:'Yeh batch hatao?',d_delete_sale_q:'Yeh bikri hatao?',d_no_stock:'Stock nahi',d_choose_batch:'— Batch chuno —',d_choose_batch_sell:'— Bechne ke liye batch chuno —',d_sell_from:(d)=>`${d} batch se becho`,d_pcs_remaining:(n)=>`${n} tukde bache`,d_net_per_pc:'Net wazn/tukda',d_cost_pc2:'Lagat/tukda',d_sale_date:'Bikri ki Tarikh',d_save_sale:'Bikri Save Karo',d_collect_payment:'Payment Lo',d_total_rev:'Kul Aamdani',d_already_coll:'Pehle mila',d_still_pend:'Abhi baaki',d_collecting_now:'Abhi lo',d_confirm_coll:'Vasoolee Confirm Karo',
+t_fill_buy:'Tukde, wazn aur kharidi bhav bharo',t_purchase_saved:'✅ Kharidi save ho gayi!',t_select_batch:'Batch chuno',t_batch_not_found:'Batch nahi mila',t_enter_pcs:'Bechne ke tukde daalo',t_enter_price:'Bikri bhav ₹/kg daalo',t_only_pcs:(n)=>`Sirf ${n} tukde hain`,t_sale_saved:'✅ Bikri save ho gayi!',t_enter_amt:'Raqam daalo',t_collected:(v)=>`✅ ${v} vasool kiya!`,t_enter_name:'Naam daalo',t_udhaar_added:(n)=>`${n} ka udhaar add kiya`,t_marked_paid:'Paid mark kiya ✅',t_day_deleted:'Din hataya',t_batch_deleted:'Batch hataya',t_sale_deleted:'Bikri hatai',t_rate_saved:'✅ Rate save ho gaya!',t_rate_cleared:'Rate hataya',t_enter_buy:'Pehle kharidi bhav daalo',t_no_supp_due:'Koi supplier payment baaki nahi!'}
+};
+
+function t(key,...args){const v=T[lang]?.[key]??T.en?.[key]??key;return typeof v==='function'?v(...args):v}
+
+function cycleLang(){
+  lang=lang==='en'?'hi':lang==='hi'?'rh':'en';
+  localStorage.setItem(KL,lang);
+  $('langBtn').textContent=lang==='en'?'HI':lang==='hi'?'RH':'EN';
+  applyLang();
+}
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.getAttribute('data-i18n'))});
+  renderHome();
+  if($('vLedger').classList.contains('on'))renderLedger();
+  if($('vAnalytics').classList.contains('on'))renderAnalytics();
+  if($('vUdhaar').classList.contains('on'))renderUdhaar();
+  if($('vEntry').classList.contains('on')){populateSellBatches();populateSuppBatches();}
+}
+
 /* ════ INIT ════ */
+$('langBtn').textContent=lang==='en'?'HI':lang==='hi'?'RH':'EN';
 renderHome();
 updateUdBadge();
-document.querySelectorAll('#aTabs .ptab').forEach((t,i)=>t.classList.toggle('on',i===0));
+document.querySelectorAll('#aTabs .ptab').forEach((el,i)=>el.classList.toggle('on',i===0));
+// Defer Firebase init until after all scripts have loaded
+window.addEventListener('load',()=>{try{initSync();}catch(e){console.warn('initSync:',e);}});
+
 </script>
 </body>
 </html>
