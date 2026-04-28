@@ -535,23 +535,19 @@ select.fi { cursor: pointer; padding-right: 2rem; background-image: url("data:im
   </div>
 </div>
 
-<!-- Firebase SDK v9.23.0 (stable compat build) -->
+<!-- Firebase SDK v9.23.0 -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-/* ════ FIREBASE CONFIG ════
-   Replace with YOUR Firebase project config.
-   Get it: Firebase Console → Project Settings → Your apps → Web app
-   App works 100% offline without Firebase. Sync is optional.
-═══════════════════════════ */
-/* ════ GLOBAL ERROR HANDLER ════ */
-window.addEventListener('unhandledrejection',e=>{
-  console.warn('Promise rejection:',e.reason);
-  e.preventDefault();
-});
+/* ─────────────────────────────────────────────
+   ChickenCalc Pro — Cloud-first, zero setup
+   Firebase is the database. All devices that
+   open the same URL see the same data live.
+   No login. No sync button. Just works.
+───────────────────────────────────────────── */
 
-const FB_CONFIG={
+const FB={
   apiKey:"AIzaSyCD2OtS092LQmUst0EzV19I5G61vVo-bgE",
   authDomain:"chick-cal.firebaseapp.com",
   projectId:"chick-cal",
@@ -560,215 +556,174 @@ const FB_CONFIG={
   appId:"1:298062038081:web:01af5f285ddcdd6c5572c0"
 };
 
-/* ════ KEYS ════ */
-const KB='cc5_buys',KS='cc5_sales',KSP='cc5_suppays',KU='cc5_ud';
-const KT='cc5_theme',KM='cc5_thm',IB='cc5_ib',KL='cc5_lang';
-const K_SHOPID='cc5_shopid',K_SYNC_ON='cc5_sync_on';
+// Fixed shop path — same for every device opening this URL
+const SHOP = 'main';
 
-/* ════ UTILS ════ */
+/* ════ KEYS / UTILS ════ */
 const $=id=>document.getElementById(id);
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const SDAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const FMON=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
 function todayKey(){const d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
 function p2(n){return String(n).padStart(2,'0')}
-function keyDisp(k){if(!k)return '—';const[y,m,d]=k.split('-').map(Number);return d+' '+FMON[m-1]+' '+y}
-function keyShort(k){if(!k)return '—';const[y,m,d]=k.split('-').map(Number);return d+' '+MON[m-1]}
-function fmt(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
+function keyDisp(k){if(!k)return'—';const[y,m,d]=k.split('-').map(Number);return d+' '+FMON[m-1]+' '+y}
+function keyShort(k){if(!k)return'—';const[y,m,d]=k.split('-').map(Number);return d+' '+MON[m-1]}
+function fmt(n){return'₹'+Math.round(n).toLocaleString('en-IN')}
 function fmtD(n){return n>=0?'+₹'+Math.round(n).toLocaleString('en-IN'):'−₹'+Math.round(-n).toLocaleString('en-IN')}
 
-/* ── localStorage (always kept, never removed) ── */
+/* ════ LOCAL CACHE (localStorage as offline buffer) ════ */
+const KB='cc5_buys',KS='cc5_sales',KSP='cc5_suppays',KU='cc5_ud';
+const KT='cc5_theme',KM='cc5_thm',KL='cc5_lang';
 function la(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch{return[]}}
 function sa(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 let _id=parseInt(localStorage.getItem('cc5_id')||'1');
 function nid(){const i=_id++;localStorage.setItem('cc5_id',_id);return i}
 
-/* ════ FIREBASE SYNC ENGINE ════ */
-let db=null,shopId=null,syncEnabled=false,syncStatus='offline';
-let _unsub=[];
-function fbOk(){return FB_CONFIG.apiKey!=='YOUR_API_KEY'}
-function initFirebase(){
-  if(!fbOk())return false;
-  if(typeof firebase==='undefined'){console.warn('Firebase SDK not loaded');return false;}
+/* ════ FIRESTORE STATE ════ */
+let db=null, _unsubs=[], _online=false;
+
+function col(name){return db.collection('shops').doc(SHOP).collection(name)}
+
+/* Show a tiny dot in the header */
+function setDot(status){
+  const d=$('cldDot');if(!d)return;
+  d.style.background=status==='live'?'#4ade80':status==='sync'?'#93c5fd':'#6b7280';
+  d.title=status==='live'?'Live — all changes sync instantly':status==='sync'?'Connecting…':'Offline';
+}
+
+/* ─── Write one record to Firestore ─── */
+async function fsSet(colName,rec){
+  if(!db||!_online)return;
+  try{ await col(colName).doc(String(rec.id)).set(rec); }
+  catch(e){ console.warn('fsSet',e.message); }
+}
+
+/* ─── Delete one record from Firestore ─── */
+async function fsDel(colName,id){
+  if(!db||!_online)return;
+  try{ await col(colName).doc(String(id)).delete(); }
+  catch(e){ console.warn('fsDel',e.message); }
+}
+
+/* ─── Save: write local cache + Firestore ─── */
+function save(key,arr,rec=null,delId=null){
+  sa(key,arr);                               // always write localStorage
+  const map={[KB]:'buys',[KS]:'sales',[KSP]:'suppays',[KU]:'udhaar'};
+  const cn=map[key];if(!cn)return;
+  if(delId!=null) fsDel(cn,delId);
+  else if(rec)    fsSet(cn,rec);
+}
+
+/* ─── Load all from Firestore → merge into localStorage ─── */
+async function loadFromCloud(){
+  if(!db)return;
+  setDot('sync');
+  const cols=[[KB,'buys'],[KS,'sales'],[KSP,'suppays'],[KU,'udhaar']];
   try{
-    if(!firebase.apps.length)firebase.initializeApp(FB_CONFIG);
-    db=firebase.firestore();
-    return true;
-  }catch(e){console.warn('Firebase init:',e.message);db=null;return false;}
-}
-function getShopId(){return localStorage.getItem(K_SHOPID)||null}
-function isSyncOn(){return localStorage.getItem(K_SYNC_ON)==='1'}
-function setSyncStatus(s){
-  syncStatus=s;
-  const dot=$('syncHdrDot'),txt=$('syncHdrTxt');if(!dot||!txt)return;
-  dot.className='sync-hdr-dot'+(s==='connected'?' on':s==='syncing'?' spin':'');
-  const lbl={connected:()=>t('sync_synced'),syncing:()=>t('sync_syncing')+'…',error:'Error',offline:()=>t('sync_offline')};
-  txt.textContent=typeof lbl[s]==='function'?lbl[s]():lbl[s]||s;
-}
-/* merge: id-based dedup, higher ts wins */
-function mergeArr(local,remote){
-  const map={};
-  local.forEach(r=>{map[r.id]=r});
-  remote.forEach(r=>{if(!map[r.id]||(r.ts||0)>(map[r.id].ts||0))map[r.id]=r});
-  return Object.values(map);
-}
-async function fsSet(col,rec){
-  if(!db||!shopId||!syncEnabled)return;
-  try{await db.collection('shops').doc(shopId).collection(col).doc(String(rec.id)).set(rec)}catch(e){}
-}
-async function fsDel(col,id){
-  if(!db||!shopId||!syncEnabled)return;
-  try{await db.collection('shops').doc(shopId).collection(col).doc(String(id)).delete()}catch(e){}
-}
-/* saSync: always writes localStorage, also writes Firebase when enabled */
-function saSync(k,v,rec=null,delId=null){
-  sa(k,v);
-  if(!db||!shopId||!syncEnabled)return;
-  const colMap={[KB]:'buys',[KS]:'sales',[KSP]:'suppays',[KU]:'udhaar'};
-  const col=colMap[k];if(!col)return;
-  if(delId!=null)fsDel(col,delId);
-  else if(rec)fsSet(col,rec);
-}
-async function pullFromCloud(){
-  if(!db||!shopId)return;
-  setSyncStatus('syncing');
-  try{
-    for(const[k,n] of [[KB,'buys'],[KS,'sales'],[KSP,'suppays'],[KU,'udhaar']]){
-      const snap=await db.collection('shops').doc(shopId).collection(n).get();
-      if(snap.empty)continue;
+    await Promise.all(cols.map(async([key,cn])=>{
+      const snap=await col(cn).get();
+      if(snap.empty)return;
       const remote=snap.docs.map(d=>d.data());
-      const merged=mergeArr(la(k),remote);
-      sa(k,merged);
+      // Merge: remote wins on conflict (higher ts)
+      const local=la(key);
+      const map={};
+      local.forEach(r=>map[r.id]=r);
+      remote.forEach(r=>{if(!map[r.id]||(r.ts||0)>(map[r.id].ts||0))map[r.id]=r});
+      const merged=Object.values(map);
+      sa(key,merged);
       const maxId=merged.reduce((m,r)=>Math.max(m,r.id||0),0);
       if(maxId>=_id){_id=maxId+1;localStorage.setItem('cc5_id',_id)}
-    }
-    setSyncStatus('connected');
-    renderHome();
-    if($('vLedger').classList.contains('on'))renderLedger();
-    if($('vUdhaar').classList.contains('on'))renderUdhaar();
-  }catch(e){setSyncStatus('error')}
+    }));
+    _online=true;
+    setDot('live');
+    rerender();
+  }catch(e){
+    console.warn('loadFromCloud:',e.message);
+    setDot('offline');
+  }
 }
-async function pushAllToCloud(){
-  if(!db||!shopId||!syncEnabled)return;
-  setSyncStatus('syncing');
-  try{
-    for(const[k,n] of [[KB,'buys'],[KS,'sales'],[KSP,'suppays'],[KU,'udhaar']]){
-      const data=la(k);if(!data.length)continue;
-      const batch=db.batch();
-      data.forEach(r=>batch.set(db.collection('shops').doc(shopId).collection(n).doc(String(r.id)),r));
-      await batch.commit();
-    }
-    setSyncStatus('connected');
-  }catch(e){setSyncStatus('error')}
+
+/* ─── Push everything local to cloud (first launch / recovery) ─── */
+async function pushLocalToCloud(){
+  if(!db)return;
+  const cols=[[KB,'buys'],[KS,'sales'],[KSP,'suppays'],[KU,'udhaar']];
+  for(const[key,cn] of cols){
+    const data=la(key);if(!data.length)continue;
+    const batch=db.batch();
+    data.forEach(r=>batch.set(col(cn).doc(String(r.id)),r));
+    try{ await batch.commit(); }catch(e){console.warn('push:',e.message)}
+  }
 }
-function attachListeners(){
-  _unsub.forEach(u=>u());_unsub=[];
-  if(!db||!shopId||!syncEnabled)return;
-  [[KB,'buys'],[KS,'sales'],[KSP,'suppays'],[KU,'udhaar']].forEach(([k,n])=>{
-    const u=db.collection('shops').doc(shopId).collection(n).onSnapshot(snap=>{
-      if(snap.metadata.hasPendingWrites)return;
+
+/* ─── Real-time listeners: update UI when any device changes data ─── */
+function listen(){
+  _unsubs.forEach(u=>u());_unsubs=[];
+  if(!db)return;
+  [[KB,'buys'],[KS,'sales'],[KSP,'suppays'],[KU,'udhaar']].forEach(([key,cn])=>{
+    const unsub=col(cn).onSnapshot(snap=>{
+      if(snap.metadata.hasPendingWrites)return; // skip our own writes
       const remote=snap.docs.map(d=>d.data());
-      const local=la(k);
-      const merged=mergeArr(local,remote);
-      const a=JSON.stringify([...local].sort((a,b)=>a.id-b.id));
-      const b=JSON.stringify([...merged].sort((a,b)=>a.id-b.id));
-      if(a!==b){
-        sa(k,merged);
+      const local=la(key);
+      const map={};
+      local.forEach(r=>map[r.id]=r);
+      remote.forEach(r=>{if(!map[r.id]||(r.ts||0)>(map[r.id].ts||0))map[r.id]=r});
+      const merged=Object.values(map);
+      // Only re-render if data actually changed
+      if(JSON.stringify(merged.sort((a,b)=>a.id-b.id))!==
+         JSON.stringify(local.sort((a,b)=>a.id-b.id))){
+        sa(key,merged);
         const maxId=merged.reduce((m,r)=>Math.max(m,r.id||0),0);
         if(maxId>=_id){_id=maxId+1;localStorage.setItem('cc5_id',_id)}
-        renderHome();
-        if($('vLedger').classList.contains('on'))renderLedger();
-        if($('vUdhaar').classList.contains('on'))renderUdhaar();
+        rerender();
       }
-      setSyncStatus('connected');
-    },()=>setSyncStatus('error'));
-    _unsub.push(u);
+      _online=true;setDot('live');
+    }, e=>{ console.warn('listener:',e.message);setDot('offline'); });
+    _unsubs.push(unsub);
   });
 }
-function initSync(){
-  shopId=getShopId();syncEnabled=isSyncOn();
-  if(!shopId||!syncEnabled||!fbOk()){setSyncStatus('offline');return}
-  if(initFirebase())pullFromCloud().then(()=>attachListeners());
+
+function rerender(){
+  renderHome();
+  if($('vLedger').classList.contains('on'))renderLedger();
+  if($('vAnalytics').classList.contains('on'))renderAnalytics();
+  if($('vUdhaar').classList.contains('on'))renderUdhaar();
+  updateUdBadge();
 }
 
-/* ── Sync Modal ── */
-function openSyncModal(){
-  const id=getShopId(),on=isSyncOn();
-  openModal(t('sync_title'),`
-    ${!fbOk()?`<div class="info-box red" style="margin-bottom:.85rem">
-      <strong>⚠️ Firebase not configured yet</strong><br>
-      <span style="font-size:.68rem">Open this file, find FB_CONFIG at the top, paste your Firebase values. App works fully offline without it.</span>
-    </div>`:''}
-    <div style="font-size:.76rem;color:var(--mu);margin-bottom:.85rem;line-height:1.7">${t('sync_desc')}</div>
-    ${id?`
-      <div class="sync-code-display">${id}</div>
-      <div style="text-align:center;font-size:.68rem;color:var(--mu);margin-bottom:.85rem">${t('sync_code_hint')}</div>
-      <div style="display:flex;gap:.5rem;margin-bottom:.55rem">
-        <button class="btn ${on?'danger':'success'} btn-md" style="flex:1" onclick="toggleSyncOn()">
-          ${on?'⏸ '+t('sync_disable'):'▶ '+t('sync_enable')}</button>
-        <button class="btn ghost btn-md" style="flex:1" onclick="changeCode()">${t('sync_change')}</button>
-      </div>
-      <div style="display:flex;gap:.5rem;margin-bottom:.85rem">
-        <button class="btn blue btn-md" style="flex:1" onclick="doManualPull()">⬇ ${t('sync_pull')}</button>
-        <button class="btn warn btn-md" style="flex:1" onclick="doManualPush()">⬆ ${t('sync_push')}</button>
-      </div>
-      <div style="font-size:.68rem;color:var(--mu);text-align:center">${t('sync_status')}: <strong>${syncStatus}</strong></div>`
-    :`
-      <div class="fg" style="margin-bottom:.6rem">
-        <label class="fl">${t('sync_enter_code')}</label>
-        <input class="fi np" id="newCode" type="text" maxlength="12" placeholder="e.g. MANDI01"
-          style="text-transform:uppercase;font-size:1.1rem;letter-spacing:.18em;text-align:center"
-          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
-      </div>
-      <div style="font-size:.68rem;color:var(--mu);margin-bottom:.85rem">${t('sync_code_tip')}</div>
-      <button class="btn primary btn-lg btn-full" onclick="activateSync()">${t('sync_activate')}</button>`}
-    ${!fbOk()?`<div style="margin-top:.85rem;padding:.75rem;background:var(--card2);border-radius:var(--r);border:1px solid var(--bdr)">
-      <div style="font-size:.7rem;font-weight:700;color:var(--mu);margin-bottom:.4rem">📋 Firebase Setup (5 steps)</div>
-      <div style="font-size:.65rem;color:var(--mu);line-height:2.1">
-        1. <strong>console.firebase.google.com</strong> → New Project<br>
-        2. Add Web App → Copy the config object<br>
-        3. Paste values into FB_CONFIG at top of this file<br>
-        4. Firestore Database → Create → Test mode (30 days)<br>
-        5. Use same code on all devices → synced! ☁️
-      </div></div>`:''}
-  `);
+/* ─── Boot Firebase, load data, start listening ─── */
+function boot(){
+  try{
+    if(typeof firebase==='undefined')throw new Error('SDK not loaded');
+    if(!firebase.apps.length)firebase.initializeApp(FB);
+    db=firebase.firestore();
+    loadFromCloud().then(()=>{
+      pushLocalToCloud();   // push any offline data the user added
+      listen();             // start real-time listeners
+    });
+  }catch(e){
+    console.warn('Firebase boot:',e.message);
+    setDot('offline');
+    // App still works fully offline with localStorage
+  }
 }
-async function activateSync(){
-  const code=$('newCode')?.value?.trim().toUpperCase();
-  if(!code||code.length<3){toast(t('sync_code_short'));return}
-  if(!fbOk()){toast('Configure Firebase first in the FB_CONFIG section');return}
-  shopId=code;localStorage.setItem(K_SHOPID,shopId);
-  localStorage.setItem(K_SYNC_ON,'1');syncEnabled=true;
-  closeModal();toast(`🔗 ${t('sync_connecting')} ${shopId}…`);
-  initFirebase();
-  await pullFromCloud();
-  await pushAllToCloud();
-  attachListeners();
-  openSyncModal();
-}
-async function toggleSyncOn(){
-  syncEnabled=!syncEnabled;
-  localStorage.setItem(K_SYNC_ON,syncEnabled?'1':'0');
-  if(syncEnabled){attachListeners();await pullFromCloud();}
-  else{_unsub.forEach(u=>u());_unsub=[];setSyncStatus('offline');}
-  closeModal();openSyncModal();
-}
-function changeCode(){localStorage.removeItem(K_SHOPID);shopId=null;_unsub.forEach(u=>u());_unsub=[];setSyncStatus('offline');closeModal();openSyncModal()}
-async function doManualPull(){closeModal();await pullFromCloud();toast('⬇ '+t('sync_pulled'))}
-async function doManualPush(){closeModal();await pushAllToCloud();toast('⬆ '+t('sync_pushed'))}
 
-/* ════ DOMAIN ════ */
+/* Reconnect when network returns */
+window.addEventListener('online',()=>{ if(db){loadFromCloud().then(()=>listen());} });
+window.addEventListener('offline',()=>{ setDot('offline'); });
+
+/* ════ DOMAIN FUNCTIONS ════ */
 function getBuys(){return la(KB)}
 function getSales(){return la(KS)}
 function getSuppays(){return la(KSP)}
+
 function buyCalc(b){
   const totalCost=(b.liveKg||0)*(b.buyPrice||0);
   const netKgTotal=(b.liveKg||0)*(1-(b.wastage||30)/100);
   const netKgPerPc=b.pcs>0?netKgTotal/b.pcs:0;
-  const liveKgPerPc=b.pcs>0?(b.liveKg||0)/b.pcs:0;
   const costPerPc=b.pcs>0?totalCost/b.pcs:0;
-  return{totalCost,netKgTotal,netKgPerPc,liveKgPerPc,costPerPc};
+  return{totalCost,netKgTotal,netKgPerPc,costPerPc};
 }
 function salesOf(buyId){return getSales().filter(s=>s.buyId===buyId)}
 function suppaysOf(buyId){return getSuppays().filter(p=>p.buyId===buyId)}
@@ -787,18 +742,22 @@ function totalCollected(b){
 }
 function pendingCash(b){return Math.max(0,totalRevenue(b)-totalCollected(b))}
 function suppTotal(b){
-  const totalPaid=suppaysOf(b.id).reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
-  const due=(b.suppDue||buyCalc(b).totalCost);
-  return{due,paid:totalPaid+(b.suppInitCash||0)+(b.suppInitUpi||0),remaining:due-totalPaid-(b.suppInitCash||0)-(b.suppInitUpi||0)};
+  const paid=suppaysOf(b.id).reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
+  const due=b.suppDue||buyCalc(b).totalCost;
+  return{due,paid:paid+(b.suppInitCash||0)+(b.suppInitUpi||0),
+    remaining:due-paid-(b.suppInitCash||0)-(b.suppInitUpi||0)};
 }
 
 /* ════ TOAST / MODAL ════ */
-function toast(msg,ms=2400){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),ms)}
+function toast(msg,ms=2400){
+  const el=$('toast');el.textContent=msg;el.classList.add('show');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),ms);
+}
 function openModal(title,html){$('mTitle').textContent=title;$('mBody').innerHTML=html;$('modalBg').classList.add('on')}
 function closeModal(){$('modalBg').classList.remove('on')}
 function closeMBg(e){if(e.target===$('modalBg'))closeModal()}
 
-/* ════ THEME (auto dark after 7pm) ════ */
+/* ════ THEME ════ */
 (function(){
   const btn=$('themeBtn'),root=document.documentElement;
   const hr=new Date().getHours();
@@ -807,7 +766,8 @@ function closeMBg(e){if(e.target===$('modalBg'))closeModal()}
   apply(th);
   btn.addEventListener('click',()=>{th=th==='dark'?'light':'dark';apply(th);localStorage.setItem(KT,th);localStorage.setItem(KM,'1')});
   function apply(th){
-    root.setAttribute('data-theme',th);$('metaTheme').content=th==='dark'?'#141a14':'#2d6a4f';
+    root.setAttribute('data-theme',th);
+    $('metaTheme').content=th==='dark'?'#141a14':'#2d6a4f';
     btn.innerHTML=th==='dark'
       ?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
       :'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
@@ -818,9 +778,12 @@ function closeMBg(e){if(e.target===$('modalBg'))closeModal()}
 (()=>{const d=new Date();$('todayBadge').textContent=SDAYS[d.getDay()]+', '+d.getDate()+' '+MON[d.getMonth()]})();
 (()=>{
   const ic=`%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%232d6a4f'/%3E%3Cpath d='M96 28C70 28 50 48 50 74c0 16 9 28 18 37l6 31h44l6-31c9-9 18-21 18-37 0-26-20-46-46-46z' fill='white'/%3E%3C/svg%3E`;
-  const m={name:'ChickenCalc',short_name:'ChickenCalc',start_url:'./',display:'standalone',background_color:'#f0f2f0',theme_color:'#2d6a4f',icons:[{src:'data:image/svg+xml,'+ic,sizes:'192x192',type:'image/svg+xml'}]};
-  const blob=new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
-  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(blob);document.head.appendChild(l);
+  const mf={name:'ChickenCalc',short_name:'ChickenCalc',start_url:'./',display:'standalone',
+    background_color:'#f0f2f0',theme_color:'#2d6a4f',
+    icons:[{src:'data:image/svg+xml,'+ic,sizes:'192x192',type:'image/svg+xml'}]};
+  const blob=new Blob([JSON.stringify(mf)],{type:'application/manifest+json'});
+  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(blob);
+  document.head.appendChild(l);
 })();
 
 /* ════ NAV ════ */
@@ -878,7 +841,7 @@ function saveBuy(){
     suppInitUpi:parseFloat($('b_suppUpi').value)||0,
     note:$('b_note').value.trim()};
   const buys=getBuys();buys.push(rec);
-  saSync(KB,buys,rec);
+  save(KB,buys,rec);
   ['b_pcs','b_kg','b_buy','b_suppdue','b_suppCash','b_suppUpi','b_note'].forEach(id=>{const e=$(id);if(e)e.value=''});
   $('b_supplier').value='';$('b_waste').value=30;suppDueManual=false;onBuyInput();
   toast(t('t_purchase_saved'));setEntryToday();setTimeout(()=>nav('Ledger'),700);
@@ -894,7 +857,7 @@ function populateSellBatches(){
 }
 function onBatchSelect(){
   const id=parseInt($('s_batch').value);
-  const buys=getBuys(),b=buys.find(x=>x.id===id);
+  const b=getBuys().find(x=>x.id===id);
   if(!b){$('batchInfo').style.display='none';return}
   const{netKgPerPc,costPerPc}=buyCalc(b);
   $('batchInfo').innerHTML=`<strong>${b.pcs} pcs</strong> · ${keyDisp(b.date)} · ₹${b.buyPrice}/kg<br><strong style="color:var(--orange)">${t('d_pcs_remaining',unsoldPcs(b))}</strong> · Net ${netKgPerPc.toFixed(3)} kg/pc · ${t('d_cost_pc2')}: ${fmt(costPerPc)}`;
@@ -904,7 +867,7 @@ function onBatchSelect(){
 }
 function onSellInput(){
   const id=parseInt($('s_batch').value);
-  const buys=getBuys(),b=buys.find(x=>x.id===id);if(!b)return;
+  const b=getBuys().find(x=>x.id===id);if(!b)return;
   const{netKgPerPc,costPerPc}=buyCalc(b);
   const pcs=parseFloat($('s_pcs').value)||0,sk=parseFloat($('s_sellkg').value)||0;
   const sp=sk>0&&netKgPerPc>0?sk*netKgPerPc:0;
@@ -918,7 +881,7 @@ function onSellInput(){
 }
 function updateSellPaid(){
   const id=parseInt($('s_batch').value);
-  const buys=getBuys(),b=buys.find(x=>x.id===id);
+  const b=getBuys().find(x=>x.id===id);
   const pcs=parseFloat($('s_pcs').value)||0,sk=parseFloat($('s_sellkg').value)||0;
   const netKgPerPc=b?buyCalc(b).netKgPerPc:0;
   const sp=sk>0&&netKgPerPc>0?sk*netKgPerPc:0;
@@ -929,7 +892,7 @@ function updateSellPaid(){
 function saveSell(){
   const buyId=parseInt($('s_batch').value);
   if(!buyId){toast(t('t_select_batch'));return}
-  const buys=getBuys(),b=buys.find(x=>x.id===buyId);
+  const b=getBuys().find(x=>x.id===buyId);
   if(!b){toast(t('t_batch_not_found'));return}
   const pcs=parseFloat($('s_pcs').value),sk=parseFloat($('s_sellkg').value)||0;
   if(!pcs||pcs<=0){toast(t('t_enter_pcs'));return}
@@ -940,7 +903,7 @@ function saveSell(){
   const rec={id:nid(),buyId,date:$('entryDate').value,ts:Date.now(),pcs,sellKg:sk,sellPc:sp,
     cash:parseFloat($('s_cash').value)||0,upi:parseFloat($('s_upi').value)||0,note:$('s_note').value.trim()};
   const sales=getSales();sales.push(rec);
-  saSync(KS,sales,rec);
+  save(KS,sales,rec);
   ['s_pcs','s_sellkg','s_sellpc','s_cash','s_upi','s_note'].forEach(id=>{const e=$(id);if(e)e.value=''});
   $('sellPreview').style.display='none';$('batchInfo').style.display='none';$('s_batch').value='';
   toast(t('t_sale_saved'));populateSellBatches();setTimeout(()=>nav('Ledger'),700);
@@ -951,11 +914,9 @@ function populateSuppBatches(){
   const buys=getBuys().sort((a,b)=>b.date.localeCompare(a.date));
   const opts=buys.filter(b=>suppTotal(b).remaining>0.5);
   if(!opts.length){$('suppPayBatchSel').innerHTML=`<div class="info-box green">✅ ${t('t_no_supp_due')}</div>`;return}
-  let html=`<div class="fg" style="margin-bottom:.7rem"><label class="fl">${t('select_batch')}</label><select class="fi np" id="sp_batch">`;
-  html+=`<option value="">${t('d_choose_batch')}</option>`;
+  let html=`<div class="fg" style="margin-bottom:.7rem"><label class="fl">${t('select_batch')}</label><select class="fi np" id="sp_batch"><option value="">${t('d_choose_batch')}</option>`;
   opts.forEach(b=>{const s=suppTotal(b);html+=`<option value="${b.id}">${keyShort(b.date)} — ${b.supplier||'Supplier'} — ${fmt(s.remaining)}</option>`});
-  html+='</select></div>';
-  $('suppPayBatchSel').innerHTML=html;
+  html+='</select></div>';$('suppPayBatchSel').innerHTML=html;
 }
 function updateSuppPayLine(){const c=parseFloat($('sp_cash').value)||0,u=parseFloat($('sp_upi').value)||0;$('suppPayLine').textContent=`Total: ${fmt(c+u)}`}
 function saveSuppPay(){
@@ -964,8 +925,7 @@ function saveSuppPay(){
   const c=parseFloat($('sp_cash').value)||0,u=parseFloat($('sp_upi').value)||0;
   if(!c&&!u){toast(t('t_enter_amt'));return}
   const rec={id:nid(),buyId,date:$('entryDate').value,ts:Date.now(),cash:c,upi:u,note:$('sp_note').value.trim()};
-  const sp=getSuppays();sp.push(rec);
-  saSync(KSP,sp,rec);
+  const sp=getSuppays();sp.push(rec);save(KSP,sp,rec);
   toast(t('save_payment'));populateSuppBatches();
   if($('sp_cash'))$('sp_cash').value='';if($('sp_upi'))$('sp_upi').value='';
 }
@@ -989,11 +949,8 @@ function renderHome(){
   const todayUpi=todaySales.reduce((a,s)=>a+(s.upi||0),0);
   const todayProfit=todayRevenue-todayCost;
   const todaySuppPaid=todaySuppays.reduce((a,p)=>a+(p.cash||0)+(p.upi||0),0);
-  const shopCode=getShopId();
-  const syncBar=shopCode&&isSyncOn()
-    ?`<div class="sync-bar ${syncStatus}"><span class="sync-dot"></span><span>${syncStatus==='connected'?`☁️ ${t('sync_synced')} · ${shopCode}`:syncStatus==='syncing'?`⏳ ${t('sync_syncing')}…`:`📵 ${t('sync_offline')}`}</span><span class="sync-bar-right"><button class="btn ghost btn-sm" onclick="openSyncModal()" style="font-size:.62rem;padding:.2rem .45rem">⚙</button></span></div>`
-    :`<div class="sync-bar offline"><span class="sync-dot"></span><span>📵 ${t('sync_offline_tip')}</span><span class="sync-bar-right"><button class="btn blue btn-sm" onclick="openSyncModal()" style="font-size:.62rem;padding:.2rem .5rem">+ ${t('sync_enable')}</button></span></div>`;
-  let html=syncBar;
+
+  let html='';
   if(totUnsold>0||totPendCash>0.5||totPendSupp>0.5){
     html+=`<div class="card card-pad" style="border-color:var(--orange);background:var(--orangeL)">
       <div class="card-title" style="margin-bottom:.7rem;color:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>${t('d_pending_actions')}</div>
@@ -1049,65 +1006,64 @@ function renderHome(){
 
 /* ════ QUICK SELL ════ */
 function quickSell(buyId){
-  const buys=getBuys(),b=buys.find(x=>x.id===buyId);if(!b)return;
+  const b=getBuys().find(x=>x.id===buyId);if(!b)return;
   const u=unsoldPcs(b),{netKgPerPc,costPerPc}=buyCalc(b);
-  const lastSale=salesOf(buyId).filter(s=>s.sellKg>0).slice(-1)[0];
+  const last=salesOf(buyId).filter(s=>s.sellKg>0).slice(-1)[0];
   openModal(t('d_sell_from',keyDisp(b.date)),`
     <div class="info-box" style="margin-bottom:.8rem"><strong>${b.pcs} ${t('d_pieces')}</strong> · ₹${b.buyPrice}/kg · ${keyDisp(b.date)}<br>
-      <strong style="color:var(--orange)">${t('d_pcs_remaining',u)}</strong><br>
-      ${t('d_net_per_pc')}: <strong>${netKgPerPc.toFixed(3)} kg</strong> · ${t('d_cost_pc2')}: <strong>${fmt(costPerPc)}</strong></div>
+      <strong style="color:var(--orange)">${t('d_pcs_remaining',u)}</strong> · Net ${netKgPerPc.toFixed(3)} kg/pc · ${t('d_cost_pc2')}: ${fmt(costPerPc)}</div>
     <div class="frow" style="margin-bottom:.6rem">
-      <div class="fg"><label class="fl">${t('pieces_to_sell')}</label><div class="fi-wrap"><input class="fi np pr" id="qs_pcs" type="number" inputmode="numeric" value="${u}" oninput="qsPreview(${buyId})"><span class="fi-suf">pcs</span></div></div>
-      <div class="fg"><label class="fl">Sell ₹/kg</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_kg" type="number" inputmode="decimal" value="${lastSale?.sellKg||''}" placeholder="e.g. 240" oninput="qsPreview(${buyId})"></div></div>
+      <div class="fg"><label class="fl">${t('pieces_to_sell')}</label><div class="fi-wrap"><input class="fi np pr" id="qs_pcs" type="number" inputmode="numeric" value="${u}" oninput="qsCalc(${buyId})"><span class="fi-suf">pcs</span></div></div>
+      <div class="fg"><label class="fl">Sell ₹/kg</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_kg" type="number" inputmode="decimal" value="${last?.sellKg||''}" placeholder="240" oninput="qsCalc(${buyId})"></div></div>
     </div>
-    <div class="fg" style="margin-bottom:.6rem"><label class="fl">= ₹/${t('d_piece')} (auto)</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_pc" type="number" placeholder="auto" style="background:var(--card2);color:var(--mu)" readonly></div></div>
+    <div class="fg" style="margin-bottom:.6rem"><label class="fl">= ₹/${t('d_piece')} (auto)</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_pc" placeholder="auto" style="background:var(--card2);color:var(--mu)" readonly></div></div>
     <div class="fg" style="margin-bottom:.6rem"><label class="fl">${t('d_sale_date')}</label><input class="fi np" id="qs_date" type="date" value="${todayKey()}" max="${todayKey()}"></div>
-    <div id="qsPreviewBox" style="display:none;margin-bottom:.6rem"></div>
+    <div id="qsPrev" style="display:none;margin-bottom:.6rem"></div>
     <div class="pay-split" style="margin-bottom:.75rem">
       <div class="pay-split-ttl">💵 ${t('cash_collected_now')}</div>
       <div class="pay-split-row">
-        <div class="fg"><label class="fl">${t('cash')}</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_cash" type="number" inputmode="decimal" placeholder="0" oninput="qsPreview(${buyId})"></div></div>
-        <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_upi" type="number" inputmode="decimal" placeholder="0" oninput="qsPreview(${buyId})"></div></div>
+        <div class="fg"><label class="fl">${t('cash')}</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_cash" type="number" inputmode="decimal" placeholder="0" oninput="qsCalc(${buyId})"></div></div>
+        <div class="fg"><label class="fl">UPI ₹</label><div class="fi-wrap"><span class="fi-pre">₹</span><input class="fi" id="qs_upi" type="number" inputmode="decimal" placeholder="0" oninput="qsCalc(${buyId})"></div></div>
       </div>
-      <div class="pay-total-line" id="qsPaidLine">${t('d_collected')}: ₹0 · ${t('pending')}: ₹0</div>
+      <div class="pay-total-line" id="qsLine">${t('d_collected')}: ₹0 · ${t('pending')}: ₹0</div>
     </div>
     <div class="fg" style="margin-bottom:.85rem"><label class="fl">${t('note_opt')}</label><input class="fi np" id="qs_note" type="text" placeholder="Customer…"></div>
-    <button class="btn primary btn-lg btn-full" onclick="confirmQuickSell(${buyId})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>${t('save_sale')}</button>
+    <button class="btn primary btn-lg btn-full" onclick="doQuickSell(${buyId})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>${t('save_sale')}</button>
   `);
-  setTimeout(()=>qsPreview(buyId),50);
+  setTimeout(()=>qsCalc(buyId),50);
 }
-function qsPreview(buyId){
-  const buys=getBuys(),b=buys.find(x=>x.id===buyId);if(!b)return;
+function qsCalc(buyId){
+  const b=getBuys().find(x=>x.id===buyId);if(!b)return;
   const{netKgPerPc,costPerPc}=buyCalc(b);
   const pcs=parseFloat($('qs_pcs')?.value)||0,sk=parseFloat($('qs_kg')?.value)||0;
   const sp=sk>0&&netKgPerPc>0?sk*netKgPerPc:0;
   const pcEl=$('qs_pc');if(pcEl)pcEl.value=sp>0?sp.toFixed(1):'';
   const cash=parseFloat($('qs_cash')?.value)||0,upi=parseFloat($('qs_upi')?.value)||0;
-  const rev=pcs*sp,cost=pcs*costPerPc,profit=rev-cost,coll=cash+upi;
-  const pb=$('qsPreviewBox');
+  const rev=pcs*sp,profit=rev-pcs*costPerPc,coll=cash+upi;
+  const pb=$('qsPrev');
   if(pb&&pcs>0&&sk>0){
     pb.innerHTML=`${pcs}pcs × ₹${sk}/kg = ₹${sp.toFixed(1)}/pc · ${t('d_profit')}: <strong style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</strong>`;
     pb.className='info-box '+(profit>=0?'green':'red');pb.style.display='block';
   }
-  const pl=$('qsPaidLine');if(pl)pl.textContent=`${t('d_collected')}: ${fmt(coll)} · ${t('pending')}: ${fmt(Math.max(0,rev-coll))}`;
+  const pl=$('qsLine');if(pl)pl.textContent=`${t('d_collected')}: ${fmt(coll)} · ${t('pending')}: ${fmt(Math.max(0,rev-coll))}`;
 }
-function confirmQuickSell(buyId){
+function doQuickSell(buyId){
   const pcs=parseFloat($('qs_pcs')?.value)||0,sk=parseFloat($('qs_kg')?.value)||0;
   if(!pcs||pcs<=0){toast(t('t_enter_pcs'));return}
   if(!sk){toast(t('t_enter_price'));return}
-  const buys=getBuys(),b=buys.find(x=>x.id===buyId);
+  const b=getBuys().find(x=>x.id===buyId);
   if(pcs>unsoldPcs(b)){toast(t('t_only_pcs',unsoldPcs(b)));return}
   const{netKgPerPc}=buyCalc(b);
   const sp=parseFloat((sk*netKgPerPc).toFixed(2));
   const rec={id:nid(),buyId,date:$('qs_date')?.value||todayKey(),ts:Date.now(),pcs,sellKg:sk,sellPc:sp,
     cash:parseFloat($('qs_cash')?.value)||0,upi:parseFloat($('qs_upi')?.value)||0,note:$('qs_note')?.value.trim()||''};
   const sales=getSales();sales.push(rec);
-  saSync(KS,sales,rec);closeModal();toast(t('t_sale_saved'));renderHome();
+  save(KS,sales,rec);closeModal();toast(t('t_sale_saved'));renderHome();
 }
 
 /* ════ QUICK COLLECT ════ */
 function quickCollect(buyId){
-  const buys=getBuys(),b=buys.find(x=>x.id===buyId);if(!b)return;
+  const b=getBuys().find(x=>x.id===buyId);if(!b)return;
   const rev=totalRevenue(b),coll=totalCollected(b),pend=pendingCash(b);
   openModal(t('d_collect_payment'),`
     <div class="info-box" style="margin-bottom:.8rem">${t('d_total_rev')}: <strong>${fmt(rev)}</strong><br>${t('d_already_coll')}: <strong style="color:var(--green)">${fmt(coll)}</strong><br><strong style="color:var(--red)">${t('d_still_pend')}: ${fmt(pend)}</strong></div>
@@ -1120,16 +1076,16 @@ function quickCollect(buyId){
       <div class="pay-total-line" id="qcLine">Total: ${fmt(pend)}</div>
     </div>
     <div class="fg" style="margin-bottom:.85rem"><label class="fl">${t('note_opt')}</label><input class="fi np" id="qc_note" type="text" placeholder="Cash, UPI…"></div>
-    <button class="btn primary btn-lg btn-full" onclick="confirmCollect(${buyId})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>${t('d_confirm_coll')}</button>
+    <button class="btn primary btn-lg btn-full" onclick="doCollect(${buyId})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>${t('d_confirm_coll')}</button>
   `);
 }
 function qcLine(){const c=parseFloat($('qc_cash')?.value)||0,u=parseFloat($('qc_upi')?.value)||0;const pl=$('qcLine');if(pl)pl.textContent=`Total: ${fmt(c+u)}`}
-function confirmCollect(buyId){
+function doCollect(buyId){
   const c=parseFloat($('qc_cash')?.value)||0,u=parseFloat($('qc_upi')?.value)||0;
   if(!c&&!u){toast(t('t_enter_amt'));return}
   const rec={id:nid(),buyId,date:todayKey(),ts:Date.now(),pcs:0,sellPc:0,sellKg:0,cash:c,upi:u,isCollectionOnly:true,note:$('qc_note')?.value.trim()||''};
-  const allSales=getSales();allSales.push(rec);
-  saSync(KS,allSales,rec);closeModal();toast(t('t_collected',fmt(c+u)));renderHome();
+  const sales=getSales();sales.push(rec);
+  save(KS,sales,rec);closeModal();toast(t('t_collected',fmt(c+u)));renderHome();
 }
 
 /* ════ LEDGER ════ */
@@ -1137,7 +1093,6 @@ let ledgerDateKey=todayKey();
 function shiftDate(d){const dt=new Date(ledgerDateKey);dt.setDate(dt.getDate()+d);const nk=dt.toISOString().slice(0,10);if(nk>todayKey())return;ledgerDateKey=nk;renderLedger()}
 function openDatePicker(){$('dpInput').max=todayKey();$('dpInput').value=ledgerDateKey;$('dpInput').click()}
 function setDateFromPicker(v){if(v){ledgerDateKey=v;renderLedger()}}
-
 function renderLedger(){
   const[y,m,d]=ledgerDateKey.split('-').map(Number);
   const isToday=ledgerDateKey===todayKey();
@@ -1190,9 +1145,8 @@ function renderLedger(){
           const isPast=s.date!==ledgerDateKey;
           sbd+=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;padding:.45rem .6rem;background:${isPast?'var(--card2)':'var(--greenL)'};border-radius:.5rem;margin-bottom:.3rem;border:1px solid ${isPast?'var(--bdr)':'var(--green)'}">
             <div style="flex:1;min-width:0">
-              <div style="font-size:.68rem;font-weight:700;color:var(--mu);margin-bottom:.12rem">${t('d_sale')} ${si+1}${isPast?` · <span style="color:var(--orange)">${keyShort(s.date)}</span>`:`· ${t('today')}`}${s.note?' · '+s.note:''}</div>
-              <div style="font-size:.82rem;font-weight:700;color:var(--tx)">${s.pcs} pcs @ ₹${s.sellKg||0}/kg</div>
-              <div style="font-size:.68rem;color:var(--mu)">= ₹${(s.sellPc||0).toFixed(1)}/pc · Net ${(s.pcs*netKgPerPc).toFixed(2)} kg</div>
+              <div style="font-size:.68rem;font-weight:700;color:var(--mu)">${t('d_sale')} ${si+1}${isPast?` · <span style="color:var(--orange)">${keyShort(s.date)}</span>`:` · ${t('today')}`}${s.note?' · '+s.note:''}</div>
+              <div style="font-size:.82rem;font-weight:700">${s.pcs} pcs @ ₹${s.sellKg||0}/kg = ₹${(s.sellPc||0).toFixed(1)}/pc</div>
             </div>
             <div style="text-align:right;flex-shrink:0">
               <div style="font-size:.9rem;font-weight:800;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--pri)">${fmt(sRev)}</div>
@@ -1203,11 +1157,13 @@ function renderLedger(){
           </div>`;
         });
         sbd+=`<div style="display:flex;justify-content:space-between;padding:.4rem .6rem;background:var(--card2);border-radius:.5rem;border:1px solid var(--bdr)">
-          <div style="font-size:.7rem;color:var(--mu)">${t('d_sold')} ${sold}/${b.pcs}${u>0?` · <span style="color:var(--orange);font-weight:700">${t('d_unsold',u)}</span>`:`· <span style="color:var(--green);font-weight:700">${t('d_all_sold_long',b.pcs)}</span>`}</div>
-          <div style="text-align:right"><div style="font-size:.78rem;font-weight:800;font-family:ui-monospace,Menlo,Consolas,monospace;color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</div>
-          ${pend>0.5?`<div style="font-size:.63rem;color:var(--red);font-weight:700">${t('d_pending_amt',fmt(pend))}</div>`:`<div style="font-size:.63rem;color:var(--green);font-weight:700">${t('d_fully_collected')}</div>`}</div>
+          <div style="font-size:.7rem;color:var(--mu)">${t('d_sold')} ${sold}/${b.pcs}${u>0?` · <span style="color:var(--orange);font-weight:700">${t('d_unsold',u)}</span>`:` · <span style="color:var(--green);font-weight:700">${t('d_all_sold_long',b.pcs)}</span>`}</div>
+          <div style="text-align:right">
+            <div style="font-size:.78rem;font-weight:800;font-family:ui-monospace,Menlo,Consolas,monospace;color:${profit>=0?'var(--green)':'var(--red)'}">${fmtD(profit)}</div>
+            ${pend>0.5?`<div style="font-size:.63rem;color:var(--red);font-weight:700">${t('d_pending_amt',fmt(pend))}</div>`:`<div style="font-size:.63rem;color:var(--green);font-weight:700">${t('d_fully_collected')}</div>`}
+          </div>
         </div></div>`;
-      } else {
+      }else{
         sbd=`<div style="margin-top:.55rem;padding:.5rem .7rem;background:var(--orangeL);border-radius:.5rem;border:1px solid var(--orange);font-size:.75rem;color:var(--orange);font-weight:600">${t('d_no_sales_batch')}</div>`;
       }
       html+=`<div class="entry"><div class="entry-head">
@@ -1232,30 +1188,30 @@ function renderLedger(){
     });
     html+='</div>';
   }
-  const crossSalesRec=daySalesRec.filter(s=>!s.isCollectionOnly&&!dayBuys.find(b=>b.id===s.buyId));
-  if(crossSalesRec.length){
+  const cross=daySalesRec.filter(s=>!s.isCollectionOnly&&!dayBuys.find(b=>b.id===s.buyId));
+  if(cross.length){
     html+=`<div class="card card-pad"><div class="section-label">${t('d_cross_sales')}</div><div style="font-size:.72rem;color:var(--mu);margin-bottom:.55rem;padding:.45rem .6rem;background:var(--card2);border-radius:.5rem;border:1px solid var(--bdr)">${t('d_cross_note')}</div>`;
-    crossSalesRec.forEach(s=>{
+    cross.forEach(s=>{
       const b=buys.find(x=>x.id===s.buyId);if(!b)return;
       const{netKgPerPc,costPerPc}=buyCalc(b);
       const sRev=s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0);
       const sP=sRev-s.pcs*costPerPc;
       html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .65rem;background:var(--card2);border-radius:.5rem;border:1px solid var(--bdr);margin-bottom:.35rem">
         <div><div style="font-size:.75rem;font-weight:700">${s.pcs} pcs @ ₹${s.sellKg||0}/kg${s.note?' · '+s.note:''}</div>
-          <div style="font-size:.65rem;color:var(--mu)">${t('d_from_batch',keyDisp(b.date))} · <span style="color:${sP>=0?'var(--green)':'var(--red)'}">${fmtD(sP)}</span></div></div>
+        <div style="font-size:.65rem;color:var(--mu)">${t('d_from_batch',keyDisp(b.date))} · <span style="color:${sP>=0?'var(--green)':'var(--red)'}">${fmtD(sP)}</span></div></div>
         <div style="text-align:right"><div style="font-size:.88rem;font-weight:800;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--pri)">${fmt(sRev)}</div>
-          <button style="font-size:.6rem;margin-top:.2rem;padding:.15rem .35rem;border-radius:.35rem;background:var(--redL);color:var(--red);border:1px solid var(--red);cursor:pointer" onclick="deleteSale(${s.id})">${t('d_del')}</button></div>
+        <button style="font-size:.6rem;margin-top:.2rem;padding:.15rem .35rem;border-radius:.35rem;background:var(--redL);color:var(--red);border:1px solid var(--red);cursor:pointer" onclick="deleteSale(${s.id})">${t('d_del')}</button></div>
       </div>`;
     });
     html+='</div>';
   }
-  const dayColl2=daySalesRec.filter(s=>s.isCollectionOnly);
-  if(dayColl2.length){
+  const collRecs=daySalesRec.filter(s=>s.isCollectionOnly);
+  if(collRecs.length){
     html+=`<div class="card card-pad"><div class="section-label">${t('d_collections')}</div>`;
-    dayColl2.forEach(s=>{const b=buys.find(x=>x.id===s.buyId);const amt=(s.cash||0)+(s.upi||0);
+    collRecs.forEach(s=>{const b=buys.find(x=>x.id===s.buyId);const amt=(s.cash||0)+(s.upi||0);
       html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .65rem;background:var(--greenL);border-radius:.5rem;border:1px solid var(--green);margin-bottom:.35rem">
         <div><div style="font-size:.75rem;font-weight:700">${s.note||t('d_collections')}</div>
-          <div style="font-size:.65rem;color:var(--mu)">${b?t('d_from_batch',keyDisp(b.date))+' · ':''} Cash: ${fmt(s.cash||0)} · UPI: ${fmt(s.upi||0)}</div></div>
+        <div style="font-size:.65rem;color:var(--mu)">${b?t('d_from_batch',keyDisp(b.date))+' · ':''} Cash: ${fmt(s.cash||0)} · UPI: ${fmt(s.upi||0)}</div></div>
         <div style="font-size:.95rem;font-weight:800;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--green)">${fmt(amt)}</div></div>`;
     });html+='</div>';
   }
@@ -1264,11 +1220,11 @@ function renderLedger(){
     daySuppays.forEach(p=>{const b=buys.find(x=>x.id===p.buyId);const amt=(p.cash||0)+(p.upi||0);
       html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .65rem;background:var(--goldL);border-radius:.5rem;border:1px solid var(--gold);margin-bottom:.35rem">
         <div><div style="font-size:.75rem;font-weight:700">${p.note||t('d_supp_payments')}</div>
-          <div style="font-size:.65rem;color:var(--mu)">→ ${b?.supplier||'Supplier'}${b?' · '+keyDisp(b.date):''}</div></div>
+        <div style="font-size:.65rem;color:var(--mu)">→ ${b?.supplier||'Supplier'}${b?' · '+keyDisp(b.date):''}</div></div>
         <div style="font-size:.95rem;font-weight:800;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--gold)">${fmt(amt)}</div></div>`;
     });html+='</div>';
   }
-  if(!dayBuys.length&&!crossSalesRec.length&&!dayColl2.length&&!daySuppays.length){
+  if(!dayBuys.length&&!cross.length&&!collRecs.length&&!daySuppays.length){
     html+=`<div class="empty"><div class="empty-icon">📅</div><p>${t('d_no_activity')}<br>${t('d_browse_dates')}</p></div>`;
   }
   $('ledgerContent').innerHTML=html;
@@ -1277,11 +1233,9 @@ function renderLedger(){
 function deleteDay(dateKey){
   if(!confirm(t('d_delete_day_q',keyDisp(dateKey))))return;
   const buyIds=getBuys().filter(b=>b.date===dateKey).map(b=>b.id);
-  if(db&&shopId&&syncEnabled){
-    buyIds.forEach(id=>fsDel('buys',id));
-    getSales().filter(s=>s.date===dateKey||buyIds.includes(s.buyId)).forEach(s=>fsDel('sales',s.id));
-    getSuppays().filter(p=>p.date===dateKey||buyIds.includes(p.buyId)).forEach(p=>fsDel('suppays',p.id));
-  }
+  buyIds.forEach(id=>fsDel('buys',id));
+  getSales().filter(s=>s.date===dateKey||buyIds.includes(s.buyId)).forEach(s=>fsDel('sales',s.id));
+  getSuppays().filter(p=>p.date===dateKey||buyIds.includes(p.buyId)).forEach(p=>fsDel('suppays',p.id));
   sa(KB,getBuys().filter(b=>b.date!==dateKey));
   sa(KS,getSales().filter(s=>s.date!==dateKey&&!buyIds.includes(s.buyId)));
   sa(KSP,getSuppays().filter(p=>p.date!==dateKey&&!buyIds.includes(p.buyId)));
@@ -1289,13 +1243,13 @@ function deleteDay(dateKey){
 }
 function deleteBatch(id){
   if(!confirm(t('d_delete_batch_q')))return;
-  if(db&&shopId&&syncEnabled){fsDel('buys',id);getSales().filter(s=>s.buyId===id).forEach(s=>fsDel('sales',s.id));getSuppays().filter(p=>p.buyId===id).forEach(p=>fsDel('suppays',p.id))}
+  fsDel('buys',id);getSales().filter(s=>s.buyId===id).forEach(s=>fsDel('sales',s.id));getSuppays().filter(p=>p.buyId===id).forEach(p=>fsDel('suppays',p.id));
   sa(KB,getBuys().filter(b=>b.id!==id));sa(KS,getSales().filter(s=>s.buyId!==id));sa(KSP,getSuppays().filter(p=>p.buyId!==id));
   toast(t('t_batch_deleted'));renderLedger();
 }
 function deleteSale(id){
   if(!confirm(t('d_delete_sale_q')))return;
-  if(db&&shopId&&syncEnabled)fsDel('sales',id);
+  fsDel('sales',id);
   sa(KS,getSales().filter(s=>s.id!==id));toast(t('t_sale_deleted'));renderLedger();
 }
 
@@ -1318,12 +1272,12 @@ function renderAnalytics(){
   else if(aPeriod==='custom'){from=$('cFrom').value||today;to=$('cTo').value||today}
   const gk={};
   buys.filter(b=>b.date>=from&&b.date<=to).forEach(b=>{
-    if(!gk[b.date])gk[b.date]={date:b.date,cost:0,revenue:0,coll:0,cash:0,upi:0,pieces:0,kg:0};
-    gk[b.date].cost+=buyCalc(b).totalCost;gk[b.date].pieces+=b.pcs;gk[b.date].kg+=b.liveKg;
+    if(!gk[b.date])gk[b.date]={date:b.date,cost:0,revenue:0,coll:0,cash:0,upi:0,kg:0};
+    gk[b.date].cost+=buyCalc(b).totalCost;gk[b.date].kg+=b.liveKg;
   });
   sales.filter(s=>s.date>=from&&s.date<=to).forEach(s=>{
     const b=buys.find(x=>x.id===s.buyId);if(!b)return;
-    if(!gk[s.date])gk[s.date]={date:s.date,cost:0,revenue:0,coll:0,cash:0,upi:0,pieces:0,kg:0};
+    if(!gk[s.date])gk[s.date]={date:s.date,cost:0,revenue:0,coll:0,cash:0,upi:0,kg:0};
     const{netKgPerPc}=buyCalc(b);
     gk[s.date].revenue+=s.isCollectionOnly?0:(s.sellPc?s.pcs*s.sellPc:s.pcs*netKgPerPc*(s.sellKg||0));
     gk[s.date].coll+=(s.cash||0)+(s.upi||0);gk[s.date].cash+=s.cash||0;gk[s.date].upi+=s.upi||0;
@@ -1371,16 +1325,21 @@ function addUdhaar(){
   const name=$('u_name').value.trim(),amt=parseFloat($('u_amt').value);
   if(!name){toast(t('t_enter_name'));return}if(!amt||amt<=0){toast(t('t_enter_amt'));return}
   const rec={id:nid(),ts:Date.now(),date:todayKey(),name,amount:amt,note:$('u_note').value.trim(),paid:false};
-  const ud=la(KU);ud.push(rec);saSync(KU,ud,rec);
+  const ud=la(KU);ud.push(rec);save(KU,ud,rec);
   $('u_name').value='';$('u_amt').value='';$('u_note').value='';
   renderUdhaar();updateUdBadge();toast(t('t_udhaar_added',name));
 }
-function markPaid(id){const ud=la(KU).map(u=>u.id===id?{...u,paid:true,ts:Date.now()}:u);saSync(KU,ud,ud.find(u=>u.id===id));renderUdhaar();updateUdBadge();toast(t('t_marked_paid'))}
-function markUnpaid(id){const ud=la(KU).map(u=>u.id===id?{...u,paid:false,ts:Date.now()}:u);saSync(KU,ud,ud.find(u=>u.id===id));renderUdhaar();updateUdBadge()}
+function markPaid(id){
+  const ud=la(KU).map(u=>u.id===id?{...u,paid:true,ts:Date.now()}:u);
+  save(KU,ud,ud.find(u=>u.id===id));renderUdhaar();updateUdBadge();toast(t('t_marked_paid'));
+}
+function markUnpaid(id){
+  const ud=la(KU).map(u=>u.id===id?{...u,paid:false,ts:Date.now()}:u);
+  save(KU,ud,ud.find(u=>u.id===id));renderUdhaar();updateUdBadge();
+}
 function delUdhaar(id){
   if(!confirm(t('d_delete_q')))return;
-  if(db&&shopId&&syncEnabled)fsDel('udhaar',id);
-  sa(KU,la(KU).filter(u=>u.id!==id));renderUdhaar();updateUdBadge();
+  fsDel('udhaar',id);sa(KU,la(KU).filter(u=>u.id!==id));renderUdhaar();updateUdBadge();
 }
 function renderUdhaar(){
   const data=la(KU).sort((a,b)=>b.ts-a.ts);
@@ -1399,25 +1358,20 @@ function renderUdhaar(){
 }
 function updateUdBadge(){const c=la(KU).filter(u=>!u.paid).length;$('udBadge').style.display=c?'block':'none'}
 
-/* ════ TRANSLATIONS ════ */
+/* ════ LANGUAGE (EN / HI / RH) ════ */
 let lang=localStorage.getItem(KL)||'en';
 const T={
 en:{subtitle:'Live Stock Ledger',nav_today:'Today',nav_entry:'Add Entry',nav_ledger:'Ledger',nav_reports:'Reports',nav_udhaar:'Udhaar',entry_date:'Entry Date',date:'Date',set_today:'Set Today',buy_stock:'Buy Stock',sell_stock:'Sell Stock',supplier_pay:'Supplier Pay',purchase_details:'Stock Purchase Details',pieces_bought:'Pieces Bought',total_weight:'Total Live Weight',buy_price:'Buy Price ₹/kg',wastage:'Wastage %',supplier_section:'Supplier Payment',supplier_name:'Supplier Name',supp_due:'Total Amount Due ₹',paid_now:'Paid Now (optional)',note_opt:'Note (optional)',note:'Note',save_purchase:'Save Purchase',cash:'Cash ₹',upi:'UPI ₹',sell_from_stock:'Sell From Stock',select_batch:'Select Stock Batch',pieces_to_sell:'Pieces to Sell',cash_collected_now:'Cash Collected Now',save_sale:'Save Sale',record_supp_pay:'Record Supplier Payment',payment_made:'Payment Made',save_payment:'Save Payment',today:'Today',week:'Week',month:'Month',year:'Year',custom:'Custom',from:'From',to:'To',add_udhaar_title:'Add Udhaar Entry',customer_name:'Customer Name',amount:'Amount ₹',add_udhaar_btn:'Add Udhaar',udhaar_ledger:'Udhaar Ledger',pending:'Pending',
-sync_title:'☁️ Cloud Sync',sync_desc:'Enter a sync code to link all devices. Same code = same data on all phones/laptops.',sync_code_hint:'Share this code with your other devices.',sync_enable:'Enable Sync',sync_disable:'Disable Sync',sync_change:'Change Code',sync_pull:'Pull from Cloud',sync_push:'Push to Cloud',sync_enter_code:'Enter Your Sync Code',sync_code_tip:'Use same code on all devices. E.g. MANDI01 or AHMED123',sync_activate:'Connect & Sync',sync_connecting:'Connecting to',sync_synced:'Synced',sync_syncing:'Syncing',sync_error:'Error',sync_offline:'Offline',sync_offline_tip:'Offline — data saved locally',sync_pulled:'Pulled latest data',sync_pushed:'Pushed all data',sync_code_short:'Code must be 3+ characters',sync_status:'Status',
-d_pending_actions:'⚠️ Pending Actions',d_unsold_alert:(n)=>`🐔 ${n} pieces unsold — tap Ledger to sell`,d_cashpend_alert:(v)=>`💰 ${v} pending from customers`,d_supppend_alert:(v)=>`🏭 ${v} owed to supplier`,d_today_summary:"Today's Summary",d_invested:'Invested',d_revenue:'Revenue',d_profit:'Profit',d_collected:'Collected',d_today_purchase:"Today's Purchase",d_batch:'Batch',d_pieces:'pieces',d_live:'live',d_buy:'Buy',d_wst:'Wastage',d_net:'Net',d_all_sold:'All sold ✓',d_unsold:(n)=>`${n} pieces unsold`,d_no_sales:'No sales yet',d_sell_rem:(n)=>`🐔 Sell ${n} remaining`,d_collect:'Collect',d_nothing_yet:'Nothing here yet.',d_add_first_purchase:'Tap <strong>Add Entry</strong> to record today\'s purchase.',d_day_summary:'Day Summary',d_delete_day:'🗑 Delete Day',d_sold_today:'Sold Today',d_day_profit:'Day Profit',d_batches_purchased:'🛒 Batches Purchased',d_total_cost:'Total cost',d_cost_pc:'Cost/pc',d_supp_paid:'Supplier paid ✅',d_supp_pending:(v)=>`Supplier: ${v} pending`,d_all_sold_long:(n)=>`All ${n} sold ✅`,d_no_sales_batch:'No sales yet for this batch',d_sale_breakdown:'Sale Breakdown',d_sale:'Sale',d_piece:'piece',d_sold:'Sold',d_fully_collected:'Fully collected ✅',d_pending_amt:(v)=>`${v} pending`,d_cross_sales:'💰 Sales Recorded Today (from other batches)',d_cross_note:"These sales belong to batches bought on other days. Tap that batch's date in the ledger for full breakdown.",d_from_batch:(d)=>`From ${d} batch`,d_collections:'💵 Collections Recorded Today',d_supp_payments:'🏭 Supplier Payments',d_no_activity:'No activity on this day.',d_browse_dates:'Use ← → to browse other dates.',d_total_cost_lbl:'Total Cost',d_profit_lbl:'Profit',d_loss_lbl:'Loss',d_margin:(m)=>`Margin ${m}%`,d_day_breakdown:'Day-wise Breakdown',d_date:'Date',d_cost:'Cost',d_chart:'Chart',d_insights:'💡 Insights',d_best_day:(d,p)=>`🏆 Best day: <strong>${d}</strong> — Profit ${p}`,d_total_kg:(kg)=>`📦 Total live kg bought: <strong>${kg} kg</strong>`,d_supp_all_paid:'🏭 Supplier: <strong style="color:var(--green)">All paid ✅</strong>',d_supp_bal_due:(v)=>`🏭 Supplier balance due: <strong style="color:var(--red)">${v}</strong>`,d_no_data:'No data yet.',d_add_first:'Add your first purchase to see reports.',d_no_udhaar:'No udhaar entries.<br>All payments are clear!',d_paid:'✅ Paid',d_undo:'Undo',d_mark_paid:'Mark Paid',d_del:'Del',d_delete_q:'Delete?',d_delete_day_q:(d)=>`Delete ALL entries for ${d}? Cannot be undone.`,d_delete_batch_q:'Delete this batch and all its sales?',d_delete_sale_q:'Delete this sale?',d_no_stock:'No stock available',d_choose_batch:'— Choose batch —',d_choose_batch_sell:'— Choose batch to sell from —',d_sell_from:(d)=>`Sell from ${d} batch`,d_pcs_remaining:(n)=>`${n} pieces remaining unsold`,d_net_per_pc:'Net weight per piece',d_cost_pc2:'Cost/piece',d_sale_date:'Sale Date',d_save_sale:'Save Sale',d_collect_payment:'Collect Payment',d_total_rev:'Total revenue',d_already_coll:'Already collected',d_still_pend:'Still pending',d_collecting_now:'Collecting Now',d_confirm_coll:'Confirm Collection',
-t_fill_buy:'Fill pieces, weight and buy price',t_purchase_saved:'✅ Purchase saved!',t_select_batch:'Select a batch',t_batch_not_found:'Batch not found',t_enter_pcs:'Enter pieces to sell',t_enter_price:'Enter sell price ₹/kg',t_only_pcs:(n)=>`Only ${n} pieces available`,t_sale_saved:'✅ Sale saved!',t_enter_amt:'Enter amount',t_collected:(v)=>`✅ ${v} collected!`,t_enter_name:'Enter name',t_udhaar_added:(n)=>`Udhaar added for ${n}`,t_marked_paid:'Marked paid ✅',t_day_deleted:'Day deleted',t_batch_deleted:'Batch deleted',t_sale_deleted:'Sale deleted',t_rate_saved:'✅ Rate saved!',t_rate_cleared:'Rate cleared',t_enter_buy:'Enter buy price first',t_no_supp_due:'No outstanding supplier payments!'},
+d_pending_actions:'⚠️ Pending Actions',d_unsold_alert:(n)=>`🐔 ${n} pieces unsold — tap Ledger to sell`,d_cashpend_alert:(v)=>`💰 ${v} pending from customers`,d_supppend_alert:(v)=>`🏭 ${v} owed to supplier`,d_today_summary:"Today's Summary",d_invested:'Invested',d_revenue:'Revenue',d_profit:'Profit',d_collected:'Collected',d_today_purchase:"Today's Purchase",d_batch:'Batch',d_pieces:'pieces',d_live:'live',d_buy:'Buy',d_wst:'Wastage',d_net:'Net',d_all_sold:'All sold ✓',d_unsold:(n)=>`${n} pieces unsold`,d_no_sales:'No sales yet',d_sell_rem:(n)=>`🐔 Sell ${n} remaining`,d_collect:'Collect',d_nothing_yet:'Nothing here yet.',d_add_first_purchase:'Tap <strong>Add Entry</strong> to record today\'s purchase.',d_day_summary:'Day Summary',d_delete_day:'🗑 Delete Day',d_sold_today:'Sold Today',d_day_profit:'Day Profit',d_batches_purchased:'🛒 Batches Purchased',d_total_cost:'Total cost',d_cost_pc:'Cost/pc',d_supp_paid:'Supplier paid ✅',d_supp_pending:(v)=>`Supplier: ${v} pending`,d_all_sold_long:(n)=>`All ${n} sold ✅`,d_no_sales_batch:'No sales yet for this batch',d_sale_breakdown:'Sale Breakdown',d_sale:'Sale',d_piece:'piece',d_sold:'Sold',d_fully_collected:'Fully collected ✅',d_pending_amt:(v)=>`${v} pending`,d_cross_sales:'💰 Sales from other batches',d_cross_note:"These sales belong to batches bought on other days.",d_from_batch:(d)=>`From ${d} batch`,d_collections:'💵 Collections Today',d_supp_payments:'🏭 Supplier Payments',d_no_activity:'No activity on this day.',d_browse_dates:'Use ← → to browse other dates.',d_total_cost_lbl:'Total Cost',d_profit_lbl:'Profit',d_loss_lbl:'Loss',d_margin:(m)=>`Margin ${m}%`,d_day_breakdown:'Day-wise Breakdown',d_date:'Date',d_cost:'Cost',d_chart:'Chart',d_insights:'💡 Insights',d_best_day:(d,p)=>`🏆 Best day: <strong>${d}</strong> — Profit ${p}`,d_total_kg:(kg)=>`📦 Total live kg: <strong>${kg} kg</strong>`,d_supp_all_paid:'🏭 Supplier: <strong style="color:var(--green)">All paid ✅</strong>',d_supp_bal_due:(v)=>`🏭 Supplier balance due: <strong style="color:var(--red)">${v}</strong>`,d_no_data:'No data yet.',d_add_first:'Add your first purchase to see reports.',d_no_udhaar:'No udhaar entries.<br>All payments are clear!',d_paid:'✅ Paid',d_undo:'Undo',d_mark_paid:'Mark Paid',d_del:'Del',d_delete_q:'Delete?',d_delete_day_q:(d)=>`Delete ALL entries for ${d}?`,d_delete_batch_q:'Delete this batch and all its sales?',d_delete_sale_q:'Delete this sale?',d_no_stock:'No stock available',d_choose_batch:'— Choose batch —',d_choose_batch_sell:'— Choose batch to sell from —',d_sell_from:(d)=>`Sell from ${d} batch`,d_pcs_remaining:(n)=>`${n} pieces remaining`,d_net_per_pc:'Net weight/piece',d_cost_pc2:'Cost/piece',d_sale_date:'Sale Date',d_save_sale:'Save Sale',d_collect_payment:'Collect Payment',d_total_rev:'Total revenue',d_already_coll:'Already collected',d_still_pend:'Still pending',d_collecting_now:'Collecting Now',d_confirm_coll:'Confirm Collection',
+t_fill_buy:'Fill pieces, weight and buy price',t_purchase_saved:'✅ Purchase saved!',t_select_batch:'Select a batch',t_batch_not_found:'Batch not found',t_enter_pcs:'Enter pieces to sell',t_enter_price:'Enter sell price ₹/kg',t_only_pcs:(n)=>`Only ${n} pieces available`,t_sale_saved:'✅ Sale saved!',t_enter_amt:'Enter amount',t_collected:(v)=>`✅ ${v} collected!`,t_enter_name:'Enter name',t_udhaar_added:(n)=>`Udhaar added for ${n}`,t_marked_paid:'Marked paid ✅',t_day_deleted:'Day deleted',t_batch_deleted:'Batch deleted',t_sale_deleted:'Sale deleted',t_enter_buy:'Enter buy price first',t_no_supp_due:'No outstanding supplier payments!'},
 hi:{subtitle:'लाइव स्टॉक बही खाता',nav_today:'आज',nav_entry:'दर्ज करें',nav_ledger:'बही खाता',nav_reports:'रिपोर्ट',nav_udhaar:'उधार',entry_date:'दिनांक',date:'तारीख',set_today:'आज की तारीख',buy_stock:'खरीद',sell_stock:'बिक्री',supplier_pay:'सप्लायर भुगतान',purchase_details:'खरीद विवरण',pieces_bought:'खरीदे टुकड़े',total_weight:'कुल जिंदा वजन',buy_price:'खरीद भाव ₹/किलो',wastage:'बर्बादी %',supplier_section:'सप्लायर भुगतान',supplier_name:'सप्लायर का नाम',supp_due:'कुल देय राशि ₹',paid_now:'अभी दिया (वैकल्पिक)',note_opt:'नोट (वैकल्पिक)',note:'नोट',save_purchase:'खरीद सेव करें',cash:'नकद ₹',upi:'UPI ₹',sell_from_stock:'स्टॉक से बेचें',select_batch:'बैच चुनें',pieces_to_sell:'बेचने के टुकड़े',cash_collected_now:'अभी मिली नकदी',save_sale:'बिक्री सेव करें',record_supp_pay:'सप्लायर भुगतान दर्ज करें',payment_made:'भुगतान किया',save_payment:'भुगतान सेव करें',today:'आज',week:'सप्ताह',month:'महीना',year:'साल',custom:'कस्टम',from:'से',to:'तक',add_udhaar_title:'उधार दर्ज करें',customer_name:'ग्राहक का नाम',amount:'राशि ₹',add_udhaar_btn:'उधार जोड़ें',udhaar_ledger:'उधार बही खाता',pending:'बाकी',
-sync_title:'☁️ क्लाउड सिंक',sync_desc:'सभी डिवाइस जोड़ने के लिए सिंक कोड डालें।',sync_code_hint:'यह कोड दूसरे डिवाइस में डालें।',sync_enable:'सिंक चालू',sync_disable:'सिंक बंद',sync_change:'कोड बदलें',sync_pull:'क्लाउड से लें',sync_push:'क्लाउड में डालें',sync_enter_code:'सिंक कोड डालें',sync_code_tip:'सभी डिवाइस में एक ही कोड। जैसे: MANDI01',sync_activate:'जोड़ें और सिंक करें',sync_connecting:'से जुड़ रहे हैं',sync_synced:'सिंक',sync_syncing:'सिंक हो रहा है',sync_error:'एरर',sync_offline:'ऑफलाइन',sync_offline_tip:'ऑफलाइन — डेटा फोन में',sync_pulled:'नया डेटा मिला',sync_pushed:'सारा डेटा भेजा',sync_code_short:'कोड 3+ अक्षर का होना चाहिए',sync_status:'स्थिति',
-d_pending_actions:'⚠️ बाकी काम',d_unsold_alert:(n)=>`🐔 ${n} टुकड़े नहीं बिके`,d_cashpend_alert:(v)=>`💰 ${v} ग्राहकों से बाकी`,d_supppend_alert:(v)=>`🏭 सप्लायर को ${v} देना है`,d_today_summary:'आज का सारांश',d_invested:'लागत',d_revenue:'आमदनी',d_profit:'मुनाफा',d_collected:'वसूली',d_today_purchase:'आज की खरीद',d_batch:'बैच',d_pieces:'टुकड़े',d_live:'जिंदा',d_buy:'खरीद',d_wst:'बर्बादी',d_net:'शुद्ध',d_all_sold:'सभी बिके ✓',d_unsold:(n)=>`${n} टुकड़े बाकी`,d_no_sales:'अभी बिक्री नहीं',d_sell_rem:(n)=>`🐔 ${n} बाकी बेचें`,d_collect:'वसूल',d_nothing_yet:'अभी कुछ नहीं।',d_add_first_purchase:'<strong>दर्ज करें</strong> दबाकर खरीद डालें।',d_day_summary:'दिन का सारांश',d_delete_day:'🗑 दिन हटाएं',d_sold_today:'आज बेचा',d_day_profit:'दिन का मुनाफा',d_batches_purchased:'🛒 खरीदे हुए बैच',d_total_cost:'कुल लागत',d_cost_pc:'लागत/टुकड़ा',d_supp_paid:'सप्लायर पेड ✅',d_supp_pending:(v)=>`सप्लायर: ${v} बाकी`,d_all_sold_long:(n)=>`सभी ${n} बिके ✅`,d_no_sales_batch:'इस बैच में बिक्री नहीं',d_sale_breakdown:'बिक्री विवरण',d_sale:'बिक्री',d_piece:'टुकड़ा',d_sold:'बिके',d_fully_collected:'पूरा वसूल ✅',d_pending_amt:(v)=>`${v} बाकी`,d_cross_sales:'💰 आज की बिक्री (पुराने बैच)',d_cross_note:'पूरा विवरण बैच की तारीख पर देखें।',d_from_batch:(d)=>`${d} बैच से`,d_collections:'💵 आज की वसूली',d_supp_payments:'🏭 सप्लायर भुगतान',d_no_activity:'इस दिन कोई काम नहीं।',d_browse_dates:'← → से तारीख बदलें।',d_total_cost_lbl:'कुल लागत',d_profit_lbl:'मुनाफा',d_loss_lbl:'नुकसान',d_margin:(m)=>`मार्जिन ${m}%`,d_day_breakdown:'दिन-वार विवरण',d_date:'तारीख',d_cost:'लागत',d_chart:'चार्ट',d_insights:'💡 जानकारी',d_best_day:(d,p)=>`🏆 सबसे अच्छा दिन: <strong>${d}</strong> — मुनाफा ${p}`,d_total_kg:(kg)=>`📦 कुल जिंदा किलो: <strong>${kg} किलो</strong>`,d_supp_all_paid:'🏭 <strong style="color:var(--green)">सप्लायर सब पेड ✅</strong>',d_supp_bal_due:(v)=>`🏭 सप्लायर को देना: <strong style="color:var(--red)">${v}</strong>`,d_no_data:'अभी कोई डेटा नहीं।',d_add_first:'पहली खरीद दर्ज करें।',d_no_udhaar:'कोई उधार नहीं।<br>सब साफ है! 🎉',d_paid:'✅ पेड',d_undo:'वापस',d_mark_paid:'पेड करें',d_del:'हटाएं',d_delete_q:'हटाएं?',d_delete_day_q:(d)=>`${d} का सारा डेटा हटाएं?`,d_delete_batch_q:'यह बैच हटाएं?',d_delete_sale_q:'यह बिक्री हटाएं?',d_no_stock:'स्टॉक नहीं',d_choose_batch:'— बैच चुनें —',d_choose_batch_sell:'— बेचने के लिए बैच चुनें —',d_sell_from:(d)=>`${d} बैच से बेचें`,d_pcs_remaining:(n)=>`${n} टुकड़े बाकी`,d_net_per_pc:'शुद्ध वजन/टुकड़ा',d_cost_pc2:'लागत/टुकड़ा',d_sale_date:'बिक्री की तारीख',d_save_sale:'बिक्री सेव करें',d_collect_payment:'भुगतान वसूल करें',d_total_rev:'कुल आमदनी',d_already_coll:'पहले वसूला',d_still_pend:'अभी बाकी',d_collecting_now:'अभी वसूल करें',d_confirm_coll:'वसूली की पुष्टि',
-t_fill_buy:'टुकड़े, वजन और खरीद भाव भरें',t_purchase_saved:'✅ खरीद सेव हो गई!',t_select_batch:'बैच चुनें',t_batch_not_found:'बैच नहीं मिला',t_enter_pcs:'बेचने के टुकड़े दर्ज करें',t_enter_price:'बिक्री भाव ₹/किलो दर्ज करें',t_only_pcs:(n)=>`केवल ${n} टुकड़े`,t_sale_saved:'✅ बिक्री सेव हो गई!',t_enter_amt:'राशि दर्ज करें',t_collected:(v)=>`✅ ${v} वसूल किया!`,t_enter_name:'नाम दर्ज करें',t_udhaar_added:(n)=>`${n} का उधार जोड़ा`,t_marked_paid:'पेड मार्क किया ✅',t_day_deleted:'दिन हटाया',t_batch_deleted:'बैच हटाया',t_sale_deleted:'बिक्री हटाई',t_rate_saved:'✅ रेट सेव!',t_rate_cleared:'रेट हटाया',t_enter_buy:'पहले खरीद भाव डालें',t_no_supp_due:'कोई सप्लायर भुगतान बाकी नहीं!'},
+d_pending_actions:'⚠️ बाकी काम',d_unsold_alert:(n)=>`🐔 ${n} टुकड़े नहीं बिके`,d_cashpend_alert:(v)=>`💰 ${v} ग्राहकों से बाकी`,d_supppend_alert:(v)=>`🏭 सप्लायर को ${v} देना है`,d_today_summary:'आज का सारांश',d_invested:'लागत',d_revenue:'आमदनी',d_profit:'मुनाफा',d_collected:'वसूली',d_today_purchase:'आज की खरीद',d_batch:'बैच',d_pieces:'टुकड़े',d_live:'जिंदा',d_buy:'खरीद',d_wst:'बर्बादी',d_net:'शुद्ध',d_all_sold:'सभी बिके ✓',d_unsold:(n)=>`${n} टुकड़े बाकी`,d_no_sales:'अभी बिक्री नहीं',d_sell_rem:(n)=>`🐔 ${n} बाकी बेचें`,d_collect:'वसूल',d_nothing_yet:'अभी कुछ नहीं।',d_add_first_purchase:'<strong>दर्ज करें</strong> दबाकर खरीद डालें।',d_day_summary:'दिन का सारांश',d_delete_day:'🗑 दिन हटाएं',d_sold_today:'आज बेचा',d_day_profit:'दिन का मुनाफा',d_batches_purchased:'🛒 खरीदे हुए बैच',d_total_cost:'कुल लागत',d_cost_pc:'लागत/टुकड़ा',d_supp_paid:'सप्लायर पेड ✅',d_supp_pending:(v)=>`सप्लायर: ${v} बाकी`,d_all_sold_long:(n)=>`सभी ${n} बिके ✅`,d_no_sales_batch:'इस बैच में बिक्री नहीं',d_sale_breakdown:'बिक्री विवरण',d_sale:'बिक्री',d_piece:'टुकड़ा',d_sold:'बिके',d_fully_collected:'पूरा वसूल ✅',d_pending_amt:(v)=>`${v} बाकी`,d_cross_sales:'💰 अन्य बैच की बिक्री',d_cross_note:'ये बिक्री दूसरे बैच की है।',d_from_batch:(d)=>`${d} बैच से`,d_collections:'💵 आज की वसूली',d_supp_payments:'🏭 सप्लायर भुगतान',d_no_activity:'इस दिन कोई काम नहीं।',d_browse_dates:'← → से तारीख बदलें।',d_total_cost_lbl:'कुल लागत',d_profit_lbl:'मुनाफा',d_loss_lbl:'नुकसान',d_margin:(m)=>`मार्जिन ${m}%`,d_day_breakdown:'दिन-वार विवरण',d_date:'तारीख',d_cost:'लागत',d_chart:'चार्ट',d_insights:'💡 जानकारी',d_best_day:(d,p)=>`🏆 सबसे अच्छा दिन: <strong>${d}</strong> — मुनाफा ${p}`,d_total_kg:(kg)=>`📦 कुल जिंदा किलो: <strong>${kg} किलो</strong>`,d_supp_all_paid:'🏭 <strong style="color:var(--green)">सप्लायर सब पेड ✅</strong>',d_supp_bal_due:(v)=>`🏭 सप्लायर को देना: <strong style="color:var(--red)">${v}</strong>`,d_no_data:'अभी कोई डेटा नहीं।',d_add_first:'पहली खरीद दर्ज करें।',d_no_udhaar:'कोई उधार नहीं।<br>सब साफ है! 🎉',d_paid:'✅ पेड',d_undo:'वापस',d_mark_paid:'पेड करें',d_del:'हटाएं',d_delete_q:'हटाएं?',d_delete_day_q:(d)=>`${d} का सारा डेटा हटाएं?`,d_delete_batch_q:'यह बैच हटाएं?',d_delete_sale_q:'यह बिक्री हटाएं?',d_no_stock:'स्टॉक नहीं',d_choose_batch:'— बैच चुनें —',d_choose_batch_sell:'— बैच चुनें —',d_sell_from:(d)=>`${d} बैच से बेचें`,d_pcs_remaining:(n)=>`${n} टुकड़े बाकी`,d_net_per_pc:'शुद्ध वजन/टुकड़ा',d_cost_pc2:'लागत/टुकड़ा',d_sale_date:'बिक्री की तारीख',d_save_sale:'बिक्री सेव करें',d_collect_payment:'भुगतान वसूल करें',d_total_rev:'कुल आमदनी',d_already_coll:'पहले वसूला',d_still_pend:'अभी बाकी',d_collecting_now:'अभी वसूल करें',d_confirm_coll:'वसूली की पुष्टि',
+t_fill_buy:'टुकड़े, वजन और खरीद भाव भरें',t_purchase_saved:'✅ खरीद सेव हो गई!',t_select_batch:'बैच चुनें',t_batch_not_found:'बैच नहीं मिला',t_enter_pcs:'बेचने के टुकड़े दर्ज करें',t_enter_price:'बिक्री भाव ₹/किलो दर्ज करें',t_only_pcs:(n)=>`केवल ${n} टुकड़े`,t_sale_saved:'✅ बिक्री सेव हो गई!',t_enter_amt:'राशि दर्ज करें',t_collected:(v)=>`✅ ${v} वसूल किया!`,t_enter_name:'नाम दर्ज करें',t_udhaar_added:(n)=>`${n} का उधार जोड़ा`,t_marked_paid:'पेड मार्क किया ✅',t_day_deleted:'दिन हटाया',t_batch_deleted:'बैच हटाया',t_sale_deleted:'बिक्री हटाई',t_enter_buy:'पहले खरीद भाव डालें',t_no_supp_due:'कोई सप्लायर भुगतान बाकी नहीं!'},
 rh:{subtitle:'Live Stock Bahi Khata',nav_today:'Aaj',nav_entry:'Entry Daalo',nav_ledger:'Bahi Khata',nav_reports:'Report',nav_udhaar:'Udhaar',entry_date:'Tarikh',date:'Date',set_today:'Aaj ki Tarikh',buy_stock:'Kharidi',sell_stock:'Bikri',supplier_pay:'Supplier Ko Do',purchase_details:'Kharidi ki Detail',pieces_bought:'Kharide Tukde',total_weight:'Kul Zinda Wazn',buy_price:'Kharidi Bhav ₹/kg',wastage:'Waste %',supplier_section:'Supplier Payment',supplier_name:'Supplier ka Naam',supp_due:'Kul Dena Hai ₹',paid_now:'Abhi Diya (optional)',note_opt:'Note (optional)',note:'Note',save_purchase:'Kharidi Save Karo',cash:'Nakit ₹',upi:'UPI ₹',sell_from_stock:'Stock Se Becho',select_batch:'Batch Chuno',pieces_to_sell:'Bechne ke Tukde',cash_collected_now:'Abhi Mili Raqam',save_sale:'Bikri Save Karo',record_supp_pay:'Supplier Payment Likho',payment_made:'Payment Kiya',save_payment:'Payment Save Karo',today:'Aaj',week:'Hafte',month:'Mahina',year:'Saal',custom:'Custom',from:'Se',to:'Tak',add_udhaar_title:'Udhaar Likho',customer_name:'Customer ka Naam',amount:'Raqam ₹',add_udhaar_btn:'Udhaar Daalo',udhaar_ledger:'Udhaar Bahi',pending:'Baaki',
-sync_title:'☁️ Cloud Sync',sync_desc:'Ek sync code daalo — sare devices pe same data dikhega.',sync_code_hint:'Yeh code doosre devices mein daalo.',sync_enable:'Sync On Karo',sync_disable:'Sync Band Karo',sync_change:'Code Badlo',sync_pull:'Cloud Se Lo',sync_push:'Cloud Mein Daalo',sync_enter_code:'Apna Sync Code Daalo',sync_code_tip:'Sabhi devices pe same code. Jaise: MANDI01',sync_activate:'Jodo aur Sync Karo',sync_connecting:'Se jud rahe hain',sync_synced:'Sync Ho Gaya',sync_syncing:'Sync Ho Raha Hai',sync_error:'Error',sync_offline:'Offline',sync_offline_tip:'Offline — data phone mein hai',sync_pulled:'Nayi data aa gayi',sync_pushed:'Sab data bhej diya',sync_code_short:'Code 3+ letters ka hona chahiye',sync_status:'Status',
-d_pending_actions:'⚠️ Baaki Kaam',d_unsold_alert:(n)=>`🐔 ${n} tukde nahi bike`,d_cashpend_alert:(v)=>`💰 Customers se ${v} lena baaki`,d_supppend_alert:(v)=>`🏭 Supplier ko ${v} dena hai`,d_today_summary:'Aaj ka Hisaab',d_invested:'Lagaaya',d_revenue:'Aamdani',d_profit:'Munafa',d_collected:'Mila',d_today_purchase:'Aaj ki Kharidi',d_batch:'Batch',d_pieces:'tukde',d_live:'zinda',d_buy:'Kharidi',d_wst:'Waste',d_net:'Net',d_all_sold:'Sab bik gaya ✓',d_unsold:(n)=>`${n} tukde bache`,d_no_sales:'Abhi bikri nahi',d_sell_rem:(n)=>`🐔 ${n} bache becho`,d_collect:'Lo',d_nothing_yet:'Abhi kuch nahi.',d_add_first_purchase:'<strong>Entry Daalo</strong> dabao kharidi ke liye.',d_day_summary:'Din ka Hisaab',d_delete_day:'🗑 Din Delete Karo',d_sold_today:'Aaj Bika',d_day_profit:'Din ka Munafa',d_batches_purchased:'🛒 Kharide Batch',d_total_cost:'Kul Lagaaya',d_cost_pc:'Lagat/Piece',d_supp_paid:'Supplier ko de diya ✅',d_supp_pending:(v)=>`Supplier: ${v} baaki`,d_all_sold_long:(n)=>`Sab ${n} bik gaye ✅`,d_no_sales_batch:'Is batch mein bikri nahi',d_sale_breakdown:'Bikri Detail',d_sale:'Bikri',d_piece:'tukda',d_sold:'Bika',d_fully_collected:'Pura vasool ✅',d_pending_amt:(v)=>`${v} baaki`,d_cross_sales:'💰 Aaj ki Bikri (purane batch se)',d_cross_note:'Poori detail us batch ki tarikh pe dekhein.',d_from_batch:(d)=>`${d} batch se`,d_collections:'💵 Aaj ki Vasoolee',d_supp_payments:'🏭 Supplier Payment',d_no_activity:'Is din koi kaam nahi.',d_browse_dates:'← → se tarikh badlo.',d_total_cost_lbl:'Kul Lagat',d_profit_lbl:'Munafa',d_loss_lbl:'Nuksaan',d_margin:(m)=>`Margin ${m}%`,d_day_breakdown:'Din-wise Detail',d_date:'Tarikh',d_cost:'Lagat',d_chart:'Chart',d_insights:'💡 Jaankari',d_best_day:(d,p)=>`🏆 Sabse achha din: <strong>${d}</strong> — Munafa ${p}`,d_total_kg:(kg)=>`📦 Kul zinda kg: <strong>${kg} kg</strong>`,d_supp_all_paid:'🏭 <strong style="color:var(--green)">Sab de diya ✅</strong>',d_supp_bal_due:(v)=>`🏭 Supplier ko dena: <strong style="color:var(--red)">${v}</strong>`,d_no_data:'Abhi koi data nahi.',d_add_first:'Pehli kharidi daalo.',d_no_udhaar:'Koi udhaar nahi.<br>Sab saaf hai! 🎉',d_paid:'✅ De diya',d_undo:'Wapas',d_mark_paid:'Paid Karo',d_del:'Hatao',d_delete_q:'Hatao?',d_delete_day_q:(d)=>`${d} ka saara data hatao?`,d_delete_batch_q:'Yeh batch hatao?',d_delete_sale_q:'Yeh bikri hatao?',d_no_stock:'Stock nahi',d_choose_batch:'— Batch chuno —',d_choose_batch_sell:'— Bechne ke liye batch chuno —',d_sell_from:(d)=>`${d} batch se becho`,d_pcs_remaining:(n)=>`${n} tukde bache`,d_net_per_pc:'Net wazn/tukda',d_cost_pc2:'Lagat/tukda',d_sale_date:'Bikri ki Tarikh',d_save_sale:'Bikri Save Karo',d_collect_payment:'Payment Lo',d_total_rev:'Kul Aamdani',d_already_coll:'Pehle mila',d_still_pend:'Abhi baaki',d_collecting_now:'Abhi lo',d_confirm_coll:'Vasoolee Confirm Karo',
-t_fill_buy:'Tukde, wazn aur kharidi bhav bharo',t_purchase_saved:'✅ Kharidi save ho gayi!',t_select_batch:'Batch chuno',t_batch_not_found:'Batch nahi mila',t_enter_pcs:'Bechne ke tukde daalo',t_enter_price:'Bikri bhav ₹/kg daalo',t_only_pcs:(n)=>`Sirf ${n} tukde hain`,t_sale_saved:'✅ Bikri save ho gayi!',t_enter_amt:'Raqam daalo',t_collected:(v)=>`✅ ${v} vasool kiya!`,t_enter_name:'Naam daalo',t_udhaar_added:(n)=>`${n} ka udhaar add kiya`,t_marked_paid:'Paid mark kiya ✅',t_day_deleted:'Din hataya',t_batch_deleted:'Batch hataya',t_sale_deleted:'Bikri hatai',t_rate_saved:'✅ Rate save ho gaya!',t_rate_cleared:'Rate hataya',t_enter_buy:'Pehle kharidi bhav daalo',t_no_supp_due:'Koi supplier payment baaki nahi!'}
+d_pending_actions:'⚠️ Baaki Kaam',d_unsold_alert:(n)=>`🐔 ${n} tukde nahi bike`,d_cashpend_alert:(v)=>`💰 ${v} customers se lena baaki`,d_supppend_alert:(v)=>`🏭 Supplier ko ${v} dena hai`,d_today_summary:'Aaj ka Hisaab',d_invested:'Lagaaya',d_revenue:'Aamdani',d_profit:'Munafa',d_collected:'Mila',d_today_purchase:'Aaj ki Kharidi',d_batch:'Batch',d_pieces:'tukde',d_live:'zinda',d_buy:'Kharidi',d_wst:'Waste',d_net:'Net',d_all_sold:'Sab bik gaya ✓',d_unsold:(n)=>`${n} tukde bache`,d_no_sales:'Abhi bikri nahi',d_sell_rem:(n)=>`🐔 ${n} bache becho`,d_collect:'Lo',d_nothing_yet:'Abhi kuch nahi.',d_add_first_purchase:'<strong>Entry Daalo</strong> dabao kharidi ke liye.',d_day_summary:'Din ka Hisaab',d_delete_day:'🗑 Din Delete Karo',d_sold_today:'Aaj Bika',d_day_profit:'Din ka Munafa',d_batches_purchased:'🛒 Kharide Batch',d_total_cost:'Kul Lagaaya',d_cost_pc:'Lagat/Piece',d_supp_paid:'Supplier ko de diya ✅',d_supp_pending:(v)=>`Supplier: ${v} baaki`,d_all_sold_long:(n)=>`Sab ${n} bik gaye ✅`,d_no_sales_batch:'Is batch mein bikri nahi',d_sale_breakdown:'Bikri Detail',d_sale:'Bikri',d_piece:'tukda',d_sold:'Bika',d_fully_collected:'Pura vasool ✅',d_pending_amt:(v)=>`${v} baaki`,d_cross_sales:'💰 Doosre batch ki bikri',d_cross_note:'Yeh doosre batch ki bikri hai.',d_from_batch:(d)=>`${d} batch se`,d_collections:'💵 Aaj ki Vasoolee',d_supp_payments:'🏭 Supplier Payment',d_no_activity:'Is din koi kaam nahi.',d_browse_dates:'← → se tarikh badlo.',d_total_cost_lbl:'Kul Lagat',d_profit_lbl:'Munafa',d_loss_lbl:'Nuksaan',d_margin:(m)=>`Margin ${m}%`,d_day_breakdown:'Din-wise Detail',d_date:'Tarikh',d_cost:'Lagat',d_chart:'Chart',d_insights:'💡 Jaankari',d_best_day:(d,p)=>`🏆 Sabse achha din: <strong>${d}</strong> — Munafa ${p}`,d_total_kg:(kg)=>`📦 Kul zinda kg: <strong>${kg} kg</strong>`,d_supp_all_paid:'🏭 <strong style="color:var(--green)">Sab de diya ✅</strong>',d_supp_bal_due:(v)=>`🏭 Supplier ko dena: <strong style="color:var(--red)">${v}</strong>`,d_no_data:'Abhi koi data nahi.',d_add_first:'Pehli kharidi daalo.',d_no_udhaar:'Koi udhaar nahi.<br>Sab saaf hai! 🎉',d_paid:'✅ De diya',d_undo:'Wapas',d_mark_paid:'Paid Karo',d_del:'Hatao',d_delete_q:'Hatao?',d_delete_day_q:(d)=>`${d} ka saara data hatao?`,d_delete_batch_q:'Yeh batch hatao?',d_delete_sale_q:'Yeh bikri hatao?',d_no_stock:'Stock nahi',d_choose_batch:'— Batch chuno —',d_choose_batch_sell:'— Bechne ke liye batch chuno —',d_sell_from:(d)=>`${d} batch se becho`,d_pcs_remaining:(n)=>`${n} tukde bache`,d_net_per_pc:'Net wazn/tukda',d_cost_pc2:'Lagat/tukda',d_sale_date:'Bikri ki Tarikh',d_save_sale:'Bikri Save Karo',d_collect_payment:'Payment Lo',d_total_rev:'Kul Aamdani',d_already_coll:'Pehle mila',d_still_pend:'Abhi baaki',d_collecting_now:'Abhi lo',d_confirm_coll:'Vasoolee Confirm Karo',
+t_fill_buy:'Tukde, wazn aur kharidi bhav bharo',t_purchase_saved:'✅ Kharidi save ho gayi!',t_select_batch:'Batch chuno',t_batch_not_found:'Batch nahi mila',t_enter_pcs:'Bechne ke tukde daalo',t_enter_price:'Bikri bhav ₹/kg daalo',t_only_pcs:(n)=>`Sirf ${n} tukde hain`,t_sale_saved:'✅ Bikri save ho gayi!',t_enter_amt:'Raqam daalo',t_collected:(v)=>`✅ ${v} vasool kiya!`,t_enter_name:'Naam daalo',t_udhaar_added:(n)=>`${n} ka udhaar add kiya`,t_marked_paid:'Paid mark kiya ✅',t_day_deleted:'Din hataya',t_batch_deleted:'Batch hataya',t_sale_deleted:'Bikri hatai',t_enter_buy:'Pehle kharidi bhav daalo',t_no_supp_due:'Koi supplier payment baaki nahi!'}
 };
-
 function t(key,...args){const v=T[lang]?.[key]??T.en?.[key]??key;return typeof v==='function'?v(...args):v}
-
 function cycleLang(){
   lang=lang==='en'?'hi':lang==='hi'?'rh':'en';
   localStorage.setItem(KL,lang);
@@ -1435,11 +1389,22 @@ function applyLang(){
 
 /* ════ INIT ════ */
 $('langBtn').textContent=lang==='en'?'HI':lang==='hi'?'RH':'EN';
+document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.getAttribute('data-i18n'))});
 renderHome();
 updateUdBadge();
 document.querySelectorAll('#aTabs .ptab').forEach((el,i)=>el.classList.toggle('on',i===0));
-// Defer Firebase init until after all scripts have loaded
-window.addEventListener('load',()=>{try{initSync();}catch(e){console.warn('initSync:',e);}});
+
+// Boot Firebase after window loads so SDK scripts are guaranteed ready
+window.addEventListener('load',()=>{
+  try{ boot(); }
+  catch(e){ console.warn('boot error:',e.message); setDot('offline'); }
+});
+
+// Handle unhandled promise rejections silently
+window.addEventListener('unhandledrejection',e=>{
+  console.warn('Unhandled promise:',e.reason?.message||e.reason);
+  e.preventDefault();
+});
 
 </script>
 </body>
