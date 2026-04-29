@@ -616,7 +616,7 @@ function save(key,arr,rec=null,delId=null){
   else if(rec)    fsSet(cn,rec);
 }
 
-/* ─── Load all from Firestore → merge into localStorage ─── */
+/* ─── Load all from Firestore → Firestore wins, replaces local cache ─── */
 async function loadFromCloud(){
   if(!db)return;
   setDot('sync');
@@ -624,16 +624,14 @@ async function loadFromCloud(){
   try{
     await Promise.all(cols.map(async([key,cn])=>{
       const snap=await col(cn).get();
-      if(snap.empty)return;
       const remote=snap.docs.map(d=>d.data());
-      // Merge: remote wins on conflict (higher ts)
-      const local=la(key);
-      const map={};
-      local.forEach(r=>map[r.id]=r);
-      remote.forEach(r=>{if(!map[r.id]||(r.ts||0)>(map[r.id].ts||0))map[r.id]=r});
-      const merged=Object.values(map);
-      sa(key,merged);
-      const maxId=merged.reduce((m,r)=>Math.max(m,r.id||0),0);
+      if(remote.length===0){
+        // Cloud is empty — first device. Keep local data (will be pushed to cloud next).
+        return;
+      }
+      // Cloud has data — it is the master copy. Replace local entirely.
+      sa(key,remote);
+      const maxId=remote.reduce((m,r)=>Math.max(m,r.id||0),0);
       if(maxId>=_id){_id=maxId+1;localStorage.setItem('cc5_id',_id)}
     }));
     _online=true;
@@ -657,24 +655,21 @@ async function pushLocalToCloud(){
   }
 }
 
-/* ─── Real-time listeners: update UI when any device changes data ─── */
+/* ─── Real-time listeners: Firestore is master, local cache mirrors it ─── */
 function listen(){
   _unsubs.forEach(u=>u());_unsubs=[];
   if(!db)return;
   [[KB,'buys'],[KS,'sales'],[KSP,'suppays'],[KU,'udhaar']].forEach(([key,cn])=>{
-    const unsub=col(cn).onSnapshot(snap=>{
-      if(snap.metadata.hasPendingWrites)return; // skip our own writes
+    const unsub=col(cn).onSnapshot({includeMetadataChanges:false}, snap=>{
+      // Use the complete Firestore snapshot as the source of truth.
+      // This means adds, edits AND deletes from any device are reflected here.
       const remote=snap.docs.map(d=>d.data());
       const local=la(key);
-      const map={};
-      local.forEach(r=>map[r.id]=r);
-      remote.forEach(r=>{if(!map[r.id]||(r.ts||0)>(map[r.id].ts||0))map[r.id]=r});
-      const merged=Object.values(map);
-      // Only re-render if data actually changed
-      if(JSON.stringify(merged.sort((a,b)=>a.id-b.id))!==
-         JSON.stringify(local.sort((a,b)=>a.id-b.id))){
-        sa(key,merged);
-        const maxId=merged.reduce((m,r)=>Math.max(m,r.id||0),0);
+      const localStr=JSON.stringify([...local].sort((a,b)=>a.id-b.id));
+      const remoteStr=JSON.stringify([...remote].sort((a,b)=>a.id-b.id));
+      if(localStr!==remoteStr){
+        sa(key,remote);
+        const maxId=remote.reduce((m,r)=>Math.max(m,r.id||0),0);
         if(maxId>=_id){_id=maxId+1;localStorage.setItem('cc5_id',_id)}
         rerender();
       }
@@ -1233,24 +1228,33 @@ function renderLedger(){
 function deleteDay(dateKey){
   if(!confirm(t('d_delete_day_q',keyDisp(dateKey))))return;
   const buyIds=getBuys().filter(b=>b.date===dateKey).map(b=>b.id);
-  buyIds.forEach(id=>fsDel('buys',id));
-  getSales().filter(s=>s.date===dateKey||buyIds.includes(s.buyId)).forEach(s=>fsDel('sales',s.id));
-  getSuppays().filter(p=>p.date===dateKey||buyIds.includes(p.buyId)).forEach(p=>fsDel('suppays',p.id));
+  // Remove from localStorage immediately
   sa(KB,getBuys().filter(b=>b.date!==dateKey));
   sa(KS,getSales().filter(s=>s.date!==dateKey&&!buyIds.includes(s.buyId)));
   sa(KSP,getSuppays().filter(p=>p.date!==dateKey&&!buyIds.includes(p.buyId)));
+  // Remove from Firestore (other devices update via listener)
+  buyIds.forEach(id=>fsDel('buys',id));
+  getSales().filter(s=>s.date===dateKey||buyIds.includes(s.buyId)).forEach(s=>fsDel('sales',s.id));
+  getSuppays().filter(p=>p.date===dateKey||buyIds.includes(p.buyId)).forEach(p=>fsDel('suppays',p.id));
   toast(t('t_day_deleted'));renderLedger();renderHome();
 }
 function deleteBatch(id){
   if(!confirm(t('d_delete_batch_q')))return;
-  fsDel('buys',id);getSales().filter(s=>s.buyId===id).forEach(s=>fsDel('sales',s.id));getSuppays().filter(p=>p.buyId===id).forEach(p=>fsDel('suppays',p.id));
-  sa(KB,getBuys().filter(b=>b.id!==id));sa(KS,getSales().filter(s=>s.buyId!==id));sa(KSP,getSuppays().filter(p=>p.buyId!==id));
+  // Remove from localStorage immediately
+  sa(KB,getBuys().filter(b=>b.id!==id));
+  sa(KS,getSales().filter(s=>s.buyId!==id));
+  sa(KSP,getSuppays().filter(p=>p.buyId!==id));
+  // Remove from Firestore
+  fsDel('buys',id);
+  getSales().filter(s=>s.buyId===id).forEach(s=>fsDel('sales',s.id));
+  getSuppays().filter(p=>p.buyId===id).forEach(p=>fsDel('suppays',p.id));
   toast(t('t_batch_deleted'));renderLedger();
 }
 function deleteSale(id){
   if(!confirm(t('d_delete_sale_q')))return;
+  sa(KS,getSales().filter(s=>s.id!==id));
   fsDel('sales',id);
-  sa(KS,getSales().filter(s=>s.id!==id));toast(t('t_sale_deleted'));renderLedger();
+  toast(t('t_sale_deleted'));renderLedger();
 }
 
 /* ════ ANALYTICS ════ */
